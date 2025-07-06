@@ -3,6 +3,10 @@ import { DealProvider } from '@/contexts/DealContext';
 import { Navigation } from '@/components/Navigation';
 import { Dashboard } from '@/components/Dashboard';
 import { DealInputs } from '@/components/DealInputs';
+import { AnalysisScenarios } from '@/components/AnalysisScenarios';
+import { DueDiligence } from '@/components/DueDiligence';
+import { Reports } from '@/components/Reports';
+import { TenYearProjection } from '@/components/TenYearProjection';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -14,26 +18,13 @@ const Index = () => {
       case 'deal-inputs':
         return <DealInputs />;
       case 'analysis':
-        return (
-          <div className="space-y-6">
-            <h2 className="text-3xl font-bold">Analysis & Scenarios</h2>
-            <p className="text-muted-foreground">Sensitivity analysis and verification tools coming soon.</p>
-          </div>
-        );
+        return <AnalysisScenarios />;
+      case 'projections':
+        return <TenYearProjection />;
       case 'due-diligence':
-        return (
-          <div className="space-y-6">
-            <h2 className="text-3xl font-bold">Due Diligence Checklists</h2>
-            <p className="text-muted-foreground">Interactive checklists for comprehensive due diligence coming soon.</p>
-          </div>
-        );
+        return <DueDiligence />;
       case 'reports':
-        return (
-          <div className="space-y-6">
-            <h2 className="text-3xl font-bold">Reports</h2>
-            <p className="text-muted-foreground">PDF report generation coming soon.</p>
-          </div>
-        );
+        return <Reports />;
       default:
         return <Dashboard />;
     }
