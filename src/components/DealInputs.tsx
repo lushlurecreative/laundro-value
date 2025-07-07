@@ -365,32 +365,62 @@ export const DealInputs: React.FC = () => {
                   <CardTitle>Annual Income</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <div className="flex items-center gap-2">
                       <Label htmlFor="grossIncomeAnnual">Gross Income</Label>
-                      <Input
-                        id="grossIncomeAnnual"
-                        type="number"
-                        value={deal?.grossIncomeAnnual || ''}
-                        onChange={(e) => updateDeal({ grossIncomeAnnual: Number(e.target.value) })}
-                        placeholder="0"
-                      />
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Total annual revenue from all machines and services before any expenses</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
-                    <div>
-                      <Label htmlFor="annualNet">Annual Net</Label>
-                      <Input
-                        id="annualNet"
-                        type="number"
-                        value={deal?.annualNet || ''}
-                        onChange={(e) => updateDeal({ annualNet: Number(e.target.value) })}
-                        placeholder="0"
-                      />
-                    </div>
+                    <Input
+                      id="grossIncomeAnnual"
+                      type="number"
+                      value={deal?.grossIncomeAnnual || ''}
+                      onChange={(e) => updateDeal({ grossIncomeAnnual: Number(e.target.value) })}
+                      placeholder="0"
+                    />
                   </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="annualNet">Annual Net</Label>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Net income after operating expenses but before debt service and taxes</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <Input
+                      id="annualNet"
+                      type="number"
+                      value={deal?.annualNet || ''}
+                      onChange={(e) => updateDeal({ annualNet: Number(e.target.value) })}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <Label htmlFor="fullTimeStaffCount">Full-Time Staff Count</Label>
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="fullTimeStaffCount">Full-Time Staff Count</Label>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Number of full-time employees currently working at the laundromat</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                       <Input
                         id="fullTimeStaffCount"
                         type="number"
@@ -400,7 +430,17 @@ export const DealInputs: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="partTimeStaffCount">Part-Time Staff Count</Label>
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="partTimeStaffCount">Part-Time Staff Count</Label>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Number of part-time employees currently working at the laundromat</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                       <Input
                         id="partTimeStaffCount"
                         type="number"
@@ -410,7 +450,17 @@ export const DealInputs: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="payrollCost">Payroll Cost (Annual)</Label>
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="payrollCost">Payroll Cost (Annual)</Label>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Total annual payroll expenses including wages, benefits, and taxes</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                       <Input
                         id="payrollCost"
                         type="number"
@@ -486,7 +536,17 @@ export const DealInputs: React.FC = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="vendingIncome">Vending Income (Annual)</Label>
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="vendingIncome">Vending Income (Annual)</Label>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Annual revenue from vending machines (snacks, drinks, detergent, etc.)</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                       <Input
                         id="vendingIncome"
                         type="number"
@@ -496,7 +556,17 @@ export const DealInputs: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="otherIncome">Other Income (Annual)</Label>
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="otherIncome">Other Income (Annual)</Label>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Any other sources of annual income (drop-off fees, bulk contracts, etc.)</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                       <Input
                         id="otherIncome"
                         type="number"
@@ -669,12 +739,24 @@ export const DealInputs: React.FC = () => {
 
           <TabsContent value="equipment" className="mt-6">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Machine Inventory</CardTitle>
-                <Button onClick={addNewMachine} size="sm" className="shadow-button">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Machine
-                </Button>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CardTitle>Equipment Inventory</CardTitle>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Complete inventory of all washing machines, dryers, and other equipment including condition and specifications</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <Button onClick={addNewMachine} size="sm" className="shadow-button">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Machine
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
@@ -692,25 +774,35 @@ export const DealInputs: React.FC = () => {
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <Label>Machine Type</Label>
-                          <Select
-                            value={machine.machineType}
-                            onValueChange={(value) => updateMachine(machine.machineId, { machineType: value as any })}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Top-Load Washer">Top-Load Washer</SelectItem>
-                              <SelectItem value="Front-Load Washer">Front-Load Washer</SelectItem>
-                              <SelectItem value="Stacked Washer/Dryer">Stacked Washer/Dryer</SelectItem>
-                              <SelectItem value="Single Dryer">Single Dryer</SelectItem>
-                              <SelectItem value="Stacked Dryer">Stacked Dryer</SelectItem>
-                              <SelectItem value="Other">Other</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Label>Machine Type</Label>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <span className="text-xs bg-muted px-1 py-0.5 rounded cursor-help">?</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Type of laundry equipment (washers, dryers, or combination units)</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <Select
+                        value={machine.machineType}
+                        onValueChange={(value) => updateMachine(machine.machineId, { machineType: value as any })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Top-Load Washer">Top-Load Washer</SelectItem>
+                          <SelectItem value="Front-Load Washer">Front-Load Washer</SelectItem>
+                          <SelectItem value="Stacked Washer/Dryer">Stacked Washer/Dryer</SelectItem>
+                          <SelectItem value="Single Dryer">Single Dryer</SelectItem>
+                          <SelectItem value="Stacked Dryer">Stacked Dryer</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                         <div>
                           <Label>Brand</Label>
                           <Input
@@ -873,7 +965,17 @@ export const DealInputs: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <Label htmlFor="downPayment">Down Payment (%)</Label>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="downPayment">Down Payment (%)</Label>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Percentage of purchase price you plan to pay as down payment</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                     <Input
                       id="downPayment"
                       type="number"
@@ -884,7 +986,17 @@ export const DealInputs: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="loanInterestRate">Loan Interest Rate (%)</Label>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="loanInterestRate">Loan Interest Rate (%)</Label>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Annual interest rate for your loan (SBA loans typically 7-11%)</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                     <Input
                       id="loanInterestRate"
                       type="number"
@@ -895,7 +1007,17 @@ export const DealInputs: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="loanTerm">Loan Term (Years)</Label>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="loanTerm">Loan Term (Years)</Label>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Length of loan in years (SBA loans typically 7-25 years)</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                     <Input
                       id="loanTerm"
                       type="number"
@@ -908,7 +1030,17 @@ export const DealInputs: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="targetCapRate">Target Cap Rate (%)</Label>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="targetCapRate">Target Cap Rate (%)</Label>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Your minimum acceptable capitalization rate for this investment (typically 6-12% for laundromats)</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                     <Input
                       id="targetCapRate"
                       type="number"
@@ -919,7 +1051,17 @@ export const DealInputs: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="targetCoCROI">Target Cash-on-Cash ROI (%)</Label>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="targetCoCROI">Target Cash-on-Cash ROI (%)</Label>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Your minimum acceptable cash-on-cash return on investment (typically 12-20%)</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                     <Input
                       id="targetCoCROI"
                       type="number"

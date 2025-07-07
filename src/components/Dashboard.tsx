@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useDeal } from '@/contexts/DealContext';
 import { calculateMetrics, formatCurrency, formatPercentage } from '@/utils/calculations';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export const Dashboard: React.FC = () => {
   const { deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, utilityAnalysis } = useDeal();
@@ -10,6 +11,23 @@ export const Dashboard: React.FC = () => {
   const metrics = calculateMetrics(
     deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, utilityAnalysis
   );
+
+  const getKPITooltip = (title: string): string => {
+    switch (title) {
+      case 'Suggested Valuation':
+        return 'Estimated fair market value range based on income multiples and comparable sales';
+      case 'Cap Rate':
+        return 'Net Operating Income divided by purchase price - measures return on investment';
+      case 'Cash-on-Cash ROI':
+        return 'Annual cash flow divided by initial cash investment - measures cash-on-cash return';
+      case 'Annual Cash Flow':
+        return 'Net Operating Income minus debt service - the actual cash generated annually';
+      case 'DSCR':
+        return 'Debt Service Coverage Ratio - NOI divided by annual debt payments (1.25+ is healthy)';
+      default:
+        return 'Key performance indicator for investment analysis';
+    }
+  };
 
   const getKPIStatus = (actual: number, target: number, isPercentage: boolean = false) => {
     const threshold = isPercentage ? 1 : 0.1;
@@ -74,7 +92,8 @@ export const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <TooltipProvider>
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold">Dashboard</h2>
@@ -169,14 +188,32 @@ export const Dashboard: React.FC = () => {
         <>
           {/* KPI Scorecard */}
           <div>
-            <h3 className="text-xl font-semibold mb-4">KPI Scorecard</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl font-semibold mb-4">KPI Scorecard</h3>
+              <Tooltip>
+                <TooltipTrigger>
+                  <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Key Performance Indicators showing investment metrics with target comparisons and status indicators</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {kpis.map((kpi, index) => (
                 <Card key={index} className="shadow-card hover:shadow-elegant transition-smooth">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      {kpi.title}
-                    </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-muted-foreground">{kpi.title}</span>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <span className="text-xs bg-muted px-1 py-0.5 rounded cursor-help">?</span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{getKPITooltip(kpi.title)}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center justify-between">
@@ -202,10 +239,20 @@ export const Dashboard: React.FC = () => {
 
           {/* Financial Summary */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="shadow-card">
-              <CardHeader>
-                <CardTitle>Income & Expenses</CardTitle>
-              </CardHeader>
+        <Card className="shadow-card">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <CardTitle>Income & Expenses</CardTitle>
+              <Tooltip>
+                <TooltipTrigger>
+                  <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Breakdown of gross income, operating expenses, and net operating income</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Gross Income</span>
@@ -226,7 +273,17 @@ export const Dashboard: React.FC = () => {
 
             <Card className="shadow-card">
               <CardHeader>
-                <CardTitle>Financing Details</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle>Financing Details</CardTitle>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Purchase price, financing structure, and debt service requirements</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center">
@@ -254,7 +311,17 @@ export const Dashboard: React.FC = () => {
           {/* Analysis Commentary */}
           <Card className="shadow-card">
             <CardHeader>
-              <CardTitle>Investment Analysis Summary</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle>Investment Analysis Summary</CardTitle>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>AI-generated analysis summary highlighting key investment characteristics and recommendations</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="prose max-w-none text-sm">
@@ -281,5 +348,6 @@ export const Dashboard: React.FC = () => {
         </>
       )}
     </div>
+    </TooltipProvider>
   );
 };
