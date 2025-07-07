@@ -69,8 +69,7 @@ export const Reports: React.FC = () => {
 
     <div class="section">
         <h3>Executive Summary</h3>
-        ${reportSettings.executiveSummary ? 
-          reportSettings.executiveSummary : 
+        ${reportSettings.executiveSummary || 
           `<div>
             <p><strong>Investment Overview:</strong> This analysis evaluates the acquisition of ${deal.dealName} for ${formatCurrency(deal.askingPrice)}.</p>
             <p><strong>Financial Performance:</strong> The property generates an estimated ${formatCurrency(metrics.noi)} in Net Operating Income, resulting in a ${formatPercentage(metrics.capRate)} cap rate and ${formatPercentage(metrics.coCROI)} cash-on-cash return.</p>
@@ -174,6 +173,61 @@ export const Reports: React.FC = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const generateAIExecutiveSummary = () => {
+    if (!deal) return '';
+    
+    const strongPoints = [];
+    const concerns = [];
+    
+    if (metrics.capRate >= (deal.targetCapRatePercent || 8)) {
+      strongPoints.push(`Strong cap rate of ${formatPercentage(metrics.capRate)} meets investment criteria`);
+    } else {
+      concerns.push(`Cap rate of ${formatPercentage(metrics.capRate)} below target of ${formatPercentage(deal.targetCapRatePercent || 8)}`);
+    }
+    
+    if (metrics.coCROI >= (deal.targetCoCROIPercent || 15)) {
+      strongPoints.push(`Excellent cash-on-cash return of ${formatPercentage(metrics.coCROI)}`);
+    } else {
+      concerns.push(`Cash-on-cash return of ${formatPercentage(metrics.coCROI)} below target`);
+    }
+    
+    if (metrics.dscr >= 1.25) {
+      strongPoints.push(`Healthy debt service coverage ratio of ${metrics.dscr.toFixed(2)}`);
+    } else {
+      concerns.push(`Debt service coverage ratio of ${metrics.dscr.toFixed(2)} indicates tight cash flow`);
+    }
+    
+    const summary = `
+**EXECUTIVE SUMMARY**
+
+**Investment Overview:** This analysis evaluates the acquisition of ${deal.dealName} located at ${deal.propertyAddress} for an asking price of ${formatCurrency(deal.askingPrice)}.
+
+**Financial Performance:** The laundromat generates approximately ${formatCurrency(metrics.totalGrossIncome)} in gross annual income with operating expenses of ${formatCurrency(metrics.totalOperatingExpenses)}, resulting in a net operating income of ${formatCurrency(metrics.noi)}.
+
+**Key Investment Metrics:**
+- Cap Rate: ${formatPercentage(metrics.capRate)}
+- Cash-on-Cash ROI: ${formatPercentage(metrics.coCROI)}
+- Annual Cash Flow: ${formatCurrency(metrics.annualCashFlow)}
+- DSCR: ${metrics.dscr.toFixed(2)}
+
+**Investment Strengths:**
+${strongPoints.map(point => `• ${point}`).join('\n')}
+
+${concerns.length > 0 ? `**Areas of Concern:**
+${concerns.map(concern => `• ${concern}`).join('\n')}` : ''}
+
+**Recommendation:** ${
+  strongPoints.length > concerns.length 
+    ? 'This investment demonstrates solid fundamentals and meets key investment criteria. Recommend proceeding with due diligence.'
+    : 'This investment has mixed performance indicators. Consider negotiating purchase price or identifying value-add opportunities before proceeding.'
+}
+
+**Next Steps:** Complete comprehensive due diligence including equipment inspection, lease review, financial verification, and market analysis before finalizing investment decision.
+    `;
+    
+    return summary.trim();
   };
 
   const generateBankFinancingReport = () => {
@@ -367,12 +421,22 @@ export const Reports: React.FC = () => {
               
               <div>
                 <Label htmlFor="executiveSummary">Executive Summary (Optional)</Label>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => setReportSettings(prev => ({ ...prev, executiveSummary: generateAIExecutiveSummary() }))}
+                    variant="outline"
+                    size="sm"
+                    className="flex-shrink-0"
+                  >
+                    Generate AI Summary
+                  </Button>
+                </div>
                 <Textarea
                   id="executiveSummary"
                   value={reportSettings.executiveSummary}
                   onChange={(e) => setReportSettings(prev => ({ ...prev, executiveSummary: e.target.value }))}
                   placeholder="Add a custom executive summary for your reports..."
-                  rows={3}
+                  rows={6}
                 />
               </div>
             </CardContent>

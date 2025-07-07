@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useDeal } from '@/contexts/DealContext';
 import { calculateMetrics, formatCurrency, formatPercentage, calculateWaterBasedIncome, calculateCollectionBasedIncome } from '@/utils/calculations';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export const AnalysisScenarios: React.FC = () => {
   const { deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, utilityAnalysis } = useDeal();
@@ -129,7 +130,8 @@ export const AnalysisScenarios: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <TooltipProvider>
+      <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold">Analysis & Scenarios</h2>
         <p className="text-muted-foreground">
@@ -156,7 +158,17 @@ export const AnalysisScenarios: React.FC = () => {
           {/* Sensitivity Analysis */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Sensitivity Analysis</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <CardTitle>Sensitivity Analysis</CardTitle>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <span className="text-xs bg-muted px-2 py-1 rounded">?</span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Test how changes in key variables (revenue, interest rates, down payment) affect your investment returns. Use sliders to model different scenarios and understand deal sensitivity to market changes.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                   <p className="text-sm text-muted-foreground">
                     <strong>What is Sensitivity Analysis?</strong> This powerful tool shows how changes in key variables affect your investment returns. 
                     Use the sliders below to test "what-if" scenarios - like increasing prices, reducing costs, or changing financing terms. 
@@ -344,9 +356,9 @@ export const AnalysisScenarios: React.FC = () => {
           <Card className="shadow-elegant">
             <CardHeader>
               <CardTitle>Expense Benchmark Analysis</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Compare your deal metrics against industry benchmarks
-              </p>
+                <p className="text-sm text-muted-foreground">
+                  Compare your deal metrics against industry standards
+                </p>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -374,5 +386,6 @@ export const AnalysisScenarios: React.FC = () => {
         </>
       )}
     </div>
+    </TooltipProvider>
   );
 };
