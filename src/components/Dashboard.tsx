@@ -4,9 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import { useDeal } from '@/contexts/DealContext';
 import { calculateMetrics, formatCurrency, formatPercentage } from '@/utils/calculations';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { MarketDataDisplay } from './MarketDataDisplay';
 
 export const Dashboard: React.FC = () => {
-  const { deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, utilityAnalysis } = useDeal();
+  const { deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, utilityAnalysis, marketData } = useDeal();
   
   const metrics = calculateMetrics(
     deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, utilityAnalysis
@@ -345,6 +346,9 @@ export const Dashboard: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Market Intelligence */}
+          <MarketDataDisplay marketData={marketData} />
         </>
       )}
     </div>

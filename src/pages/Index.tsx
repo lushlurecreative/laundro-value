@@ -8,7 +8,6 @@ import { Resources } from '@/components/Resources';
 import { DueDiligence } from '@/components/DueDiligence';
 import { Reports } from '@/components/Reports';
 import { TenYearProjection } from '@/components/TenYearProjection';
-import { APIIntegrationHub } from '@/components/APIIntegrationHub';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -29,8 +28,6 @@ const Index = () => {
         return <DueDiligence />;
       case 'reports':
         return <Reports />;
-      case 'api-hub':
-        return <APIIntegrationHub />;
       default:
         return <Dashboard />;
     }

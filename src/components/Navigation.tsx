@@ -13,7 +13,6 @@ const navigationItems = [
   { id: 'deal-inputs', label: 'Deal Inputs', icon: '📝' },
   { id: 'analysis', label: 'Analysis & Scenarios', icon: '📈' },
   { id: 'projections', label: '10-Year Projections', icon: '📅' },
-  { id: 'api-hub', label: 'Market Intelligence Hub', icon: '🔗' },
   { id: 'resources', label: 'Resources', icon: '💡' },
   { id: 'due-diligence', label: 'Due Diligence', icon: '✅' },
   { id: 'reports', label: 'Reports', icon: '📋' }

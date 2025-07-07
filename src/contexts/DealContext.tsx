@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Deal, LeaseDetails, ExpenseItem, MachineInventory, AncillaryIncome, UtilityAnalysis } from '@/types/deal';
 import { useAutoSave } from '@/hooks/useAutoSave';
+import { useMarketData } from '@/hooks/useMarketData';
 
 interface DealContextType {
   deal: Deal | null;
@@ -9,6 +10,7 @@ interface DealContextType {
   machineInventory: MachineInventory[];
   ancillaryIncome: AncillaryIncome | null;
   utilityAnalysis: UtilityAnalysis | null;
+  marketData: any;
   updateDeal: (deal: Partial<Deal>) => void;
   updateLeaseDetails: (lease: Partial<LeaseDetails>) => void;
   addExpenseItem: (expense: ExpenseItem) => void;
@@ -48,6 +50,9 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [ancillaryIncome, setAncillaryIncome] = useState<AncillaryIncome | null>(null);
   const [utilityAnalysis, setUtilityAnalysis] = useState<UtilityAnalysis | null>(null);
   const [lastSaved, setLastSaved] = useState<string>('');
+
+  // Automatically fetch market data when property address changes
+  const marketData = useMarketData(deal?.propertyAddress || '');
 
   // Auto-save all deal data to localStorage
   const dealData = {
@@ -243,6 +248,7 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       machineInventory,
       ancillaryIncome,
       utilityAnalysis,
+      marketData,
       updateDeal,
       updateLeaseDetails,
       addExpenseItem,
