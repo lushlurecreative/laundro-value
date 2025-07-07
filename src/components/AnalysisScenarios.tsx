@@ -154,13 +154,15 @@ export const AnalysisScenarios: React.FC = () => {
       {deal && (
         <>
           {/* Sensitivity Analysis */}
-          <Card className="shadow-elegant">
-            <CardHeader>
-              <CardTitle>Sensitivity Analysis</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Test different scenarios by adjusting key variables. This shows how sensitive your returns are to changes in pricing, costs, and financing terms.
-              </p>
-            </CardHeader>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Sensitivity Analysis</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    <strong>What is Sensitivity Analysis?</strong> This powerful tool shows how changes in key variables affect your investment returns. 
+                    Use the sliders below to test "what-if" scenarios - like increasing prices, reducing costs, or changing financing terms. 
+                    This helps you understand which factors most impact profitability and assess deal risk under different conditions.
+                  </p>
+                </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-6">

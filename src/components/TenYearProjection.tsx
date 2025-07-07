@@ -28,7 +28,7 @@ export const TenYearProjection: React.FC = () => {
     deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome
   );
 
-  const initialInvestment = deal.purchasePrice * (deal.downPaymentPercent / 100);
+  const initialInvestment = deal.askingPrice * (deal.downPaymentPercent / 100);
   const totalROI = calculateROI(projections, initialInvestment);
   const irr = calculateIRR(projections, initialInvestment);
 

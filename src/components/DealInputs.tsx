@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { useDeal } from '@/contexts/DealContext';
 import { formatCurrency } from '@/utils/calculations';
 import { Plus, X } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export const DealInputs: React.FC = () => {
   const {
@@ -80,6 +81,7 @@ export const DealInputs: React.FC = () => {
   };
 
   return (
+    <TooltipProvider>
       <div className="space-y-6">
         <div>
           <h2 className="text-3xl font-bold">Deal Inputs</h2>
@@ -185,15 +187,128 @@ export const DealInputs: React.FC = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="notes">Notes</Label>
+                  <Label htmlFor="notes">Notes & Observations</Label>
                   <Textarea
                     id="notes"
                     value={deal?.notes || ''}
                     onChange={(e) => updateDeal({ notes: e.target.value })}
-                    placeholder="Additional notes about the deal..."
+                    placeholder="Additional notes about the deal, paste any information here and our AI will auto-populate relevant fields..."
                     rows={3}
                   />
                 </div>
+
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle>Expansion Potential</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Analyze the potential for adding machines or services to grow revenue
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="additionalMachines">Additional Machines Possible</Label>
+                        <Input
+                          id="additionalMachines"
+                          type="number"
+                          value={deal?.expansionPotential?.additionalMachines || ''}
+                          onChange={(e) => updateDeal({ 
+                            expansionPotential: { 
+                              ...deal?.expansionPotential, 
+                              additionalMachines: Number(e.target.value) 
+                            } 
+                          })}
+                          placeholder="0"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="expansionCost">Estimated Expansion Cost</Label>
+                        <Input
+                          id="expansionCost"
+                          type="number"
+                          value={deal?.expansionPotential?.expansionCost || ''}
+                          onChange={(e) => updateDeal({ 
+                            expansionPotential: { 
+                              ...deal?.expansionPotential, 
+                              expansionCost: Number(e.target.value) 
+                            } 
+                          })}
+                          placeholder="0"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="potentialAdditionalIncome">Potential Additional Income</Label>
+                        <Input
+                          id="potentialAdditionalIncome"
+                          type="number"
+                          value={deal?.expansionPotential?.potentialAdditionalIncome || ''}
+                          onChange={(e) => updateDeal({ 
+                            expansionPotential: { 
+                              ...deal?.expansionPotential, 
+                              potentialAdditionalIncome: Number(e.target.value) 
+                            } 
+                          })}
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle>Value-Added Services</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Consider these services to increase revenue and customer retention
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-3">
+                        <h4 className="font-semibold text-primary">Popular Revenue Boosters:</h4>
+                        <ul className="space-y-2 text-sm">
+                          <li className="flex items-start">
+                            <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                            <span><strong>Wash & Fold Service:</strong> $1.50-2.50/lb, typically 25% markup</span>
+                          </li>
+                          <li className="flex items-start">
+                            <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                            <span><strong>Drop-off Service:</strong> Convenience fee $5-15 per order</span>
+                          </li>
+                          <li className="flex items-start">
+                            <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                            <span><strong>Vending Machines:</strong> Snacks, drinks, detergent - $200-500/month</span>
+                          </li>
+                          <li className="flex items-start">
+                            <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                            <span><strong>Dry Cleaning Pickup:</strong> Partner with local cleaner, 10-15% commission</span>
+                          </li>
+                        </ul>
+                      </div>
+                      <div className="space-y-3">
+                        <h4 className="font-semibold text-primary">Customer Experience Enhancements:</h4>
+                        <ul className="space-y-2 text-sm">
+                          <li className="flex items-start">
+                            <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                            <span><strong>Free WiFi & Seating:</strong> Increases dwell time and customer satisfaction</span>
+                          </li>
+                          <li className="flex items-start">
+                            <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                            <span><strong>Mobile Payment Systems:</strong> Card readers on all machines</span>
+                          </li>
+                          <li className="flex items-start">
+                            <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                            <span><strong>Loyalty Program:</strong> Encourage repeat business with punch cards/app</span>
+                          </li>
+                          <li className="flex items-start">
+                            <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                            <span><strong>Extended Hours:</strong> 24/7 access can increase revenue 15-25%</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </CardContent>
             </Card>
           </TabsContent>
@@ -668,6 +783,7 @@ export const DealInputs: React.FC = () => {
                               <SelectItem value="Stacked Washer/Dryer">Stacked Washer/Dryer</SelectItem>
                               <SelectItem value="Single Dryer">Single Dryer</SelectItem>
                               <SelectItem value="Stacked Dryer">Stacked Dryer</SelectItem>
+                              <SelectItem value="Other">Other</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -680,6 +796,17 @@ export const DealInputs: React.FC = () => {
                           />
                         </div>
                         <div>
+                          <Label>Model</Label>
+                          <Input
+                            value={machine.model || ''}
+                            onChange={(e) => updateMachine(machine.machineId, { model: e.target.value })}
+                            placeholder="Model number"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+                        <div>
                           <Label>Quantity</Label>
                           <Input
                             type="number"
@@ -688,9 +815,6 @@ export const DealInputs: React.FC = () => {
                             placeholder="1"
                           />
                         </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
                         <div>
                           <Label>Age (Years)</Label>
                           <Input
@@ -769,6 +893,13 @@ export const DealInputs: React.FC = () => {
                             onCheckedChange={(checked) => updateMachine(machine.machineId, { isCardOperated: checked })}
                           />
                           <Label>Card Operated</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            checked={machine.isCoinOperated}
+                            onCheckedChange={(checked) => updateMachine(machine.machineId, { isCoinOperated: checked })}
+                          />
+                          <Label>Coin Operated</Label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Switch
@@ -880,6 +1011,7 @@ export const DealInputs: React.FC = () => {
           </TabsContent>
         </Tabs>
       </Card>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 };
