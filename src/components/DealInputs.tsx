@@ -307,27 +307,27 @@ export const DealInputs: React.FC = () => {
             <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Primary Income</CardTitle>
+                  <CardTitle>Annual Income</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="reportedGrossIncome">Reported Gross Income (Annual)</Label>
+                      <Label htmlFor="grossIncomeAnnual">Gross Income</Label>
                       <Input
-                        id="reportedGrossIncome"
+                        id="grossIncomeAnnual"
                         type="number"
-                        value={deal?.reportedGrossIncomeAnnual || ''}
-                        onChange={(e) => updateDeal({ reportedGrossIncomeAnnual: Number(e.target.value) })}
+                        value={deal?.grossIncomeAnnual || ''}
+                        onChange={(e) => updateDeal({ grossIncomeAnnual: Number(e.target.value) })}
                         placeholder="0"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="reportedAnnualNet">Reported Annual Net</Label>
+                      <Label htmlFor="annualNet">Annual Net</Label>
                       <Input
-                        id="reportedAnnualNet"
+                        id="annualNet"
                         type="number"
-                        value={deal?.reportedAnnualNet || ''}
-                        onChange={(e) => updateDeal({ reportedAnnualNet: Number(e.target.value) })}
+                        value={deal?.annualNet || ''}
+                        onChange={(e) => updateDeal({ annualNet: Number(e.target.value) })}
                         placeholder="0"
                       />
                     </div>
@@ -355,12 +355,12 @@ export const DealInputs: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="reportedPayrollCost">Reported Payroll Cost (Annual)</Label>
+                      <Label htmlFor="payrollCost">Payroll Cost (Annual)</Label>
                       <Input
-                        id="reportedPayrollCost"
+                        id="payrollCost"
                         type="number"
-                        value={deal?.reportedPayrollCost || ''}
-                        onChange={(e) => updateDeal({ reportedPayrollCost: Number(e.target.value) })}
+                        value={deal?.payrollCost || ''}
+                        onChange={(e) => updateDeal({ payrollCost: Number(e.target.value) })}
                         placeholder="0"
                       />
                     </div>
@@ -485,7 +485,7 @@ export const DealInputs: React.FC = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Income Verification</CardTitle>
+                  <CardTitle>Utility Analysis</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -494,8 +494,8 @@ export const DealInputs: React.FC = () => {
                       <Input
                         id="collectionPeriod"
                         type="number"
-                        value={incomeVerification?.collectionPeriodWeeks || ''}
-                        onChange={(e) => updateIncomeVerification({ collectionPeriodWeeks: Number(e.target.value) })}
+                        value={utilityAnalysis?.collectionPeriodWeeks || ''}
+                        onChange={(e) => updateUtilityAnalysis({ collectionPeriodWeeks: Number(e.target.value) })}
                         placeholder="0"
                       />
                     </div>
@@ -504,8 +504,8 @@ export const DealInputs: React.FC = () => {
                       <Input
                         id="totalCollected"
                         type="number"
-                        value={incomeVerification?.totalCollectedAmount || ''}
-                        onChange={(e) => updateIncomeVerification({ totalCollectedAmount: Number(e.target.value) })}
+                        value={utilityAnalysis?.totalCollectedAmount || ''}
+                        onChange={(e) => updateUtilityAnalysis({ totalCollectedAmount: Number(e.target.value) })}
                         placeholder="0"
                       />
                     </div>
@@ -517,8 +517,8 @@ export const DealInputs: React.FC = () => {
                       <Input
                         id="waterBillGallons"
                         type="number"
-                        value={incomeVerification?.waterBillTotalGallons || ''}
-                        onChange={(e) => updateIncomeVerification({ waterBillTotalGallons: Number(e.target.value) })}
+                        value={utilityAnalysis?.waterBillTotalGallons || ''}
+                        onChange={(e) => updateUtilityAnalysis({ waterBillTotalGallons: Number(e.target.value) })}
                         placeholder="0"
                       />
                     </div>
@@ -527,8 +527,8 @@ export const DealInputs: React.FC = () => {
                       <Input
                         id="waterBillPeriod"
                         type="number"
-                        value={incomeVerification?.waterBillPeriodMonths || ''}
-                        onChange={(e) => updateIncomeVerification({ waterBillPeriodMonths: Number(e.target.value) })}
+                        value={utilityAnalysis?.waterBillPeriodMonths || ''}
+                        onChange={(e) => updateUtilityAnalysis({ waterBillPeriodMonths: Number(e.target.value) })}
                         placeholder="0"
                       />
                     </div>
@@ -538,11 +538,22 @@ export const DealInputs: React.FC = () => {
                         id="waterSewerCost"
                         type="number"
                         step="0.001"
-                        value={incomeVerification?.waterSewerCostPerGallon || ''}
-                        onChange={(e) => updateIncomeVerification({ waterSewerCostPerGallon: Number(e.target.value) })}
+                        value={utilityAnalysis?.waterSewerCostPerGallon || ''}
+                        onChange={(e) => updateUtilityAnalysis({ waterSewerCostPerGallon: Number(e.target.value) })}
                         placeholder="0.000"
                       />
                     </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="analysisNotes">Analysis Notes</Label>
+                    <Textarea
+                      id="analysisNotes"
+                      value={utilityAnalysis?.notes || ''}
+                      onChange={(e) => updateUtilityAnalysis({ notes: e.target.value })}
+                      placeholder="Notes about utility analysis..."
+                      rows={3}
+                    />
                   </div>
                 </CardContent>
               </Card>

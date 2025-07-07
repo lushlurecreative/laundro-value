@@ -7,7 +7,7 @@ import { useDeal } from '@/contexts/DealContext';
 import { calculateMetrics, formatCurrency, formatPercentage, calculateWaterBasedIncome, calculateCollectionBasedIncome } from '@/utils/calculations';
 
 export const AnalysisScenarios: React.FC = () => {
-  const { deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, incomeVerification } = useDeal();
+  const { deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, utilityAnalysis } = useDeal();
   
   // Sensitivity analysis sliders
   const [vendPriceAdjustment, setVendPriceAdjustment] = useState([0]);
@@ -18,7 +18,7 @@ export const AnalysisScenarios: React.FC = () => {
 
   // Calculate baseline metrics
   const baselineMetrics = calculateMetrics(
-    deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, incomeVerification
+    deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, utilityAnalysis
   );
 
   // Calculate adjusted metrics based on sensitivity sliders
@@ -28,7 +28,7 @@ export const AnalysisScenarios: React.FC = () => {
     // Create adjusted deal object
     const adjustedDeal = {
       ...deal,
-      reportedGrossIncomeAnnual: deal.reportedGrossIncomeAnnual * (1 + turnsPerDayAdjustment[0] / 100),
+      grossIncomeAnnual: deal.grossIncomeAnnual * (1 + turnsPerDayAdjustment[0] / 100),
       loanInterestRatePercent: Math.max(0.1, deal.loanInterestRatePercent + interestRateAdjustment[0]),
       downPaymentPercent: Math.max(5, Math.min(50, deal.downPaymentPercent + downPaymentAdjustment[0]))
     };
@@ -51,16 +51,16 @@ export const AnalysisScenarios: React.FC = () => {
     });
 
     return calculateMetrics(
-      adjustedDeal, leaseDetails, adjustedExpenses, adjustedMachines, ancillaryIncome, incomeVerification
+      adjustedDeal, leaseDetails, adjustedExpenses, adjustedMachines, ancillaryIncome, utilityAnalysis
     );
   };
 
   const adjustedMetrics = getAdjustedMetrics();
 
   // Income verification calculations
-  const waterBasedIncome = calculateWaterBasedIncome(incomeVerification, machineInventory);
-  const collectionBasedIncome = calculateCollectionBasedIncome(incomeVerification);
-  const sellerReported = deal?.reportedGrossIncomeAnnual || 0;
+  const waterBasedIncome = calculateWaterBasedIncome(utilityAnalysis, machineInventory);
+  const collectionBasedIncome = calculateCollectionBasedIncome(utilityAnalysis);
+  const sellerReported = deal?.grossIncomeAnnual || 0;
 
   const calculateVariance = (val1: number, val2: number) => {
     if (val2 === 0) return 0;
@@ -99,7 +99,7 @@ export const AnalysisScenarios: React.FC = () => {
     return 'text-danger';
   };
 
-  // Industry benchmarks (example data)
+  // Industry benchmarks 
   const industryBenchmarks = [
     { category: 'Rent as % of Gross Income', benchmark: '15-25%', actual: deal ? ((leaseDetails?.monthlyRent || 0) * 12 / baselineMetrics.totalGrossIncome * 100).toFixed(1) + '%' : 'N/A' },
     { category: 'Utilities as % of Gross Income', benchmark: '20-30%', actual: deal ? ((expenseItems.filter(e => ['Water/Sewer', 'Gas', 'Electricity'].includes(e.expenseName)).reduce((sum, e) => sum + e.amountAnnual, 0) / baselineMetrics.totalGrossIncome * 100).toFixed(1) + '%') : 'N/A' },
@@ -132,7 +132,10 @@ export const AnalysisScenarios: React.FC = () => {
     <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold">Analysis & Scenarios</h2>
-        <p className="text-muted-foreground">Sensitivity analysis and income verification tools</p>
+        <p className="text-muted-foreground">
+          Sensitivity analysis helps you understand how changes in key variables affect your investment returns. 
+          Use the sliders below to test different scenarios and see real-time impact on your KPIs.
+        </p>
       </div>
 
       {!deal && (
@@ -155,7 +158,7 @@ export const AnalysisScenarios: React.FC = () => {
             <CardHeader>
               <CardTitle>Sensitivity Analysis</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Adjust key variables to see how they impact your investment returns
+                Test different scenarios by adjusting key variables. This shows how sensitive your returns are to changes in pricing, costs, and financing terms.
               </p>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -193,7 +196,7 @@ export const AnalysisScenarios: React.FC = () => {
 
                   <div>
                     <div className="flex justify-between items-center mb-2">
-                      <label className="text-sm font-medium">Turns per Day Adjustment</label>
+                      <label className="text-sm font-medium">Revenue Adjustment</label>
                       <Badge variant="outline">{turnsPerDayAdjustment[0] > 0 ? '+' : ''}{turnsPerDayAdjustment[0]}%</Badge>
                     </div>
                     <Slider
@@ -349,7 +352,7 @@ export const AnalysisScenarios: React.FC = () => {
                   <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
                       <p className="font-medium">{benchmark.category}</p>
-                      <p className="text-sm text-muted-foreground">Industry: {benchmark.benchmark}</p>
+                      <p className="text-sm text-muted-foreground">Industry Standard: {benchmark.benchmark}</p>
                     </div>
                     <div className="text-right">
                       <p className={`text-lg font-bold ${isOutOfRange(benchmark.category, benchmark.actual) ? 'text-danger' : 'text-success'}`}>

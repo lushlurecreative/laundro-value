@@ -12,7 +12,7 @@ import { calculateTenYearProjection } from '@/utils/projections';
 import { FileText, Download, Building, TrendingUp, DollarSign, Calendar } from 'lucide-react';
 
 export const Reports: React.FC = () => {
-  const { deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, incomeVerification } = useDeal();
+  const { deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, utilityAnalysis } = useDeal();
   const [reportSettings, setReportSettings] = useState({
     companyName: '',
     preparedBy: '',
@@ -23,7 +23,7 @@ export const Reports: React.FC = () => {
   });
 
   const metrics = calculateMetrics(
-    deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, incomeVerification
+    deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, utilityAnalysis
   );
 
   const tenYearProjection = deal ? calculateTenYearProjection(
@@ -71,7 +71,7 @@ export const Reports: React.FC = () => {
         <h3>Executive Summary</h3>
         ${reportSettings.executiveSummary ? 
           `<p>${reportSettings.executiveSummary}</p>` : 
-          `<p>This investment analysis evaluates the acquisition of ${deal.dealName} for ${formatCurrency(deal.purchasePrice)}. 
+          `<p>This investment analysis evaluates the acquisition of ${deal.dealName} for ${formatCurrency(deal.askingPrice)}. 
           The property generates an estimated ${formatCurrency(metrics.noi)} in Net Operating Income, 
           resulting in a ${formatPercentage(metrics.capRate)} cap rate and ${formatPercentage(metrics.coCROI)} cash-on-cash return.</p>`
         }
@@ -111,8 +111,8 @@ export const Reports: React.FC = () => {
         <h3>Financial Summary</h3>
         <table class="table">
             <tr><th>Item</th><th>Amount</th></tr>
-            <tr><td>Purchase Price</td><td>${formatCurrency(deal.purchasePrice)}</td></tr>
-            <tr><td>Down Payment (${formatPercentage(deal.downPaymentPercent)})</td><td>${formatCurrency(deal.purchasePrice * deal.downPaymentPercent / 100)}</td></tr>
+            <tr><td>Asking Price</td><td>${formatCurrency(deal.askingPrice)}</td></tr>
+            <tr><td>Down Payment (${formatPercentage(deal.downPaymentPercent)})</td><td>${formatCurrency(deal.askingPrice * deal.downPaymentPercent / 100)}</td></tr>
             <tr><td>Loan Amount</td><td>${formatCurrency(metrics.loanAmount)}</td></tr>
             <tr><td>Gross Income</td><td>${formatCurrency(metrics.totalGrossIncome)}</td></tr>
             <tr><td>Operating Expenses</td><td>${formatCurrency(metrics.totalOperatingExpenses)}</td></tr>
@@ -219,8 +219,8 @@ export const Reports: React.FC = () => {
         <h3>Loan Request Summary</h3>
         <table class="table">
             <tr><th>Item</th><th>Amount</th></tr>
-            <tr><td>Total Purchase Price</td><td class="highlight">${formatCurrency(deal.purchasePrice)}</td></tr>
-            <tr><td>Down Payment (${formatPercentage(deal.downPaymentPercent)})</td><td>${formatCurrency(deal.purchasePrice * deal.downPaymentPercent / 100)}</td></tr>
+            <tr><td>Total Asking Price</td><td class="highlight">${formatCurrency(deal.askingPrice)}</td></tr>
+            <tr><td>Down Payment (${formatPercentage(deal.downPaymentPercent)})</td><td>${formatCurrency(deal.askingPrice * deal.downPaymentPercent / 100)}</td></tr>
             <tr><td>Requested Loan Amount</td><td class="highlight">${formatCurrency(metrics.loanAmount)}</td></tr>
             <tr><td>Loan-to-Value Ratio</td><td>${formatPercentage(100 - deal.downPaymentPercent)}</td></tr>
         </table>
@@ -498,8 +498,8 @@ export const Reports: React.FC = () => {
                         <p className="font-medium">{deal.dealName}</p>
                       </div>
                       <div>
-                        <p className="text-muted-foreground">Purchase Price</p>
-                        <p className="font-medium">{formatCurrency(deal.purchasePrice)}</p>
+                        <p className="text-muted-foreground">Asking Price</p>
+                        <p className="font-medium">{formatCurrency(deal.askingPrice)}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Report Date</p>

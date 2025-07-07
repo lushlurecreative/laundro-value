@@ -5,10 +5,10 @@ import { useDeal } from '@/contexts/DealContext';
 import { calculateMetrics, formatCurrency, formatPercentage } from '@/utils/calculations';
 
 export const Dashboard: React.FC = () => {
-  const { deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, incomeVerification } = useDeal();
+  const { deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, utilityAnalysis } = useDeal();
   
   const metrics = calculateMetrics(
-    deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, incomeVerification
+    deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, utilityAnalysis
   );
 
   const getKPIStatus = (actual: number, target: number, isPercentage: boolean = false) => {
@@ -22,8 +22,8 @@ export const Dashboard: React.FC = () => {
     {
       title: 'Suggested Valuation',
       value: `${formatCurrency(metrics.suggestedValuationLow)} - ${formatCurrency(metrics.suggestedValuationHigh)}`,
-      status: deal?.purchasePrice ? 
-        (deal.purchasePrice >= metrics.suggestedValuationLow && deal.purchasePrice <= metrics.suggestedValuationHigh ? 'success' : 'warning') : 
+      status: deal?.askingPrice ? 
+        (deal.askingPrice >= metrics.suggestedValuationLow && deal.askingPrice <= metrics.suggestedValuationHigh ? 'success' : 'warning') : 
         'muted'
     },
     {
@@ -230,12 +230,12 @@ export const Dashboard: React.FC = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Purchase Price</span>
-                  <span className="font-semibold">{formatCurrency(deal.purchasePrice)}</span>
+                  <span className="text-muted-foreground">Asking Price</span>
+                  <span className="font-semibold">{formatCurrency(deal.askingPrice)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Down Payment ({formatPercentage(deal.downPaymentPercent)})</span>
-                  <span className="font-semibold">{formatCurrency(deal.purchasePrice * deal.downPaymentPercent / 100)}</span>
+                  <span className="font-semibold">{formatCurrency(deal.askingPrice * deal.downPaymentPercent / 100)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Loan Amount</span>
