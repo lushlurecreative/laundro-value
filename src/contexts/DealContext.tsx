@@ -118,7 +118,14 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         notes: ''
       });
     } else {
-      setDeal({ ...deal, ...dealUpdate });
+      const updatedDeal = { ...deal, ...dealUpdate };
+      
+      // Clear lease details if real estate is now included
+      if (dealUpdate.isRealEstateIncluded === true && !deal.isRealEstateIncluded) {
+        setLeaseDetails(null);
+      }
+      
+      setDeal(updatedDeal);
     }
   };
 

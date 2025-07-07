@@ -91,10 +91,18 @@ export const DealInputs: React.FC = () => {
         </div>
 
       <Card className="shadow-elegant">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-6">
+        <Tabs value={activeTab} onValueChange={(value) => {
+          // Skip lease tab if real estate is included
+          if (value === 'lease' && deal?.isRealEstateIncluded) {
+            return;
+          }
+          setActiveTab(value);
+        }}>
+          <TabsList className={`grid w-full ${deal?.isRealEstateIncluded ? 'grid-cols-5' : 'grid-cols-6'}`}>
             <TabsTrigger value="property">Property & Deal</TabsTrigger>
-            <TabsTrigger value="lease">Lease</TabsTrigger>
+            {!deal?.isRealEstateIncluded && (
+              <TabsTrigger value="lease">Lease</TabsTrigger>
+            )}
             <TabsTrigger value="income">Income</TabsTrigger>
             <TabsTrigger value="expenses">Expenses</TabsTrigger>
             <TabsTrigger value="equipment">Equipment</TabsTrigger>
@@ -156,9 +164,24 @@ export const DealInputs: React.FC = () => {
                     <Switch
                       id="isRealEstateIncluded"
                       checked={deal?.isRealEstateIncluded || false}
-                      onCheckedChange={(checked) => updateDeal({ isRealEstateIncluded: checked })}
+                      onCheckedChange={(checked) => {
+                        updateDeal({ isRealEstateIncluded: checked });
+                        // Switch to a different tab if currently on lease tab
+                        if (checked && activeTab === 'lease') {
+                          setActiveTab('property');
+                        }
+                      }}
                     />
-                    <Label htmlFor="isRealEstateIncluded">Real Estate Included</Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Label htmlFor="isRealEstateIncluded" className="cursor-help">
+                          Real Estate Included
+                        </Label>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Check this if you're purchasing the real estate along with the business. When enabled, lease details become unnecessary.</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
 
@@ -253,110 +276,115 @@ export const DealInputs: React.FC = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="lease" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Lease Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="monthlyRent">Monthly Rent</Label>
-                    <Input
-                      id="monthlyRent"
-                      type="number"
-                      value={leaseDetails?.monthlyRent || ''}
-                      onChange={(e) => updateLeaseDetails({ monthlyRent: Number(e.target.value) })}
-                      placeholder="0"
-                    />
+          {!deal?.isRealEstateIncluded && (
+            <TabsContent value="lease" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Lease Details</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Enter lease terms and conditions for the property rental
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="monthlyRent">Monthly Rent</Label>
+                      <Input
+                        id="monthlyRent"
+                        type="number"
+                        value={leaseDetails?.monthlyRent || ''}
+                        onChange={(e) => updateLeaseDetails({ monthlyRent: Number(e.target.value) })}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="annualRentIncrease">Annual Rent Increase (%)</Label>
+                      <Input
+                        id="annualRentIncrease"
+                        type="number"
+                        step="0.1"
+                        value={leaseDetails?.annualRentIncreasePercent || ''}
+                        onChange={(e) => updateLeaseDetails({ annualRentIncreasePercent: Number(e.target.value) })}
+                        placeholder="3.0"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="camCost">CAM Cost (Annual)</Label>
+                      <Input
+                        id="camCost"
+                        type="number"
+                        value={leaseDetails?.camCostAnnual || ''}
+                        onChange={(e) => updateLeaseDetails({ camCostAnnual: Number(e.target.value) })}
+                        placeholder="0"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="annualRentIncrease">Annual Rent Increase (%)</Label>
-                    <Input
-                      id="annualRentIncrease"
-                      type="number"
-                      step="0.1"
-                      value={leaseDetails?.annualRentIncreasePercent || ''}
-                      onChange={(e) => updateLeaseDetails({ annualRentIncreasePercent: Number(e.target.value) })}
-                      placeholder="3.0"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="camCost">CAM Cost (Annual)</Label>
-                    <Input
-                      id="camCost"
-                      type="number"
-                      value={leaseDetails?.camCostAnnual || ''}
-                      onChange={(e) => updateLeaseDetails({ camCostAnnual: Number(e.target.value) })}
-                      placeholder="0"
-                    />
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="remainingLeaseTerm">Remaining Lease Term (Years)</Label>
-                    <Input
-                      id="remainingLeaseTerm"
-                      type="number"
-                      value={leaseDetails?.remainingLeaseTermYears || ''}
-                      onChange={(e) => updateLeaseDetails({ remainingLeaseTermYears: Number(e.target.value) })}
-                      placeholder="0"
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="remainingLeaseTerm">Remaining Lease Term (Years)</Label>
+                      <Input
+                        id="remainingLeaseTerm"
+                        type="number"
+                        value={leaseDetails?.remainingLeaseTermYears || ''}
+                        onChange={(e) => updateLeaseDetails({ remainingLeaseTermYears: Number(e.target.value) })}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="renewalOptionsCount">Renewal Options Count</Label>
+                      <Input
+                        id="renewalOptionsCount"
+                        type="number"
+                        value={leaseDetails?.renewalOptionsCount || ''}
+                        onChange={(e) => updateLeaseDetails({ renewalOptionsCount: Number(e.target.value) })}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="renewalOptionLength">Renewal Option Length (Years)</Label>
+                      <Input
+                        id="renewalOptionLength"
+                        type="number"
+                        value={leaseDetails?.renewalOptionLengthYears || ''}
+                        onChange={(e) => updateLeaseDetails({ renewalOptionLengthYears: Number(e.target.value) })}
+                        placeholder="5"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="renewalOptionsCount">Renewal Options Count</Label>
-                    <Input
-                      id="renewalOptionsCount"
-                      type="number"
-                      value={leaseDetails?.renewalOptionsCount || ''}
-                      onChange={(e) => updateLeaseDetails({ renewalOptionsCount: Number(e.target.value) })}
-                      placeholder="0"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="renewalOptionLength">Renewal Option Length (Years)</Label>
-                    <Input
-                      id="renewalOptionLength"
-                      type="number"
-                      value={leaseDetails?.renewalOptionLengthYears || ''}
-                      onChange={(e) => updateLeaseDetails({ renewalOptionLengthYears: Number(e.target.value) })}
-                      placeholder="5"
-                    />
-                  </div>
-                </div>
 
-                <div>
-                  <Label htmlFor="leaseType">Lease Type</Label>
-                  <Select
-                    value={leaseDetails?.leaseType || 'Triple Net (NNN)'}
-                    onValueChange={(value) => updateLeaseDetails({ leaseType: value as any })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Triple Net (NNN)">Triple Net (NNN)</SelectItem>
-                      <SelectItem value="Modified Gross">Modified Gross</SelectItem>
-                      <SelectItem value="Gross Lease">Gross Lease</SelectItem>
-                      <SelectItem value="Other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="leaseHistory">Lease History</Label>
-                  <Textarea
-                    id="leaseHistory"
-                    value={deal?.leaseHistory || ''}
-                    onChange={(e) => updateDeal({ leaseHistory: e.target.value })}
-                    placeholder="Enter lease history and any relevant notes..."
-                    rows={3}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                  <div>
+                    <Label htmlFor="leaseType">Lease Type</Label>
+                    <Select
+                      value={leaseDetails?.leaseType || 'Triple Net (NNN)'}
+                      onValueChange={(value) => updateLeaseDetails({ leaseType: value as any })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Triple Net (NNN)">Triple Net (NNN)</SelectItem>
+                        <SelectItem value="Modified Gross">Modified Gross</SelectItem>
+                        <SelectItem value="Gross Lease">Gross Lease</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="leaseHistory">Lease History</Label>
+                    <Textarea
+                      id="leaseHistory"
+                      value={deal?.leaseHistory || ''}
+                      onChange={(e) => updateDeal({ leaseHistory: e.target.value })}
+                      placeholder="Enter lease history and any relevant notes..."
+                      rows={3}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
 
           <TabsContent value="income" className="mt-6">
             <div className="space-y-6">
