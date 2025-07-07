@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Deal, LeaseDetails, ExpenseItem, MachineInventory, AncillaryIncome, IncomeVerification } from '@/types/deal';
+import { Deal, LeaseDetails, ExpenseItem, MachineInventory, AncillaryIncome, UtilityAnalysis } from '@/types/deal';
 
 interface DealContextType {
   deal: Deal | null;
@@ -7,7 +7,7 @@ interface DealContextType {
   expenseItems: ExpenseItem[];
   machineInventory: MachineInventory[];
   ancillaryIncome: AncillaryIncome | null;
-  incomeVerification: IncomeVerification | null;
+  utilityAnalysis: UtilityAnalysis | null;
   updateDeal: (deal: Partial<Deal>) => void;
   updateLeaseDetails: (lease: Partial<LeaseDetails>) => void;
   addExpenseItem: (expense: ExpenseItem) => void;
@@ -17,7 +17,7 @@ interface DealContextType {
   updateMachine: (machineId: string, machine: Partial<MachineInventory>) => void;
   removeMachine: (machineId: string) => void;
   updateAncillaryIncome: (income: Partial<AncillaryIncome>) => void;
-  updateIncomeVerification: (verification: Partial<IncomeVerification>) => void;
+  updateUtilityAnalysis: (analysis: Partial<UtilityAnalysis>) => void;
 }
 
 const DealContext = createContext<DealContextType | undefined>(undefined);
@@ -45,7 +45,7 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [expenseItems, setExpenseItems] = useState<ExpenseItem[]>([]);
   const [machineInventory, setMachineInventory] = useState<MachineInventory[]>([]);
   const [ancillaryIncome, setAncillaryIncome] = useState<AncillaryIncome | null>(null);
-  const [incomeVerification, setIncomeVerification] = useState<IncomeVerification | null>(null);
+  const [utilityAnalysis, setUtilityAnalysis] = useState<UtilityAnalysis | null>(null);
 
   const updateDeal = (dealUpdate: Partial<Deal>) => {
     if (!deal) {
@@ -54,23 +54,30 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         dealName: 'New Laundromat Deal',
         userId: 'user-1',
         propertyAddress: '',
-        purchasePrice: 0,
+        askingPrice: 0,
         facilitySizeSqft: 0,
         isRealEstateIncluded: false,
-        reportedGrossIncomeAnnual: 0,
-        reportedAnnualNet: 0,
+        grossIncomeAnnual: 0,
+        annualNet: 0,
         fullTimeStaffCount: 0,
         partTimeStaffCount: 0,
-        reportedPayrollCost: 0,
+        payrollCost: 0,
         downPaymentPercent: 25,
         loanInterestRatePercent: 7.5,
         loanTermYears: 10,
+        loanType: 'Conventional',
         targetCapRatePercent: 8,
         targetCoCROIPercent: 15,
         ownerWeeklyHours: 0,
         replacementLaborCostHourly: 15,
         leaseHistory: '',
         notes: '',
+        expansionPotential: {
+          additionalMachines: 0,
+          expansionCost: 0,
+          potentialAdditionalIncome: 0
+        },
+        valueAddedServices: [],
         ...dealUpdate
       };
       setDeal(newDeal);
@@ -99,15 +106,16 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         securityMeasures: []
       });
       
-      // Initialize income verification
-      setIncomeVerification({
-        verificationId: 'verification-1',
+      // Initialize utility analysis
+      setUtilityAnalysis({
+        analysisId: 'analysis-1',
         dealId: newDeal.dealId,
         collectionPeriodWeeks: 0,
         totalCollectedAmount: 0,
         waterBillTotalGallons: 0,
         waterBillPeriodMonths: 0,
-        waterSewerCostPerGallon: 0
+        waterSewerCostPerGallon: 0,
+        notes: ''
       });
     } else {
       setDeal({ ...deal, ...dealUpdate });
@@ -171,9 +179,9 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const updateIncomeVerification = (verificationUpdate: Partial<IncomeVerification>) => {
-    if (incomeVerification) {
-      setIncomeVerification({ ...incomeVerification, ...verificationUpdate });
+  const updateUtilityAnalysis = (analysisUpdate: Partial<UtilityAnalysis>) => {
+    if (utilityAnalysis) {
+      setUtilityAnalysis({ ...utilityAnalysis, ...analysisUpdate });
     }
   };
 
@@ -184,7 +192,7 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       expenseItems,
       machineInventory,
       ancillaryIncome,
-      incomeVerification,
+      utilityAnalysis,
       updateDeal,
       updateLeaseDetails,
       addExpenseItem,
@@ -194,7 +202,7 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       updateMachine,
       removeMachine,
       updateAncillaryIncome,
-      updateIncomeVerification
+      updateUtilityAnalysis
     }}>
       {children}
     </DealContext.Provider>

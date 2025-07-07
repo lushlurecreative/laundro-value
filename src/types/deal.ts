@@ -3,23 +3,33 @@ export interface Deal {
   dealName: string;
   userId: string;
   propertyAddress: string;
-  purchasePrice: number;
+  askingPrice: number;
   facilitySizeSqft: number;
   isRealEstateIncluded: boolean;
-  reportedGrossIncomeAnnual: number;
-  reportedAnnualNet: number;
+  grossIncomeAnnual: number;
+  annualNet: number;
   fullTimeStaffCount: number;
   partTimeStaffCount: number;
-  reportedPayrollCost: number;
+  payrollCost: number;
   downPaymentPercent: number;
   loanInterestRatePercent: number;
   loanTermYears: number;
+  loanType: string;
   targetCapRatePercent: number;
   targetCoCROIPercent: number;
   ownerWeeklyHours: number;
   replacementLaborCostHourly: number;
   leaseHistory: string;
   notes: string;
+  expansionPotential: {
+    additionalMachines: number;
+    expansionCost: number;
+    potentialAdditionalIncome: number;
+  };
+  valueAddedServices: {
+    description: string;
+    potentialRevenue: number;
+  }[];
 }
 
 export interface LeaseDetails {
@@ -45,18 +55,22 @@ export interface ExpenseItem {
 export interface MachineInventory {
   machineId: string;
   dealId: string;
-  machineType: 'Top-Load Washer' | 'Front-Load Washer' | 'Stacked Washer/Dryer' | 'Single Dryer' | 'Stacked Dryer';
+  machineType: 'Top-Load Washer' | 'Front-Load Washer' | 'Stacked Washer/Dryer' | 'Single Dryer' | 'Stacked Dryer' | 'Other';
   brand: string;
+  model?: string;
   quantity: number;
   ageYears: number;
   capacityLbs: number;
   vendPricePerUse: number;
   conditionRating: number; // 1-5 scale
   waterConsumptionGalPerCycle?: number; // for washers only
+  electricConsumptionKwh?: number;
+  gasConsumptionBtu?: number;
   purchaseValue: number;
   currentValue: number;
   maintenanceCostAnnual: number;
   isCardOperated: boolean;
+  isCoinOperated: boolean;
   isOutOfOrder: boolean;
 }
 
@@ -75,14 +89,15 @@ export interface AncillaryIncome {
   securityMeasures: string[];
 }
 
-export interface IncomeVerification {
-  verificationId: string;
+export interface UtilityAnalysis {
+  analysisId: string;
   dealId: string;
   collectionPeriodWeeks: number;
   totalCollectedAmount: number;
   waterBillTotalGallons: number;
   waterBillPeriodMonths: number;
   waterSewerCostPerGallon: number;
+  notes: string;
 }
 
 export interface CalculatedMetrics {

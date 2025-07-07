@@ -1,4 +1,4 @@
-import { Deal, LeaseDetails, ExpenseItem, MachineInventory, AncillaryIncome, IncomeVerification, CalculatedMetrics } from '@/types/deal';
+import { Deal, LeaseDetails, ExpenseItem, MachineInventory, AncillaryIncome, UtilityAnalysis, CalculatedMetrics } from '@/types/deal';
 
 export const calculateMetrics = (
   deal: Deal | null,
@@ -6,7 +6,7 @@ export const calculateMetrics = (
   expenseItems: ExpenseItem[],
   machineInventory: MachineInventory[],
   ancillaryIncome: AncillaryIncome | null,
-  incomeVerification: IncomeVerification | null
+  utilityAnalysis: UtilityAnalysis | null
 ): CalculatedMetrics => {
   if (!deal) {
     return {
@@ -26,7 +26,7 @@ export const calculateMetrics = (
   }
 
   // Calculate Total Gross Income
-  let totalGrossIncome = deal.reportedGrossIncomeAnnual;
+  let totalGrossIncome = deal.grossIncomeAnnual;
   if (ancillaryIncome) {
     if (ancillaryIncome.isWDFActive) {
       totalGrossIncome += ancillaryIncome.wdfPricePerLb * ancillaryIncome.wdfVolumeLbsPerWeek * 52;
@@ -41,8 +41,8 @@ export const calculateMetrics = (
   const noi = totalGrossIncome - totalOperatingExpenses;
 
   // Calculate Loan Metrics
-  const downPaymentAmount = deal.purchasePrice * (deal.downPaymentPercent / 100);
-  const loanAmount = deal.purchasePrice - downPaymentAmount;
+  const downPaymentAmount = deal.askingPrice * (deal.downPaymentPercent / 100);
+  const loanAmount = deal.askingPrice - downPaymentAmount;
   
   // Calculate Annual Debt Service using PMT formula
   const monthlyRate = deal.loanInterestRatePercent / 100 / 12;
@@ -59,7 +59,7 @@ export const calculateMetrics = (
   // Calculate Cash Flow and Returns
   const annualCashFlow = noi - annualDebtService;
   const coCROI = downPaymentAmount > 0 ? (annualCashFlow / downPaymentAmount) * 100 : 0;
-  const capRate = deal.purchasePrice > 0 ? (noi / deal.purchasePrice) * 100 : 0;
+  const capRate = deal.askingPrice > 0 ? (noi / deal.askingPrice) * 100 : 0;
   const dscr = annualDebtService > 0 ? noi / annualDebtService : 0;
 
   // Calculate Dynamic Valuation Multiplier
@@ -135,10 +135,10 @@ export const formatPercentage = (value: number, decimals: number = 1): string =>
 };
 
 export const calculateWaterBasedIncome = (
-  incomeVerification: IncomeVerification | null,
+  utilityAnalysis: UtilityAnalysis | null,
   machineInventory: MachineInventory[]
 ): number => {
-  if (!incomeVerification || machineInventory.length === 0) return 0;
+  if (!utilityAnalysis || machineInventory.length === 0) return 0;
 
   const washers = machineInventory.filter(machine => 
     machine.machineType.includes('Washer') && machine.waterConsumptionGalPerCycle
@@ -150,7 +150,7 @@ export const calculateWaterBasedIncome = (
     sum + (washer.waterConsumptionGalPerCycle || 0) * washer.quantity, 0
   ) / washers.reduce((sum, washer) => sum + washer.quantity, 0);
 
-  const monthlyGallons = incomeVerification.waterBillTotalGallons / incomeVerification.waterBillPeriodMonths;
+  const monthlyGallons = utilityAnalysis.waterBillTotalGallons / utilityAnalysis.waterBillPeriodMonths;
   const estimatedCyclesPerMonth = monthlyGallons / avgWaterPerCycle;
   
   const avgVendPrice = washers.reduce((sum, washer) => sum + washer.vendPricePerUse, 0) / washers.length;
@@ -159,9 +159,9 @@ export const calculateWaterBasedIncome = (
 };
 
 export const calculateCollectionBasedIncome = (
-  incomeVerification: IncomeVerification | null
+  utilityAnalysis: UtilityAnalysis | null
 ): number => {
-  if (!incomeVerification || incomeVerification.collectionPeriodWeeks === 0) return 0;
+  if (!utilityAnalysis || utilityAnalysis.collectionPeriodWeeks === 0) return 0;
   
-  return (incomeVerification.totalCollectedAmount / incomeVerification.collectionPeriodWeeks) * 52;
+  return (utilityAnalysis.totalCollectedAmount / utilityAnalysis.collectionPeriodWeeks) * 52;
 };

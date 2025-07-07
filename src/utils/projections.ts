@@ -35,7 +35,7 @@ export const calculateTenYearProjection = (
   const projections: YearlyProjection[] = [];
   
   // Starting values
-  let currentGrossIncome = deal.reportedGrossIncomeAnnual;
+  let currentGrossIncome = deal.grossIncomeAnnual;
   if (ancillaryIncome) {
     if (ancillaryIncome.isWDFActive) {
       currentGrossIncome += ancillaryIncome.wdfPricePerLb * ancillaryIncome.wdfVolumeLbsPerWeek * 52;
@@ -46,8 +46,8 @@ export const calculateTenYearProjection = (
   let currentOperatingExpenses = expenseItems.reduce((sum, expense) => sum + expense.amountAnnual, 0);
   
   // Calculate annual debt service
-  const downPaymentAmount = deal.purchasePrice * (deal.downPaymentPercent / 100);
-  const loanAmount = deal.purchasePrice - downPaymentAmount;
+  const downPaymentAmount = deal.askingPrice * (deal.downPaymentPercent / 100);
+  const loanAmount = deal.askingPrice - downPaymentAmount;
   const monthlyRate = deal.loanInterestRatePercent / 100 / 12;
   const numberOfPayments = deal.loanTermYears * 12;
   

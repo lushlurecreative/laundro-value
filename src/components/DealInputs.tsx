@@ -19,7 +19,7 @@ export const DealInputs: React.FC = () => {
     expenseItems,
     machineInventory,
     ancillaryIncome,
-    incomeVerification,
+    utilityAnalysis,
     updateDeal,
     updateLeaseDetails,
     updateExpenseItem,
@@ -29,7 +29,7 @@ export const DealInputs: React.FC = () => {
     updateMachine,
     removeMachine,
     updateAncillaryIncome,
-    updateIncomeVerification
+    updateUtilityAnalysis
   } = useDeal();
 
   const [activeTab, setActiveTab] = useState('property');
@@ -38,7 +38,8 @@ export const DealInputs: React.FC = () => {
     updateDeal({
       downPaymentPercent: 10,
       loanInterestRatePercent: 7.5,
-      loanTermYears: 10
+      loanTermYears: 10,
+      loanType: 'SBA'
     });
   };
 
@@ -59,27 +60,33 @@ export const DealInputs: React.FC = () => {
       dealId: deal?.dealId || 'deal-1',
       machineType: 'Top-Load Washer' as const,
       brand: '',
+      model: '',
       quantity: 1,
       ageYears: 0,
       capacityLbs: 35,
       vendPricePerUse: 2.50,
       conditionRating: 3,
       waterConsumptionGalPerCycle: 40,
+      electricConsumptionKwh: 0,
+      gasConsumptionBtu: 0,
       purchaseValue: 0,
       currentValue: 0,
       maintenanceCostAnnual: 0,
       isCardOperated: false,
+      isCoinOperated: true,
       isOutOfOrder: false
     };
     addMachine(newMachine);
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold">Deal Inputs</h2>
-        <p className="text-muted-foreground">Enter your laundromat deal information</p>
-      </div>
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-3xl font-bold">Deal Inputs</h2>
+          <p className="text-muted-foreground">
+            Enter information if known, otherwise estimate or leave blank. Required fields: Deal Name*, Property Address*, Asking Price*
+          </p>
+        </div>
 
       <Card className="shadow-elegant">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -100,34 +107,37 @@ export const DealInputs: React.FC = () => {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="dealName">Deal Name</Label>
+                    <Label htmlFor="dealName">Deal Name *</Label>
                     <Input
                       id="dealName"
                       value={deal?.dealName || ''}
                       onChange={(e) => updateDeal({ dealName: e.target.value })}
                       placeholder="e.g., 123 Main St Laundromat"
+                      required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="propertyAddress">Property Address</Label>
+                    <Label htmlFor="propertyAddress">Property Address *</Label>
                     <Input
                       id="propertyAddress"
                       value={deal?.propertyAddress || ''}
                       onChange={(e) => updateDeal({ propertyAddress: e.target.value })}
                       placeholder="Full property address"
+                      required
                     />
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <Label htmlFor="purchasePrice">Purchase Price</Label>
+                    <Label htmlFor="askingPrice">Asking Price *</Label>
                     <Input
-                      id="purchasePrice"
+                      id="askingPrice"
                       type="number"
-                      value={deal?.purchasePrice || ''}
-                      onChange={(e) => updateDeal({ purchasePrice: Number(e.target.value) })}
+                      value={deal?.askingPrice || ''}
+                      onChange={(e) => updateDeal({ askingPrice: Number(e.target.value) })}
                       placeholder="0"
+                      required
                     />
                   </div>
                   <div>
