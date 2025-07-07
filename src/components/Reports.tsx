@@ -70,10 +70,13 @@ export const Reports: React.FC = () => {
     <div class="section">
         <h3>Executive Summary</h3>
         ${reportSettings.executiveSummary ? 
-          `<p>${reportSettings.executiveSummary}</p>` : 
-          `<p>This investment analysis evaluates the acquisition of ${deal.dealName} for ${formatCurrency(deal.askingPrice)}. 
-          The property generates an estimated ${formatCurrency(metrics.noi)} in Net Operating Income, 
-          resulting in a ${formatPercentage(metrics.capRate)} cap rate and ${formatPercentage(metrics.coCROI)} cash-on-cash return.</p>`
+          reportSettings.executiveSummary : 
+          `<div>
+            <p><strong>Investment Overview:</strong> This analysis evaluates the acquisition of ${deal.dealName} for ${formatCurrency(deal.askingPrice)}.</p>
+            <p><strong>Financial Performance:</strong> The property generates an estimated ${formatCurrency(metrics.noi)} in Net Operating Income, resulting in a ${formatPercentage(metrics.capRate)} cap rate and ${formatPercentage(metrics.coCROI)} cash-on-cash return.</p>
+            <p><strong>Key Highlights:</strong> ${metrics.dscr >= 1.25 ? 'Strong debt service coverage indicates healthy cash flow.' : 'Debt service coverage may require attention.'} ${metrics.coCROI >= 15 ? 'Excellent cash-on-cash returns exceed typical market expectations.' : 'Returns are moderate and should be carefully evaluated.'}</p>
+            <p><strong>Recommendation:</strong> ${metrics.capRate >= (deal.targetCapRatePercent || 8) && metrics.coCROI >= (deal.targetCoCROIPercent || 15) ? 'This investment meets target criteria and appears financially sound.' : 'Consider negotiating purchase price or identifying value-add opportunities to improve returns.'}</p>
+          </div>`
         }
     </div>
 

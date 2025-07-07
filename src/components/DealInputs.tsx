@@ -199,13 +199,23 @@ export const DealInputs: React.FC = () => {
 
                 <Card className="mt-6">
                   <CardHeader>
-                    <CardTitle>Expansion Potential</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <CardTitle>Expansion Potential</CardTitle>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <span className="text-xs bg-muted px-2 py-1 rounded">?</span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Analyze physical space and infrastructure capacity for adding more equipment. This helps estimate future growth potential and required capital.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                     <p className="text-sm text-muted-foreground">
-                      Analyze the potential for adding machines or services to grow revenue
+                      Analyze the potential for adding machines to grow revenue
                     </p>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="additionalMachines">Additional Machines Possible</Label>
                         <Input
@@ -235,76 +245,6 @@ export const DealInputs: React.FC = () => {
                           })}
                           placeholder="0"
                         />
-                      </div>
-                      <div>
-                        <Label htmlFor="potentialAdditionalIncome">Potential Additional Income</Label>
-                        <Input
-                          id="potentialAdditionalIncome"
-                          type="number"
-                          value={deal?.expansionPotential?.potentialAdditionalIncome || ''}
-                          onChange={(e) => updateDeal({ 
-                            expansionPotential: { 
-                              ...deal?.expansionPotential, 
-                              potentialAdditionalIncome: Number(e.target.value) 
-                            } 
-                          })}
-                          placeholder="0"
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="mt-6">
-                  <CardHeader>
-                    <CardTitle>Value-Added Services</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Consider these services to increase revenue and customer retention
-                    </p>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-3">
-                        <h4 className="font-semibold text-primary">Popular Revenue Boosters:</h4>
-                        <ul className="space-y-2 text-sm">
-                          <li className="flex items-start">
-                            <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                            <span><strong>Wash & Fold Service:</strong> $1.50-2.50/lb, typically 25% markup</span>
-                          </li>
-                          <li className="flex items-start">
-                            <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                            <span><strong>Drop-off Service:</strong> Convenience fee $5-15 per order</span>
-                          </li>
-                          <li className="flex items-start">
-                            <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                            <span><strong>Vending Machines:</strong> Snacks, drinks, detergent - $200-500/month</span>
-                          </li>
-                          <li className="flex items-start">
-                            <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                            <span><strong>Dry Cleaning Pickup:</strong> Partner with local cleaner, 10-15% commission</span>
-                          </li>
-                        </ul>
-                      </div>
-                      <div className="space-y-3">
-                        <h4 className="font-semibold text-primary">Customer Experience Enhancements:</h4>
-                        <ul className="space-y-2 text-sm">
-                          <li className="flex items-start">
-                            <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                            <span><strong>Free WiFi & Seating:</strong> Increases dwell time and customer satisfaction</span>
-                          </li>
-                          <li className="flex items-start">
-                            <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                            <span><strong>Mobile Payment Systems:</strong> Card readers on all machines</span>
-                          </li>
-                          <li className="flex items-start">
-                            <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                            <span><strong>Loyalty Program:</strong> Encourage repeat business with punch cards/app</span>
-                          </li>
-                          <li className="flex items-start">
-                            <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                            <span><strong>Extended Hours:</strong> 24/7 access can increase revenue 15-25%</span>
-                          </li>
-                        </ul>
                       </div>
                     </div>
                   </CardContent>
@@ -543,35 +483,6 @@ export const DealInputs: React.FC = () => {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="lastVentCleaning">Last Vent Cleaning Date</Label>
-                      <Input
-                        id="lastVentCleaning"
-                        type="date"
-                        value={ancillaryIncome?.lastVentCleaningDate || ''}
-                        onChange={(e) => updateAncillaryIncome({ lastVentCleaningDate: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="ventCleaningFreq">Vent Cleaning Frequency</Label>
-                      <Select
-                        value={ancillaryIncome?.ventCleaningFrequency || 'Monthly'}
-                        onValueChange={(value) => updateAncillaryIncome({ ventCleaningFrequency: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Weekly">Weekly</SelectItem>
-                          <SelectItem value="Bi-weekly">Bi-weekly</SelectItem>
-                          <SelectItem value="Monthly">Monthly</SelectItem>
-                          <SelectItem value="Quarterly">Quarterly</SelectItem>
-                          <SelectItem value="Annually">Annually</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -600,7 +511,20 @@ export const DealInputs: React.FC = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Utility Analysis</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <CardTitle>Utility Analysis</CardTitle>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <span className="text-xs bg-muted px-2 py-1 rounded">?</span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Analyze utility costs by comparing actual collection amounts with utility bills. This helps verify the accuracy of income statements and identify potential cost-saving opportunities.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Verify income accuracy by analyzing utility consumption patterns
+                  </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

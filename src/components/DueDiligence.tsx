@@ -196,6 +196,37 @@ export const DueDiligence: React.FC = () => {
         </div>
       </div>
 
+      {/* Due Diligence Instructions */}
+      <Card className="shadow-card mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            How to Use This Checklist
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-semibold mb-2">How to Complete:</h4>
+              <ul className="text-sm space-y-1">
+                <li>• Click checkboxes to mark items as complete</li>
+                <li>• Add detailed notes for each section</li>
+                <li>• Upload supporting documents when available</li>
+                <li>• Review all sections before finalizing</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-2">Best Practices:</h4>
+              <ul className="text-sm space-y-1">
+                <li>• Work through items systematically</li>
+                <li>• Don't skip sections - all are important</li>
+                <li>• Get professional help for complex items</li>
+                <li>• Document everything for future reference</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card className="shadow-elegant">
         <CardContent className="p-6">
           <div className="mb-6">

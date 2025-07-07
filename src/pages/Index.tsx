@@ -4,6 +4,7 @@ import { Navigation } from '@/components/Navigation';
 import { Dashboard } from '@/components/Dashboard';
 import { DealInputs } from '@/components/DealInputs';
 import { AnalysisScenarios } from '@/components/AnalysisScenarios';
+import { Resources } from '@/components/Resources';
 import { DueDiligence } from '@/components/DueDiligence';
 import { Reports } from '@/components/Reports';
 import { TenYearProjection } from '@/components/TenYearProjection';
@@ -21,6 +22,8 @@ const Index = () => {
         return <AnalysisScenarios />;
       case 'projections':
         return <TenYearProjection />;
+      case 'resources':
+        return <Resources />;
       case 'due-diligence':
         return <DueDiligence />;
       case 'reports':
