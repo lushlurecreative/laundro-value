@@ -64,7 +64,12 @@ export const DealInputs: React.FC = () => {
       capacityLbs: 35,
       vendPricePerUse: 2.50,
       conditionRating: 3,
-      waterConsumptionGalPerCycle: 40
+      waterConsumptionGalPerCycle: 40,
+      purchaseValue: 0,
+      currentValue: 0,
+      maintenanceCostAnnual: 0,
+      isCardOperated: false,
+      isOutOfOrder: false
     };
     addMachine(newMachine);
   };
@@ -273,6 +278,17 @@ export const DealInputs: React.FC = () => {
                     </SelectContent>
                   </Select>
                 </div>
+                
+                <div>
+                  <Label htmlFor="leaseHistory">Lease History</Label>
+                  <Textarea
+                    id="leaseHistory"
+                    value={deal?.leaseHistory || ''}
+                    onChange={(e) => updateDeal({ leaseHistory: e.target.value })}
+                    placeholder="Enter lease history and any relevant notes..."
+                    rows={3}
+                  />
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -283,16 +299,61 @@ export const DealInputs: React.FC = () => {
                 <CardHeader>
                   <CardTitle>Primary Income</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div>
-                    <Label htmlFor="reportedGrossIncome">Reported Gross Income (Annual)</Label>
-                    <Input
-                      id="reportedGrossIncome"
-                      type="number"
-                      value={deal?.reportedGrossIncomeAnnual || ''}
-                      onChange={(e) => updateDeal({ reportedGrossIncomeAnnual: Number(e.target.value) })}
-                      placeholder="0"
-                    />
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="reportedGrossIncome">Reported Gross Income (Annual)</Label>
+                      <Input
+                        id="reportedGrossIncome"
+                        type="number"
+                        value={deal?.reportedGrossIncomeAnnual || ''}
+                        onChange={(e) => updateDeal({ reportedGrossIncomeAnnual: Number(e.target.value) })}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="reportedAnnualNet">Reported Annual Net</Label>
+                      <Input
+                        id="reportedAnnualNet"
+                        type="number"
+                        value={deal?.reportedAnnualNet || ''}
+                        onChange={(e) => updateDeal({ reportedAnnualNet: Number(e.target.value) })}
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="fullTimeStaffCount">Full-Time Staff Count</Label>
+                      <Input
+                        id="fullTimeStaffCount"
+                        type="number"
+                        value={deal?.fullTimeStaffCount || ''}
+                        onChange={(e) => updateDeal({ fullTimeStaffCount: Number(e.target.value) })}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="partTimeStaffCount">Part-Time Staff Count</Label>
+                      <Input
+                        id="partTimeStaffCount"
+                        type="number"
+                        value={deal?.partTimeStaffCount || ''}
+                        onChange={(e) => updateDeal({ partTimeStaffCount: Number(e.target.value) })}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="reportedPayrollCost">Reported Payroll Cost (Annual)</Label>
+                      <Input
+                        id="reportedPayrollCost"
+                        type="number"
+                        value={deal?.reportedPayrollCost || ''}
+                        onChange={(e) => updateDeal({ reportedPayrollCost: Number(e.target.value) })}
+                        placeholder="0"
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -312,30 +373,80 @@ export const DealInputs: React.FC = () => {
                   </div>
 
                   {ancillaryIncome?.isWDFActive && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="wdfPrice">WDF Price per Lb</Label>
-                        <Input
-                          id="wdfPrice"
-                          type="number"
-                          step="0.01"
-                          value={ancillaryIncome?.wdfPricePerLb || ''}
-                          onChange={(e) => updateAncillaryIncome({ wdfPricePerLb: Number(e.target.value) })}
-                          placeholder="0.00"
-                        />
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="wdfPrice">WDF Price per Lb</Label>
+                          <Input
+                            id="wdfPrice"
+                            type="number"
+                            step="0.01"
+                            value={ancillaryIncome?.wdfPricePerLb || ''}
+                            onChange={(e) => updateAncillaryIncome({ wdfPricePerLb: Number(e.target.value) })}
+                            placeholder="0.00"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="wdfVolume">WDF Volume (Lbs per Week)</Label>
+                          <Input
+                            id="wdfVolume"
+                            type="number"
+                            value={ancillaryIncome?.wdfVolumeLbsPerWeek || ''}
+                            onChange={(e) => updateAncillaryIncome({ wdfVolumeLbsPerWeek: Number(e.target.value) })}
+                            placeholder="0"
+                          />
+                        </div>
                       </div>
                       <div>
-                        <Label htmlFor="wdfVolume">WDF Volume (Lbs per Week)</Label>
-                        <Input
-                          id="wdfVolume"
-                          type="number"
-                          value={ancillaryIncome?.wdfVolumeLbsPerWeek || ''}
-                          onChange={(e) => updateAncillaryIncome({ wdfVolumeLbsPerWeek: Number(e.target.value) })}
-                          placeholder="0"
-                        />
+                        <Label htmlFor="wdfProcessStatus">WDF Process Status</Label>
+                        <Select
+                          value={ancillaryIncome?.wdfProcessStatus || ''}
+                          onValueChange={(value) => updateAncillaryIncome({ wdfProcessStatus: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Planning">Planning</SelectItem>
+                            <SelectItem value="Setup">Setup</SelectItem>
+                            <SelectItem value="Active">Active</SelectItem>
+                            <SelectItem value="Expanding">Expanding</SelectItem>
+                            <SelectItem value="Paused">Paused</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="lastVentCleaning">Last Vent Cleaning Date</Label>
+                      <Input
+                        id="lastVentCleaning"
+                        type="date"
+                        value={ancillaryIncome?.lastVentCleaningDate || ''}
+                        onChange={(e) => updateAncillaryIncome({ lastVentCleaningDate: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="ventCleaningFreq">Vent Cleaning Frequency</Label>
+                      <Select
+                        value={ancillaryIncome?.ventCleaningFrequency || 'Monthly'}
+                        onValueChange={(value) => updateAncillaryIncome({ ventCleaningFrequency: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Weekly">Weekly</SelectItem>
+                          <SelectItem value="Bi-weekly">Bi-weekly</SelectItem>
+                          <SelectItem value="Monthly">Monthly</SelectItem>
+                          <SelectItem value="Quarterly">Quarterly</SelectItem>
+                          <SelectItem value="Annually">Annually</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -597,6 +708,53 @@ export const DealInputs: React.FC = () => {
                             onChange={(e) => updateMachine(machine.machineId, { conditionRating: Number(e.target.value) })}
                             placeholder="3"
                           />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <div>
+                          <Label>Purchase Value</Label>
+                          <Input
+                            type="number"
+                            value={machine.purchaseValue}
+                            onChange={(e) => updateMachine(machine.machineId, { purchaseValue: Number(e.target.value) })}
+                            placeholder="0"
+                          />
+                        </div>
+                        <div>
+                          <Label>Current Value</Label>
+                          <Input
+                            type="number"
+                            value={machine.currentValue}
+                            onChange={(e) => updateMachine(machine.machineId, { currentValue: Number(e.target.value) })}
+                            placeholder="0"
+                          />
+                        </div>
+                        <div>
+                          <Label>Annual Maintenance Cost</Label>
+                          <Input
+                            type="number"
+                            value={machine.maintenanceCostAnnual}
+                            onChange={(e) => updateMachine(machine.machineId, { maintenanceCostAnnual: Number(e.target.value) })}
+                            placeholder="0"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-6 mt-4">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            checked={machine.isCardOperated}
+                            onCheckedChange={(checked) => updateMachine(machine.machineId, { isCardOperated: checked })}
+                          />
+                          <Label>Card Operated</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            checked={machine.isOutOfOrder}
+                            onCheckedChange={(checked) => updateMachine(machine.machineId, { isOutOfOrder: checked })}
+                          />
+                          <Label>Out of Order</Label>
                         </div>
                       </div>
 

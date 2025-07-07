@@ -7,6 +7,10 @@ export interface Deal {
   facilitySizeSqft: number;
   isRealEstateIncluded: boolean;
   reportedGrossIncomeAnnual: number;
+  reportedAnnualNet: number;
+  fullTimeStaffCount: number;
+  partTimeStaffCount: number;
+  reportedPayrollCost: number;
   downPaymentPercent: number;
   loanInterestRatePercent: number;
   loanTermYears: number;
@@ -14,6 +18,7 @@ export interface Deal {
   targetCoCROIPercent: number;
   ownerWeeklyHours: number;
   replacementLaborCostHourly: number;
+  leaseHistory: string;
   notes: string;
 }
 
@@ -48,6 +53,11 @@ export interface MachineInventory {
   vendPricePerUse: number;
   conditionRating: number; // 1-5 scale
   waterConsumptionGalPerCycle?: number; // for washers only
+  purchaseValue: number;
+  currentValue: number;
+  maintenanceCostAnnual: number;
+  isCardOperated: boolean;
+  isOutOfOrder: boolean;
 }
 
 export interface AncillaryIncome {
@@ -56,8 +66,13 @@ export interface AncillaryIncome {
   isWDFActive: boolean;
   wdfPricePerLb: number;
   wdfVolumeLbsPerWeek: number;
+  wdfProcessStatus: string;
   vendingIncomeAnnual: number;
   otherIncomeAnnual: number;
+  lastVentCleaningDate: string;
+  ventCleaningFrequency: string;
+  automationLevel: string[];
+  securityMeasures: string[];
 }
 
 export interface IncomeVerification {

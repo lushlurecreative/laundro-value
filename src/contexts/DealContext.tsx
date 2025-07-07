@@ -32,6 +32,9 @@ const defaultExpenses: Omit<ExpenseItem, 'expenseId' | 'dealId'>[] = [
   { expenseName: 'Supplies', amountAnnual: 0, expenseType: 'Variable' },
   { expenseName: 'Staff Salaries', amountAnnual: 0, expenseType: 'Fixed' },
   { expenseName: 'Payroll Taxes', amountAnnual: 0, expenseType: 'Fixed' },
+  { expenseName: 'Unemployment Insurance', amountAnnual: 0, expenseType: 'Fixed' },
+  { expenseName: 'Disability Insurance', amountAnnual: 0, expenseType: 'Fixed' },
+  { expenseName: 'Vent Cleaning', amountAnnual: 0, expenseType: 'Fixed' },
   { expenseName: 'Marketing', amountAnnual: 0, expenseType: 'Variable' },
   { expenseName: 'Security', amountAnnual: 0, expenseType: 'Fixed' },
 ];
@@ -55,6 +58,10 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         facilitySizeSqft: 0,
         isRealEstateIncluded: false,
         reportedGrossIncomeAnnual: 0,
+        reportedAnnualNet: 0,
+        fullTimeStaffCount: 0,
+        partTimeStaffCount: 0,
+        reportedPayrollCost: 0,
         downPaymentPercent: 25,
         loanInterestRatePercent: 7.5,
         loanTermYears: 10,
@@ -62,6 +69,7 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         targetCoCROIPercent: 15,
         ownerWeeklyHours: 0,
         replacementLaborCostHourly: 15,
+        leaseHistory: '',
         notes: '',
         ...dealUpdate
       };
@@ -82,8 +90,13 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isWDFActive: false,
         wdfPricePerLb: 0,
         wdfVolumeLbsPerWeek: 0,
+        wdfProcessStatus: '',
         vendingIncomeAnnual: 0,
-        otherIncomeAnnual: 0
+        otherIncomeAnnual: 0,
+        lastVentCleaningDate: '',
+        ventCleaningFrequency: 'Monthly',
+        automationLevel: [],
+        securityMeasures: []
       });
       
       // Initialize income verification
