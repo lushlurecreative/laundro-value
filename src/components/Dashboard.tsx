@@ -90,12 +90,75 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {!deal && (
-        <Card className="border-dashed border-2 border-muted">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">No Deal Data</h3>
-              <p className="text-muted-foreground mb-4">
-                Get started by entering your deal information in the Deal Inputs section.
+        <Card className="mb-8">
+          <CardContent className="p-8">
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+                AI Laundromat Deal Analyzer
+              </h1>
+              <p className="text-xl text-muted-foreground mb-2">
+                Transform complex data into clear, actionable insights
+              </p>
+              <p className="text-lg text-muted-foreground">
+                This tool helps prospective buyers analyze, value, and assess the risk of purchasing an existing laundromat with precision and confidence.
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-8 mb-8">
+              <div>
+                <h3 className="text-xl font-semibold mb-4 text-primary">What This Tool Does For You:</h3>
+                <ul className="space-y-3 text-muted-foreground">
+                  <li className="flex items-start">
+                    <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                    <span><strong>Calculate Key Financials:</strong> Instantly see critical metrics like Net Operating Income (NOI), Cap Rate, Cash-on-Cash ROI, and total cash flow</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                    <span><strong>Generate AI-Powered Valuation:</strong> Receive a suggested purchase price based on financials, equipment condition, and market analysis</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                    <span><strong>Assess Investment Risk:</strong> Get a clear deal recommendation backed by detailed analysis of strengths and weaknesses</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                    <span><strong>Professional Reporting:</strong> Generate comprehensive reports for financing and decision-making</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-semibold mb-4 text-primary">How to Get Started:</h3>
+                <div className="space-y-4">
+                  <div className="flex items-start">
+                    <div className="w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0">1</div>
+                    <div>
+                      <h4 className="font-semibold mb-1">Enter Deal Information</h4>
+                      <p className="text-sm text-muted-foreground">Navigate to "Deal Inputs" and fill in property details, financials, and equipment information. The more data you provide, the more accurate your analysis.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <div className="w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0">2</div>
+                    <div>
+                      <h4 className="font-semibold mb-1">Review Analysis</h4>
+                      <p className="text-sm text-muted-foreground">Our AI processes your information, compares it to industry benchmarks, and provides comprehensive analysis and scenarios.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <div className="w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0">3</div>
+                    <div>
+                      <h4 className="font-semibold mb-1">Generate Reports</h4>
+                      <p className="text-sm text-muted-foreground">View detailed breakdowns, financial projections, and generate professional reports for financing or decision-making.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-muted/50 rounded-lg p-4 text-center">
+              <p className="text-sm text-muted-foreground">
+                <strong>Disclaimer:</strong> This tool provides AI-driven analysis for informational purposes only. 
+                All data and calculations should be independently verified. We are not financial advisors.
               </p>
             </div>
           </CardContent>
