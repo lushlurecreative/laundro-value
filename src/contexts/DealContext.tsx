@@ -21,6 +21,7 @@ interface DealContextType {
   removeMachine: (machineId: string) => void;
   updateAncillaryIncome: (income: Partial<AncillaryIncome>) => void;
   updateUtilityAnalysis: (analysis: Partial<UtilityAnalysis>) => void;
+  clearAllData: () => void;
 }
 
 const DealContext = createContext<DealContextType | undefined>(undefined);
@@ -240,6 +241,21 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const clearAllData = () => {
+    setDeal(null);
+    setLeaseDetails(null);
+    setExpenseItems([]);
+    setMachineInventory([]);
+    setAncillaryIncome(null);
+    setUtilityAnalysis(null);
+    try {
+      localStorage.removeItem('laundromat-deal-data');
+      setLastSaved('Data cleared');
+    } catch (error) {
+      console.error('Failed to clear data:', error);
+    }
+  };
+
   return (
     <DealContext.Provider value={{
       deal,
@@ -258,7 +274,8 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       updateMachine,
       removeMachine,
       updateAncillaryIncome,
-      updateUtilityAnalysis
+      updateUtilityAnalysis,
+      clearAllData
     }}>
       {children}
       {lastSaved && (

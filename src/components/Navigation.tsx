@@ -2,6 +2,9 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { useDeal } from '@/contexts/DealContext';
+import { Trash2 } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -19,6 +22,7 @@ const navigationItems = [
 ];
 
 export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
+  const { clearAllData } = useDeal();
   return (
     <Card className="h-full shadow-elegant bg-gradient-card border-0">
       <div className="p-6">
@@ -51,9 +55,32 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
         </nav>
         
         <div className="mt-8 p-4 bg-gradient-subtle rounded-lg border">
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground mb-3">
             Professional-grade analysis tool for laundromat investment evaluation
           </p>
+          
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" size="sm" className="w-full text-xs">
+                <Trash2 className="h-3 w-3 mr-1" />
+                Clear All Data
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Clear All Data</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete all deal information, including property details, financials, equipment inventory, and analysis data. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={clearAllData} className="bg-destructive hover:bg-destructive/90">
+                  Clear All Data
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </Card>
