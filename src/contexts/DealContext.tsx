@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Deal, LeaseDetails, ExpenseItem, MachineInventory, AncillaryIncome, UtilityAnalysis } from '@/types/deal';
+import { useAutoSave } from '@/hooks/useAutoSave';
 
 interface DealContextType {
   deal: Deal | null;
@@ -46,6 +47,49 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [machineInventory, setMachineInventory] = useState<MachineInventory[]>([]);
   const [ancillaryIncome, setAncillaryIncome] = useState<AncillaryIncome | null>(null);
   const [utilityAnalysis, setUtilityAnalysis] = useState<UtilityAnalysis | null>(null);
+  const [lastSaved, setLastSaved] = useState<string>('');
+
+  // Auto-save all deal data to localStorage
+  const dealData = {
+    deal,
+    leaseDetails,
+    expenseItems,
+    machineInventory,
+    ancillaryIncome,
+    utilityAnalysis
+  };
+
+  useAutoSave({
+    data: dealData,
+    onSave: (data) => {
+      try {
+        localStorage.setItem('laundromat-deal-data', JSON.stringify(data));
+        setLastSaved(new Date().toLocaleTimeString());
+      } catch (error) {
+        console.error('Failed to save deal data:', error);
+      }
+    },
+    delay: 2000 // Save after 2 seconds of inactivity
+  });
+
+  // Load data from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedData = localStorage.getItem('laundromat-deal-data');
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        if (parsedData.deal) setDeal(parsedData.deal);
+        if (parsedData.leaseDetails) setLeaseDetails(parsedData.leaseDetails);
+        if (parsedData.expenseItems) setExpenseItems(parsedData.expenseItems);
+        if (parsedData.machineInventory) setMachineInventory(parsedData.machineInventory);
+        if (parsedData.ancillaryIncome) setAncillaryIncome(parsedData.ancillaryIncome);
+        if (parsedData.utilityAnalysis) setUtilityAnalysis(parsedData.utilityAnalysis);
+        setLastSaved('Loaded from browser');
+      }
+    } catch (error) {
+      console.error('Failed to load saved deal data:', error);
+    }
+  }, []);
 
   const updateDeal = (dealUpdate: Partial<Deal>) => {
     if (!deal) {
@@ -69,7 +113,6 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         targetCapRatePercent: 8,
         targetCoCROIPercent: 15,
         ownerWeeklyHours: 0,
-        replacementLaborCostHourly: 15,
         leaseHistory: '',
         notes: '',
         expansionPotential: {
@@ -212,6 +255,11 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       updateUtilityAnalysis
     }}>
       {children}
+      {lastSaved && (
+        <div className="fixed bottom-4 right-4 bg-muted/80 text-xs px-3 py-1 rounded-md border backdrop-blur-sm">
+          Auto-saved: {lastSaved}
+        </div>
+      )}
     </DealContext.Provider>
   );
 };

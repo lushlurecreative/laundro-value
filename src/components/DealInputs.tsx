@@ -35,12 +35,57 @@ export const DealInputs: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState('property');
 
-  const handleSBAPreset = () => {
+  const financingPresets = [
+    {
+      name: 'SBA 7(a) Loan',
+      downPayment: 10,
+      interestRate: 7.5,
+      termYears: 10,
+      loanType: 'SBA 7(a)'
+    },
+    {
+      name: 'SBA 504 Loan',
+      downPayment: 10,
+      interestRate: 6.5,
+      termYears: 20,
+      loanType: 'SBA 504'
+    },
+    {
+      name: 'Conventional Bank',
+      downPayment: 25,
+      interestRate: 8.0,
+      termYears: 10,
+      loanType: 'Conventional'
+    },
+    {
+      name: 'Portfolio Lender',
+      downPayment: 20,
+      interestRate: 7.75,
+      termYears: 15,
+      loanType: 'Portfolio'
+    },
+    {
+      name: 'Equipment Financing',
+      downPayment: 15,
+      interestRate: 9.0,
+      termYears: 7,
+      loanType: 'Equipment'
+    },
+    {
+      name: 'Seller Financing',
+      downPayment: 15,
+      interestRate: 6.0,
+      termYears: 15,
+      loanType: 'Seller'
+    }
+  ];
+
+  const handleFinancingPreset = (preset: typeof financingPresets[0]) => {
     updateDeal({
-      downPaymentPercent: 10,
-      loanInterestRatePercent: 7.5,
-      loanTermYears: 10,
-      loanType: 'SBA'
+      downPaymentPercent: preset.downPayment,
+      loanInterestRatePercent: preset.interestRate,
+      loanTermYears: preset.termYears,
+      loanType: preset.loanType
     });
   };
 
@@ -194,17 +239,6 @@ export const DealInputs: React.FC = () => {
                       value={deal?.ownerWeeklyHours || ''}
                       onChange={(e) => updateDeal({ ownerWeeklyHours: Number(e.target.value) })}
                       placeholder="0"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="replacementLaborCost">Replacement Labor Cost (Hourly)</Label>
-                    <Input
-                      id="replacementLaborCost"
-                      type="number"
-                      step="0.01"
-                      value={deal?.replacementLaborCostHourly || ''}
-                      onChange={(e) => updateDeal({ replacementLaborCostHourly: Number(e.target.value) })}
-                      placeholder="15.00"
                     />
                   </div>
                 </div>
@@ -985,10 +1019,18 @@ export const DealInputs: React.FC = () => {
                 <CardTitle>Financing & Investment Goals</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex justify-end">
-                  <Button onClick={handleSBAPreset} variant="outline" className="shadow-button">
-                    Apply SBA 7(a) Loan Preset
-                  </Button>
+                <div className="flex flex-wrap gap-2 justify-end">
+                  {financingPresets.map((preset) => (
+                    <Button 
+                      key={preset.name}
+                      onClick={() => handleFinancingPreset(preset)} 
+                      variant="outline" 
+                      size="sm"
+                      className="shadow-button"
+                    >
+                      {preset.name}
+                    </Button>
+                  ))}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

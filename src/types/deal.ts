@@ -18,7 +18,6 @@ export interface Deal {
   targetCapRatePercent: number;
   targetCoCROIPercent: number;
   ownerWeeklyHours: number;
-  replacementLaborCostHourly: number;
   leaseHistory: string;
   notes: string;
   expansionPotential: {

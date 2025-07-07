@@ -255,31 +255,81 @@ export const AnalysisScenarios: React.FC = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <h4 className="text-lg font-semibold">Adjusted KPIs</h4>
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-lg font-semibold">Adjusted KPIs</h4>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Real-time KPI calculations showing how your scenario adjustments impact key investment metrics compared to baseline values</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-gradient-subtle rounded-lg">
-                      <p className="text-sm text-muted-foreground">Cap Rate</p>
+                      <div className="flex items-center gap-1">
+                        <p className="text-sm text-muted-foreground">Cap Rate</p>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <span className="text-xs bg-muted px-1 py-0.5 rounded cursor-help">?</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Net Operating Income ÷ Purchase Price - shows your adjusted return on total investment</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                       <p className="text-xl font-bold">{formatPercentage(adjustedMetrics.capRate)}</p>
                       <p className="text-xs text-muted-foreground">
                         ({adjustedMetrics.capRate > baselineMetrics.capRate ? '+' : ''}{(adjustedMetrics.capRate - baselineMetrics.capRate).toFixed(1)}%)
                       </p>
                     </div>
                     <div className="p-4 bg-gradient-subtle rounded-lg">
-                      <p className="text-sm text-muted-foreground">Cash-on-Cash ROI</p>
+                      <div className="flex items-center gap-1">
+                        <p className="text-sm text-muted-foreground">Cash-on-Cash ROI</p>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <span className="text-xs bg-muted px-1 py-0.5 rounded cursor-help">?</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Annual Cash Flow ÷ Initial Cash Investment - measures your adjusted cash return on cash invested</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                       <p className="text-xl font-bold">{formatPercentage(adjustedMetrics.coCROI)}</p>
                       <p className="text-xs text-muted-foreground">
                         ({adjustedMetrics.coCROI > baselineMetrics.coCROI ? '+' : ''}{(adjustedMetrics.coCROI - baselineMetrics.coCROI).toFixed(1)}%)
                       </p>
                     </div>
                     <div className="p-4 bg-gradient-subtle rounded-lg">
-                      <p className="text-sm text-muted-foreground">Annual Cash Flow</p>
+                      <div className="flex items-center gap-1">
+                        <p className="text-sm text-muted-foreground">Annual Cash Flow</p>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <span className="text-xs bg-muted px-1 py-0.5 rounded cursor-help">?</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Net Operating Income - Debt Service - actual cash you'll receive annually after all expenses and loan payments</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                       <p className="text-xl font-bold">{formatCurrency(adjustedMetrics.annualCashFlow)}</p>
                       <p className="text-xs text-muted-foreground">
                         ({adjustedMetrics.annualCashFlow > baselineMetrics.annualCashFlow ? '+' : ''}{formatCurrency(adjustedMetrics.annualCashFlow - baselineMetrics.annualCashFlow)})
                       </p>
                     </div>
                     <div className="p-4 bg-gradient-subtle rounded-lg">
-                      <p className="text-sm text-muted-foreground">DSCR</p>
+                      <div className="flex items-center gap-1">
+                        <p className="text-sm text-muted-foreground">DSCR</p>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <span className="text-xs bg-muted px-1 py-0.5 rounded cursor-help">?</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Debt Service Coverage Ratio - NOI ÷ Annual Debt Payments. Shows ability to service debt (1.25+ is healthy)</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                       <p className="text-xl font-bold">{adjustedMetrics.dscr.toFixed(2)}</p>
                       <p className="text-xs text-muted-foreground">
                         ({adjustedMetrics.dscr > baselineMetrics.dscr ? '+' : ''}{(adjustedMetrics.dscr - baselineMetrics.dscr).toFixed(2)})
