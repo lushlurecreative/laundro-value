@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useDeal } from '@/contexts/DealContext';
 import { formatCurrency } from '@/utils/calculations';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { Plus, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -216,12 +217,10 @@ export const DealInputs: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="askingPrice">Asking Price *</Label>
-                     <Input
+                     <CurrencyInput
                        id="askingPrice"
-                       type="number"
-                       min="0"
-                       value={deal?.askingPrice === 0 ? '' : deal?.askingPrice || ''}
-                       onChange={(e) => updateDeal({ askingPrice: Number(e.target.value) || 0 })}
+                       value={deal?.askingPrice || 0}
+                       onChange={(value) => updateDeal({ askingPrice: value })}
                        placeholder="Purchase price"
                        required
                      />
@@ -288,67 +287,25 @@ export const DealInputs: React.FC = () => {
                   />
                 </div>
 
-                <Card className="mt-6">
-                  <CardHeader>
-                    <div className="flex items-center gap-2">
-                      <CardTitle>Expansion Potential</CardTitle>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <span className="text-xs bg-muted px-2 py-1 rounded">?</span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Analyze physical space and infrastructure capacity for adding more equipment. This helps estimate future growth potential and required capital.</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Analyze the potential for adding machines to grow revenue
-                    </p>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="additionalMachines">Additional Machines Possible</Label>
-                        <Input
-                          id="additionalMachines"
-                          type="number"
-                          value={deal?.expansionPotential?.additionalMachines || ''}
-                          onChange={(e) => updateDeal({ 
-                            expansionPotential: { 
-                              ...deal?.expansionPotential, 
-                              additionalMachines: Number(e.target.value) 
-                            } 
-                          })}
-                          placeholder="0"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="expansionCost">Estimated Expansion Cost</Label>
-                        <Input
-                          id="expansionCost"
-                          type="number"
-                          value={deal?.expansionPotential?.expansionCost || ''}
-                          onChange={(e) => updateDeal({ 
-                            expansionPotential: { 
-                              ...deal?.expansionPotential, 
-                              expansionCost: Number(e.target.value) 
-                            } 
-                          })}
-                          placeholder="0"
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="flex justify-end pt-4">
+                  <Button 
+                    onClick={() => setActiveTab('lease')}
+                    disabled={deal?.isRealEstateIncluded}
+                    className="bg-success hover:bg-success/90"
+                  >
+                    {deal?.isRealEstateIncluded ? 'Next: Income Information' : 'Next: Lease Information'}
+                  </Button>
+                </div>
+
               </CardContent>
             </Card>
           </TabsContent>
 
           {!deal?.isRealEstateIncluded && (
             <TabsContent value="lease" className="mt-6">
-              <Card>
+                <Card>
                 <CardHeader>
-                  <CardTitle>Lease Details</CardTitle>
+                  <CardTitle>Lease Information</CardTitle>
                   <p className="text-sm text-muted-foreground">
                     Enter lease terms and conditions for the property rental
                   </p>
