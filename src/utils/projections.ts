@@ -58,10 +58,10 @@ export const calculateTenYearProjection = (
   }
   const annualDebtService = monthlyPayment * 12;
   
-  // Growth assumptions
-  const incomeGrowthRate = 0.02; // 2% annual income growth
-  const expenseGrowthRate = 0.03; // 3% annual expense growth
-  const rentGrowthRate = leaseDetails?.annualRentIncreasePercent / 100 || 0.03;
+  // Growth assumptions - now user-configurable
+  const incomeGrowthRate = (deal.incomeGrowthRatePercent || 2.0) / 100;
+  const expenseGrowthRate = (deal.expenseGrowthRatePercent || 3.0) / 100;
+  const rentGrowthRate = leaseDetails?.annualRentIncreasePercent / 100 || expenseGrowthRate;
   
   let cumulativeCashFlow = 0;
   

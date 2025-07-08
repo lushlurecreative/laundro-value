@@ -20,6 +20,9 @@ export interface Deal {
   ownerWeeklyHours: number;
   leaseHistory: string;
   notes: string;
+  // Growth assumptions for projections
+  incomeGrowthRatePercent: number;
+  expenseGrowthRatePercent: number;
   expansionPotential: {
     additionalMachines: number;
     expansionCost: number;

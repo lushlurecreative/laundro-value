@@ -123,6 +123,9 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         ownerWeeklyHours: 0,
         leaseHistory: '',
         notes: '',
+        // Default growth assumptions
+        incomeGrowthRatePercent: 2.0,
+        expenseGrowthRatePercent: 3.0,
         expansionPotential: {
           additionalMachines: 0,
           expansionCost: 0,

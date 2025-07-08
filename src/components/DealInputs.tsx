@@ -60,7 +60,7 @@ export const DealInputs: React.FC = () => {
         if (fields.lease.leaseType) leaseUpdates.leaseType = fields.lease.leaseType;
       }
       
-      // Expense fields
+      // Expense fields with improved mapping
       if (fields.expenses) {
         Object.entries(fields.expenses).forEach(([expenseKey, value]) => {
           const expenseMapping: Record<string, string> = {
@@ -72,7 +72,7 @@ export const DealInputs: React.FC = () => {
             maintenance: 'Maintenance',
             supplies: 'Supplies',
             staff: 'Staff Salaries',
-            other: 'Other'
+            other: 'Marketing'
           };
           
           const expenseName = expenseMapping[expenseKey];
@@ -83,6 +83,63 @@ export const DealInputs: React.FC = () => {
             }
           }
         });
+      }
+      
+      // Equipment inventory auto-population
+      if (fields.equipment && (fields.equipment.washers > 0 || fields.equipment.dryers > 0)) {
+        // Add washers
+        if (fields.equipment.washers > 0) {
+          for (let i = 0; i < fields.equipment.washers; i++) {
+            addMachine({
+              machineId: `machine-washer-${Date.now()}-${i}`,
+              dealId: deal?.dealId || 'deal-1',
+              machineType: 'Front-Load Washer',
+              brand: '',
+              model: '',
+              quantity: 1,
+              ageYears: fields.equipment.avgAge || 0,
+              capacityLbs: 35,
+              vendPricePerUse: 2.50,
+              conditionRating: fields.equipment.avgCondition || 3,
+              waterConsumptionGalPerCycle: 40,
+              electricConsumptionKwh: 0,
+              gasConsumptionBtu: 0,
+              purchaseValue: 0,
+              currentValue: 0,
+              maintenanceCostAnnual: 0,
+              isCardOperated: false,
+              isCoinOperated: true,
+              isOutOfOrder: false
+            });
+          }
+        }
+        
+        // Add dryers
+        if (fields.equipment.dryers > 0) {
+          for (let i = 0; i < fields.equipment.dryers; i++) {
+            addMachine({
+              machineId: `machine-dryer-${Date.now()}-${i}`,
+              dealId: deal?.dealId || 'deal-1',
+              machineType: 'Single Dryer',
+              brand: '',
+              model: '',
+              quantity: 1,
+              ageYears: fields.equipment.avgAge || 0,
+              capacityLbs: 35,
+              vendPricePerUse: 2.00,
+              conditionRating: fields.equipment.avgCondition || 3,
+              waterConsumptionGalPerCycle: 0,
+              electricConsumptionKwh: 2.5,
+              gasConsumptionBtu: 0,
+              purchaseValue: 0,
+              currentValue: 0,
+              maintenanceCostAnnual: 0,
+              isCardOperated: false,
+              isCoinOperated: true,
+              isOutOfOrder: false
+            });
+          }
+        }
       }
       
       // Ancillary income
@@ -243,7 +300,7 @@ export const DealInputs: React.FC = () => {
           }
           setActiveTab(value);
         }}>
-          <TabsList className={`grid w-full ${deal?.isRealEstateIncluded ? 'grid-cols-5' : 'grid-cols-6'}`}>
+          <TabsList className={`grid w-full ${deal?.isRealEstateIncluded ? 'grid-cols-6' : 'grid-cols-7'}`}>
             <TabsTrigger value="property">Property & Deal</TabsTrigger>
             {!deal?.isRealEstateIncluded && (
               <TabsTrigger value="lease">Lease</TabsTrigger>
@@ -251,6 +308,7 @@ export const DealInputs: React.FC = () => {
             <TabsTrigger value="income">Income</TabsTrigger>
             <TabsTrigger value="expenses">Expenses</TabsTrigger>
             <TabsTrigger value="equipment">Equipment</TabsTrigger>
+            <TabsTrigger value="growth">Growth Assumptions</TabsTrigger>
             <TabsTrigger value="financing">Financing & Goals</TabsTrigger>
           </TabsList>
 
@@ -1325,7 +1383,159 @@ export const DealInputs: React.FC = () => {
                   )}
                 </div>
                 
-                <div className="flex justify-end pt-4">
+                 <div className="flex justify-end pt-4">
+                  <Button 
+                    onClick={() => setActiveTab('growth')}
+                    className="bg-success hover:bg-success/90"
+                  >
+                    Next: Growth Assumptions
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="growth" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Growth Assumptions</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Set annual growth rates for income and expenses used in 10-year projections
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <span className="text-amber-600 dark:text-amber-400 font-semibold">⚠️ Important:</span>
+                    <div className="text-sm text-amber-800 dark:text-amber-200">
+                      <p className="font-medium">These growth rates directly impact your 10-year financial projections.</p>
+                      <p className="mt-1">Business value increases come from your active improvements, not just time passing.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Label htmlFor="incomeGrowthRate">Annual Income Growth Rate (%)</Label>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Annual percentage increase in gross income. Consider inflation, market growth, and business improvements.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <Input
+                        id="incomeGrowthRate"
+                        type="number"
+                        step="0.1"
+                        min="-5"
+                        max="15"
+                        value={deal?.incomeGrowthRatePercent || ''}
+                        onChange={(e) => updateDeal({ incomeGrowthRatePercent: Number(e.target.value) })}
+                        placeholder="2.0"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Typical range: 0% to 5% annually. Higher rates require specific improvement plans.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Income Growth Scenarios:</h4>
+                      <div className="space-y-1 text-xs text-muted-foreground">
+                        <div><strong>0-1%:</strong> Conservative, inflation-only</div>
+                        <div><strong>2-3%:</strong> Market growth, minor improvements</div>
+                        <div><strong>4-6%:</strong> Active management, new services</div>
+                        <div><strong>7%+:</strong> Requires major business transformation</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Label htmlFor="expenseGrowthRate">Annual Expense Growth Rate (%)</Label>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <span className="text-xs bg-muted px-2 py-1 rounded cursor-help">?</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Annual percentage increase in operating expenses. Usually driven by inflation and labor costs.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <Input
+                        id="expenseGrowthRate"
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="10"
+                        value={deal?.expenseGrowthRatePercent || ''}
+                        onChange={(e) => updateDeal({ expenseGrowthRatePercent: Number(e.target.value) })}
+                        placeholder="3.0"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Typical range: 2% to 4% annually, tracking with inflation and wage growth.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Expense Growth Factors:</h4>
+                      <div className="space-y-1 text-xs text-muted-foreground">
+                        <div><strong>2-3%:</strong> General inflation</div>
+                        <div><strong>3-4%:</strong> Inflation + labor cost increases</div>
+                        <div><strong>4%+:</strong> High inflation periods, wage pressures</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => updateDeal({ incomeGrowthRatePercent: 1.0, expenseGrowthRatePercent: 2.5 })}
+                    className="text-sm"
+                  >
+                    Conservative (1%/2.5%)
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => updateDeal({ incomeGrowthRatePercent: 2.5, expenseGrowthRatePercent: 3.0 })}
+                    className="text-sm"
+                  >
+                    Moderate (2.5%/3%)
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => updateDeal({ incomeGrowthRatePercent: 4.0, expenseGrowthRatePercent: 3.5 })}
+                    className="text-sm"
+                  >
+                    Aggressive (4%/3.5%)
+                  </Button>
+                </div>
+
+                <div className="p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <div className="text-sm">
+                    <p className="font-medium text-blue-900 dark:text-blue-100 mb-2">💡 Growth Assumption Tips:</p>
+                    <ul className="space-y-1 text-blue-800 dark:text-blue-200 text-xs">
+                      <li>• Conservative projections help avoid overoptimistic valuations</li>
+                      <li>• Income growth above 3% should be tied to specific improvement plans</li>
+                      <li>• Consider local market conditions and competition</li>
+                      <li>• Factor in your management experience and time commitment</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="flex justify-between pt-4">
+                  <Button 
+                    onClick={() => setActiveTab('equipment')}
+                    variant="outline"
+                  >
+                    Back: Equipment
+                  </Button>
                   <Button 
                     onClick={() => setActiveTab('financing')}
                     className="bg-success hover:bg-success/90"

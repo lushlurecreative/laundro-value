@@ -82,14 +82,30 @@ export const useOpenAIAnalysis = ({ onFieldsPopulated }: UseOpenAIAnalysisProps 
           flatFields.lease = jsonData.lease;
         }
         
-        // Expenses
+        // Expenses - improved mapping and validation
         if (jsonData.expenses) {
-          flatFields.expenses = jsonData.expenses;
+          const processedExpenses: Record<string, any> = {};
+          Object.entries(jsonData.expenses).forEach(([key, value]) => {
+            if (typeof value === 'number' && value > 0) {
+              // Convert monthly values to annual if they seem too small for annual amounts
+              let annualValue = value;
+              if (key === 'rent' && value < 10000) {
+                annualValue = value * 12; // Convert monthly to annual
+              }
+              processedExpenses[key] = annualValue;
+            }
+          });
+          flatFields.expenses = processedExpenses;
         }
         
-        // Equipment
+        // Equipment - improved parsing for machine inventory
         if (jsonData.equipment) {
-          flatFields.equipment = jsonData.equipment;
+          flatFields.equipment = {
+            washers: Number(jsonData.equipment.washers) || 0,
+            dryers: Number(jsonData.equipment.dryers) || 0,
+            avgAge: Number(jsonData.equipment.avgAge) || 0,
+            avgCondition: Number(jsonData.equipment.avgCondition) || 3
+          };
         }
         
         // Ancillary income
@@ -111,7 +127,9 @@ export const useOpenAIAnalysis = ({ onFieldsPopulated }: UseOpenAIAnalysisProps 
       income: /income[:\s]*\$?([0-9,]+)/i,
       size: /([0-9,]+)\s*sq\.?\s*ft|square\s*feet/i,
       machines: /([0-9]+)\s*machine/i,
-      hours: /([0-9]+)\s*hour/i
+      hours: /([0-9]+)\s*hour/i,
+      washers: /([0-9]+)\s*washer/i,
+      dryers: /([0-9]+)\s*dryer/i
     };
 
     Object.entries(patterns).forEach(([key, pattern]) => {
@@ -119,7 +137,12 @@ export const useOpenAIAnalysis = ({ onFieldsPopulated }: UseOpenAIAnalysisProps 
       if (match) {
         const value = parseInt(match[1].replace(/,/g, ''));
         if (!isNaN(value)) {
-          fields[key] = value;
+          if (key === 'washers' || key === 'dryers') {
+            if (!fields.equipment) fields.equipment = {};
+            fields.equipment[key] = value;
+          } else {
+            fields[key] = value;
+          }
         }
       }
     });

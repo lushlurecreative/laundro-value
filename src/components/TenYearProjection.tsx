@@ -93,6 +93,49 @@ export const TenYearProjection: React.FC = () => {
         </Card>
       </div>
 
+      {/* Growth Assumptions Display */}
+      <Card className="shadow-card border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            📈 Growth Assumptions Used in Projections
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Annual Income Growth:</span>
+                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">
+                  {formatPercentage(deal.incomeGrowthRatePercent || 2.0)}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Revenue increases by this rate each year through market growth, price increases, and business improvements.
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Annual Expense Growth:</span>
+                <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300">
+                  {formatPercentage(deal.expenseGrowthRatePercent || 3.0)}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Operating costs increase by this rate annually due to inflation, wage growth, and utility cost increases.
+              </p>
+            </div>
+          </div>
+          
+          <div className="mt-4 p-3 bg-amber-100 dark:bg-amber-900/50 rounded-lg">
+            <p className="text-xs text-amber-800 dark:text-amber-200">
+              <strong>⚠️ Important:</strong> These growth rates are assumptions you can modify in the Growth Assumptions tab. 
+              Higher income growth rates should be backed by specific business improvement plans, not just the passage of time.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Cash Flow Chart */}
       <Card className="shadow-elegant">
         <CardHeader>
