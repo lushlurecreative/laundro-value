@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { useDeal } from '@/contexts/DealContext';
+import { useDeal } from '@/contexts/useDeal';
 import { formatCurrency } from '@/utils/calculations';
 import { CurrencyInput } from '@/components/ui/currency-input';
 import { useOpenAIAnalysis } from '@/hooks/useOpenAIAnalysis';

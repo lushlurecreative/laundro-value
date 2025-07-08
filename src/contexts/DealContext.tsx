@@ -1,49 +1,11 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { Deal, LeaseDetails, ExpenseItem, MachineInventory, AncillaryIncome, UtilityAnalysis } from '@/types/deal';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { useMarketData } from '@/hooks/useMarketData';
-import { calculateMetrics } from '@/utils/calculations';
+import { DealContextType } from './types';
+import { defaultExpenses } from './constants';
 
-interface DealContextType {
-  deal: Deal | null;
-  leaseDetails: LeaseDetails | null;
-  expenseItems: ExpenseItem[];
-  machineInventory: MachineInventory[];
-  ancillaryIncome: AncillaryIncome | null;
-  utilityAnalysis: UtilityAnalysis | null;
-  marketData: any;
-  updateDeal: (deal: Partial<Deal>) => void;
-  updateLeaseDetails: (lease: Partial<LeaseDetails>) => void;
-  addExpenseItem: (expense: ExpenseItem) => void;
-  updateExpenseItem: (expenseId: string, expense: Partial<ExpenseItem>) => void;
-  removeExpenseItem: (expenseId: string) => void;
-  addMachine: (machine: MachineInventory) => void;
-  updateMachine: (machineId: string, machine: Partial<MachineInventory>) => void;
-  removeMachine: (machineId: string) => void;
-  updateAncillaryIncome: (income: Partial<AncillaryIncome>) => void;
-  updateUtilityAnalysis: (analysis: Partial<UtilityAnalysis>) => void;
-  clearAllData: () => void;
-  saveAndStartNew: () => void;
-}
-
-const DealContext = createContext<DealContextType | undefined>(undefined);
-
-const defaultExpenses: Omit<ExpenseItem, 'expenseId' | 'dealId'>[] = [
-  { expenseName: 'Rent', amountAnnual: 0, expenseType: 'Fixed' },
-  { expenseName: 'Water/Sewer', amountAnnual: 0, expenseType: 'Variable' },
-  { expenseName: 'Gas', amountAnnual: 0, expenseType: 'Variable' },
-  { expenseName: 'Electricity', amountAnnual: 0, expenseType: 'Variable' },
-  { expenseName: 'Insurance', amountAnnual: 0, expenseType: 'Fixed' },
-  { expenseName: 'Maintenance', amountAnnual: 0, expenseType: 'Variable' },
-  { expenseName: 'Supplies', amountAnnual: 0, expenseType: 'Variable' },
-  { expenseName: 'Staff Salaries', amountAnnual: 0, expenseType: 'Fixed' },
-  { expenseName: 'Payroll Taxes', amountAnnual: 0, expenseType: 'Fixed' },
-  { expenseName: 'Unemployment Insurance', amountAnnual: 0, expenseType: 'Fixed' },
-  { expenseName: 'Disability Insurance', amountAnnual: 0, expenseType: 'Fixed' },
-  { expenseName: 'Vent Cleaning', amountAnnual: 0, expenseType: 'Fixed' },
-  { expenseName: 'Marketing', amountAnnual: 0, expenseType: 'Variable' },
-  { expenseName: 'Security', amountAnnual: 0, expenseType: 'Fixed' },
-];
+export const DealContext = createContext<DealContextType | undefined>(undefined);
 
 export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [deal, setDeal] = useState<Deal | null>(null);
@@ -335,12 +297,4 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       )}
     </DealContext.Provider>
   );
-};
-
-export const useDeal = () => {
-  const context = useContext(DealContext);
-  if (context === undefined) {
-    throw new Error('useDeal must be used within a DealProvider');
-  }
-  return context;
 };

@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useDeal } from '@/contexts/DealContext';
+import { useDeal } from '@/contexts/useDeal';
 import { calculateMetrics, formatCurrency, formatPercentage } from '@/utils/calculations';
 import { calculateTenYearProjection } from '@/utils/projections';
 import { FileText, Download, Building, TrendingUp, DollarSign, Calendar } from 'lucide-react';
