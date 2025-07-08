@@ -23,6 +23,7 @@ interface DealContextType {
   updateAncillaryIncome: (income: Partial<AncillaryIncome>) => void;
   updateUtilityAnalysis: (analysis: Partial<UtilityAnalysis>) => void;
   clearAllData: () => void;
+  saveAndStartNew: () => void;
 }
 
 const DealContext = createContext<DealContextType | undefined>(undefined);
@@ -276,6 +277,31 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const saveAndStartNew = () => {
+    try {
+      // Save current data with timestamp
+      const timestamp = new Date().toISOString();
+      const currentData = {
+        deal,
+        leaseDetails,
+        expenseItems,
+        machineInventory,
+        ancillaryIncome,
+        utilityAnalysis,
+        savedAt: timestamp
+      };
+      
+      // Save to a backup with timestamp
+      localStorage.setItem(`laundromat-deal-backup-${timestamp}`, JSON.stringify(currentData));
+      
+      // Clear current data for new deal
+      clearAllData();
+      setLastSaved('Saved and started new deal');
+    } catch (error) {
+      console.error('Failed to save and start new:', error);
+    }
+  };
+
   return (
     <DealContext.Provider value={{
       deal,
@@ -295,7 +321,8 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       removeMachine,
       updateAncillaryIncome,
       updateUtilityAnalysis,
-      clearAllData
+      clearAllData,
+      saveAndStartNew
     }}>
       {children}
       {lastSaved && (

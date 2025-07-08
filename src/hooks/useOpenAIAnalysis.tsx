@@ -38,7 +38,12 @@ export const useOpenAIAnalysis = ({ onFieldsPopulated }: UseOpenAIAnalysisProps 
         
         toast({
           title: "AI Analysis Complete",
-          description: `Auto-populated ${Object.keys(extractedFields).length} fields from your text`,
+          description: `Auto-populated fields from your text`,
+        });
+      } else {
+        toast({
+          title: "Analysis Complete",
+          description: "No specific data fields were found to auto-populate. Please review and enter data manually.",
         });
       }
 
@@ -60,7 +65,39 @@ export const useOpenAIAnalysis = ({ onFieldsPopulated }: UseOpenAIAnalysisProps 
       const jsonMatch = response.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const jsonData = JSON.parse(jsonMatch[0]);
-        return jsonData;
+        
+        // Flatten the structured response for easier field population
+        const flatFields: Record<string, any> = {};
+        
+        // Basic fields
+        if (jsonData.price) flatFields.price = jsonData.price;
+        if (jsonData.income) flatFields.income = jsonData.income;
+        if (jsonData.rent) flatFields.rent = jsonData.rent;
+        if (jsonData.size) flatFields.size = jsonData.size;
+        if (jsonData.machines) flatFields.machines = jsonData.machines;
+        if (jsonData.hours) flatFields.hours = jsonData.hours;
+        
+        // Lease information
+        if (jsonData.lease) {
+          flatFields.lease = jsonData.lease;
+        }
+        
+        // Expenses
+        if (jsonData.expenses) {
+          flatFields.expenses = jsonData.expenses;
+        }
+        
+        // Equipment
+        if (jsonData.equipment) {
+          flatFields.equipment = jsonData.equipment;
+        }
+        
+        // Ancillary income
+        if (jsonData.ancillary) {
+          flatFields.ancillary = jsonData.ancillary;
+        }
+        
+        return flatFields;
       }
     } catch (error) {
       console.warn('Failed to parse JSON response, falling back to pattern matching');

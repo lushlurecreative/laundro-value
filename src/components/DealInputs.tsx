@@ -37,10 +37,14 @@ export const DealInputs: React.FC = () => {
 
   const { analyzeText, isAnalyzing } = useOpenAIAnalysis({
     onFieldsPopulated: (fields) => {
+      console.log('AI Analysis Fields:', fields);
+      
       // Update deal fields based on AI analysis
       const dealUpdates: any = {};
       const leaseUpdates: any = {};
+      const ancillaryUpdates: any = {};
       
+      // Basic deal fields
       if (fields.price) dealUpdates.askingPrice = fields.price;
       if (fields.income) dealUpdates.grossIncomeAnnual = fields.income;
       if (fields.size) dealUpdates.facilitySizeSqft = fields.size;
@@ -48,8 +52,54 @@ export const DealInputs: React.FC = () => {
       if (fields.hours) dealUpdates.ownerWeeklyHours = fields.hours;
       if (fields.rent) leaseUpdates.monthlyRent = fields.rent;
       
+      // Lease details
+      if (fields.lease) {
+        if (fields.lease.monthlyRent) leaseUpdates.monthlyRent = fields.lease.monthlyRent;
+        if (fields.lease.leaseTerm) leaseUpdates.remainingLeaseTermYears = fields.lease.leaseTerm;
+        if (fields.lease.renewalOptions) leaseUpdates.renewalOptionsCount = fields.lease.renewalOptions;
+        if (fields.lease.leaseType) leaseUpdates.leaseType = fields.lease.leaseType;
+      }
+      
+      // Expense fields
+      if (fields.expenses) {
+        Object.entries(fields.expenses).forEach(([expenseKey, value]) => {
+          const expenseMapping: Record<string, string> = {
+            rent: 'Rent',
+            water: 'Water/Sewer',
+            gas: 'Gas',
+            electricity: 'Electricity',
+            insurance: 'Insurance',
+            maintenance: 'Maintenance',
+            supplies: 'Supplies',
+            staff: 'Staff Salaries',
+            other: 'Other'
+          };
+          
+          const expenseName = expenseMapping[expenseKey];
+          if (expenseName && typeof value === 'number' && value > 0) {
+            const existingExpense = expenseItems.find(exp => exp.expenseName === expenseName);
+            if (existingExpense) {
+              updateExpenseItem(existingExpense.expenseId, { amountAnnual: value });
+            }
+          }
+        });
+      }
+      
+      // Ancillary income
+      if (fields.ancillary) {
+        if (fields.ancillary.vending) ancillaryUpdates.vendingIncomeAnnual = fields.ancillary.vending;
+        if (fields.ancillary.other) ancillaryUpdates.otherIncomeAnnual = fields.ancillary.other;
+        if (fields.ancillary.wdf) {
+          ancillaryUpdates.isWDFActive = fields.ancillary.wdf.active || false;
+          if (fields.ancillary.wdf.pricePerLb) ancillaryUpdates.wdfPricePerLb = fields.ancillary.wdf.pricePerLb;
+          if (fields.ancillary.wdf.volumeWeekly) ancillaryUpdates.wdfVolumeLbsPerWeek = fields.ancillary.wdf.volumeWeekly;
+        }
+      }
+      
+      // Apply updates
       if (Object.keys(dealUpdates).length > 0) updateDeal(dealUpdates);
       if (Object.keys(leaseUpdates).length > 0) updateLeaseDetails(leaseUpdates);
+      if (Object.keys(ancillaryUpdates).length > 0) updateAncillaryIncome(ancillaryUpdates);
     }
   });
 
@@ -301,22 +351,28 @@ export const DealInputs: React.FC = () => {
                     id="notes"
                     value={deal?.notes || ''}
                     onChange={(e) => updateDeal({ notes: e.target.value })}
-                    placeholder="Additional notes about the deal, paste any information here and our AI will auto-populate relevant fields..."
-                    rows={3}
+                    placeholder="🤖 COMPREHENSIVE AI AUTO-FILL: Paste ANY and ALL deal information here (lease agreements, financial statements, property listings, notes, etc.) and our AI will automatically populate ALL relevant fields throughout the entire app including property details, lease terms, income, expenses, equipment details, and more..."
+                    rows={4}
                   />
                   {deal?.notes && deal.notes.trim().length > 0 && (
                     <Button
                       onClick={() => analyzeText(deal.notes)}
                       disabled={isAnalyzing}
-                      variant="outline"
-                      className="w-full mt-2"
+                      variant="default"
+                      className="w-full mt-2 bg-gradient-primary shadow-button"
                     >
-                      {isAnalyzing ? 'Analyzing...' : '🤖 Auto-Fill Fields from Notes'}
+                      {isAnalyzing ? '🔄 Analyzing & Auto-Filling Fields...' : '🤖 Auto-Fill ALL Fields from Deal Information'}
                     </Button>
                   )}
-                  <p className="text-xs text-muted-foreground mt-1">
-                    💡 Paste deal information and click analyze to auto-populate fields
-                  </p>
+                  <div className="mt-2 p-3 bg-muted/50 rounded-lg">
+                    <p className="text-xs text-muted-foreground">
+                      <strong>💡 AI AUTO-FILL INSTRUCTIONS:</strong><br/>
+                      • Paste deal listings, financial statements, lease agreements, broker packages, etc.<br/>
+                      • AI will extract and populate: property details, lease terms, income/expenses, equipment info<br/>
+                      • Works with ANY text format - the more detail you provide, the better the results<br/>
+                      • Review and adjust auto-filled values as needed
+                    </p>
+                  </div>
                 </div>
 
                 <div className="flex justify-end pt-4">
@@ -426,19 +482,29 @@ export const DealInputs: React.FC = () => {
                   </div>
                   
                   <div>
-                    <Label htmlFor="leaseHistory">Lease Information</Label>
+                    <Label htmlFor="leaseHistory">Additional Lease Information (Optional)</Label>
                     <Textarea
                       id="leaseHistory"
                       value={deal?.leaseHistory || ''}
                       onChange={(e) => updateDeal({ leaseHistory: e.target.value })}
-                      placeholder="Paste lease information here - our AI will auto-populate relevant fields..."
-                      rows={3}
+                      placeholder="Additional lease details or supplementary information (Note: Main AI analysis is done in the Notes & Observations section)"
+                      rows={2}
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      💡 For comprehensive auto-fill, use the "Notes & Observations" section in Property & Deal tab
+                    </p>
                   </div>
                 </CardContent>
               </Card>
               
-              {/* Next Button */}
+              <div className="flex justify-end pt-4">
+                <Button 
+                  onClick={() => setActiveTab('income')}
+                  className="bg-success hover:bg-success/90"
+                >
+                  Next: Income Information
+                </Button>
+              </div>
               {deal?.dealName && deal?.propertyAddress && deal?.askingPrice && (
                 <div className="flex justify-end mt-6">
                   <Button 
@@ -960,6 +1026,15 @@ export const DealInputs: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
+            
+            <div className="flex justify-end pt-4">
+              <Button 
+                onClick={() => setActiveTab('expenses')}
+                className="bg-success hover:bg-success/90"
+              >
+                Next: Operating Expenses
+              </Button>
+            </div>
           </TabsContent>
 
           <TabsContent value="expenses" className="mt-6">
@@ -1025,6 +1100,15 @@ export const DealInputs: React.FC = () => {
                       {formatCurrency(expenseItems.reduce((sum, expense) => sum + expense.amountAnnual, 0))}
                     </span>
                   </div>
+                </div>
+                
+                <div className="flex justify-end pt-4">
+                  <Button 
+                    onClick={() => setActiveTab('equipment')}
+                    className="bg-success hover:bg-success/90"
+                  >
+                    Next: Equipment Inventory
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -1240,6 +1324,15 @@ export const DealInputs: React.FC = () => {
                     </div>
                   )}
                 </div>
+                
+                <div className="flex justify-end pt-4">
+                  <Button 
+                    onClick={() => setActiveTab('financing')}
+                    className="bg-success hover:bg-success/90"
+                  >
+                    Next: Financing & Goals
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1372,6 +1465,19 @@ export const DealInputs: React.FC = () => {
                       placeholder="15.0"
                     />
                   </div>
+                </div>
+                
+                <div className="flex justify-end pt-4">
+                  <Button 
+                    onClick={() => {
+                      // Navigate to analysis tab in main app
+                      const event = new CustomEvent('navigateToAnalysis');
+                      window.dispatchEvent(event);
+                    }}
+                    className="bg-success hover:bg-success/90"
+                  >
+                    Complete Setup - View Analysis
+                  </Button>
                 </div>
               </CardContent>
             </Card>

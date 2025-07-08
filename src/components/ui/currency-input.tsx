@@ -10,40 +10,40 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
   ({ className, value, onChange, ...props }, ref) => {
     const [displayValue, setDisplayValue] = React.useState('')
 
-    React.useEffect(() => {
-      if (value === 0 || value === '0' || value === '') {
-        setDisplayValue('')
-      } else if (typeof value === 'number' && value > 0) {
-        setDisplayValue(value.toLocaleString('en-US', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        }))
-      }
-    }, [value])
+  React.useEffect(() => {
+    if (value === undefined || value === null || value === 0 || value === '0' || value === '') {
+      setDisplayValue('')
+    } else if (typeof value === 'number' && value > 0) {
+      setDisplayValue(value.toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }))
+    }
+  }, [value])
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const inputValue = e.target.value.replace(/[^\d.]/g, '')
-      
-      if (inputValue === '') {
-        setDisplayValue('')
-        onChange?.(0)
-        return
-      }
-
-      const numValue = parseFloat(inputValue)
-      if (!isNaN(numValue)) {
-        onChange?.(numValue)
-      }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value.replace(/[^\d]/g, '')
+    setDisplayValue(inputValue)
+    
+    if (inputValue === '') {
+      onChange?.(0)
+      return
     }
 
-    const handleBlur = () => {
-      if (displayValue && typeof value === 'number' && value > 0) {
-        setDisplayValue(value.toLocaleString('en-US', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        }))
-      }
+    const numValue = parseInt(inputValue)
+    if (!isNaN(numValue)) {
+      onChange?.(numValue)
     }
+  }
+
+  const handleBlur = () => {
+    if (displayValue && typeof value === 'number' && value > 0) {
+      setDisplayValue(value.toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }))
+    }
+  }
 
     return (
       <div className="relative">

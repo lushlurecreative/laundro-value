@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DealProvider } from '@/contexts/DealContext';
 import { Navigation } from '@/components/Navigation';
 import { Dashboard } from '@/components/Dashboard';
@@ -11,6 +11,16 @@ import { TenYearProjection } from '@/components/TenYearProjection';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  // Listen for navigation events from DealInputs
+  useEffect(() => {
+    const handleNavigateToAnalysis = () => {
+      setActiveTab('analysis');
+    };
+
+    window.addEventListener('navigateToAnalysis', handleNavigateToAnalysis);
+    return () => window.removeEventListener('navigateToAnalysis', handleNavigateToAnalysis);
+  }, []);
 
   const renderContent = () => {
     switch (activeTab) {

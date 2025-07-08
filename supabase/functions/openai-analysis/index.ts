@@ -22,7 +22,7 @@ serve(async (req) => {
     let systemPrompt = '';
     switch (analysisType) {
       case 'field-extraction':
-        systemPrompt = `You are an expert data extraction specialist for laundromat investment deals. Extract key information from the provided text and return it in this JSON format:
+        systemPrompt = `You are an expert data extraction specialist for laundromat investment deals. Extract ALL relevant information from the provided text and return it in this JSON format:
         {
           "price": number (asking price or purchase price in dollars),
           "income": number (annual gross income in dollars),
@@ -30,9 +30,40 @@ serve(async (req) => {
           "size": number (facility size in square feet),
           "machines": number (number of machines),
           "hours": number (owner weekly hours),
-          "expenses": number (annual expenses in dollars)
+          "expenses": {
+            "rent": number (annual rent),
+            "water": number (annual water costs),
+            "gas": number (annual gas costs),
+            "electricity": number (annual electricity costs),
+            "insurance": number (annual insurance),
+            "maintenance": number (annual maintenance),
+            "supplies": number (annual supplies),
+            "staff": number (annual staff salaries),
+            "other": number (other annual expenses)
+          },
+          "lease": {
+            "monthlyRent": number,
+            "leaseTerm": number (years),
+            "renewalOptions": number,
+            "leaseType": string
+          },
+          "equipment": {
+            "washers": number,
+            "dryers": number,
+            "avgAge": number,
+            "avgCondition": number (1-5 scale)
+          },
+          "ancillary": {
+            "vending": number (annual),
+            "wdf": {
+              "active": boolean,
+              "pricePerLb": number,
+              "volumeWeekly": number
+            },
+            "other": number (annual)
+          }
         }
-        Only include fields that you can confidently extract from the text. Return valid JSON only.`;
+        Extract ALL available information. Only include fields you can confidently extract. Return valid JSON only.`;
         break;
       case 'deal-analysis':
         systemPrompt = `You are an expert laundromat investment analyst. Analyze the provided deal data and provide:
