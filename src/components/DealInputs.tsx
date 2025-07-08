@@ -285,12 +285,14 @@ export const DealInputs: React.FC = () => {
                     placeholder="Additional notes about the deal, paste any information here and our AI will auto-populate relevant fields..."
                     rows={3}
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    💡 AI auto-population requires OpenAI configuration
+                  </p>
                 </div>
 
                 <div className="flex justify-end pt-4">
                   <Button 
-                    onClick={() => setActiveTab('lease')}
-                    disabled={deal?.isRealEstateIncluded}
+                    onClick={() => setActiveTab(deal?.isRealEstateIncluded ? 'income' : 'lease')}
                     className="bg-success hover:bg-success/90"
                   >
                     {deal?.isRealEstateIncluded ? 'Next: Income Information' : 'Next: Lease Information'}
@@ -507,22 +509,27 @@ export const DealInputs: React.FC = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="leaseType">Lease Type</Label>
-                    <Select
-                      value={leaseDetails?.leaseType || 'Triple Net (NNN)'}
-                      onValueChange={(value) => updateLeaseDetails({ leaseType: value as any })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Triple Net (NNN)">Triple Net (NNN)</SelectItem>
-                        <SelectItem value="Modified Gross">Modified Gross</SelectItem>
-                        <SelectItem value="Gross Lease">Gross Lease</SelectItem>
-                        <SelectItem value="Other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="leaseInformation">Lease Information</Label>
+                    <Textarea
+                      id="leaseInformation"
+                      value={deal?.leaseHistory || ''}
+                      onChange={(e) => updateDeal({ leaseHistory: e.target.value })}
+                      placeholder="Paste lease information here and our AI will auto-populate relevant fields..."
+                      rows={4}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      💡 AI auto-population requires OpenAI configuration
+                    </p>
                   </div>
+
+              <div className="flex justify-end pt-4">
+                <Button 
+                  onClick={() => setActiveTab('expenses')}
+                  className="bg-success hover:bg-success/90"
+                >
+                  Next: Expenses Information
+                </Button>
+              </div>
                   
                   <div>
                     <Label htmlFor="leaseHistory">Lease Information</Label>

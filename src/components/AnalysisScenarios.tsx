@@ -346,6 +346,54 @@ export const AnalysisScenarios: React.FC = () => {
             </CardContent>
           </Card>
 
+          {/* Expansion Potential Analysis */}
+          <Card className="shadow-elegant">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <CardTitle>Expansion Potential Analysis</CardTitle>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <span className="text-xs bg-muted px-2 py-1 rounded">?</span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Analyze physical space and infrastructure capacity for adding more equipment. This helps estimate future growth potential and required capital investment.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Evaluate the potential for adding machines to grow revenue and calculate ROI on expansion investment
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {deal?.expansionPotential && (deal.expansionPotential.additionalMachines > 0 || deal.expansionPotential.expansionCost > 0) ? (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="font-semibold mb-2">Additional Machines</h4>
+                    <p className="text-2xl font-bold text-primary">{deal.expansionPotential.additionalMachines}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Machines that can be added</p>
+                  </div>
+                  
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="font-semibold mb-2">Expansion Cost</h4>
+                    <p className="text-2xl font-bold text-primary">{formatCurrency(deal.expansionPotential.expansionCost)}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Total investment required</p>
+                  </div>
+                  
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="font-semibold mb-2">Potential Additional Income</h4>
+                    <p className="text-2xl font-bold text-primary">{formatCurrency(deal.expansionPotential.potentialAdditionalIncome || 0)}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Estimated annual revenue increase</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-8 text-center text-muted-foreground">
+                  <p>No expansion potential data entered yet.</p>
+                  <p className="text-sm mt-1">Go to Deal Inputs to add expansion information.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Income Verification Analysis */}
           <Card className="shadow-elegant">
             <CardHeader>
