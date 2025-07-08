@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { useDeal } from '@/contexts/DealContext';
 import { formatCurrency } from '@/utils/calculations';
 import { CurrencyInput } from '@/components/ui/currency-input';
+import { useOpenAIAnalysis } from '@/hooks/useOpenAIAnalysis';
 import { Plus, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -33,6 +34,24 @@ export const DealInputs: React.FC = () => {
     updateAncillaryIncome,
     updateUtilityAnalysis
   } = useDeal();
+
+  const { analyzeText, isAnalyzing } = useOpenAIAnalysis({
+    onFieldsPopulated: (fields) => {
+      // Update deal fields based on AI analysis
+      const dealUpdates: any = {};
+      const leaseUpdates: any = {};
+      
+      if (fields.price) dealUpdates.askingPrice = fields.price;
+      if (fields.income) dealUpdates.grossIncomeAnnual = fields.income;
+      if (fields.size) dealUpdates.facilitySizeSqft = fields.size;
+      if (fields.machines) dealUpdates.numberOfMachines = fields.machines;
+      if (fields.hours) dealUpdates.ownerWeeklyHours = fields.hours;
+      if (fields.rent) leaseUpdates.monthlyRent = fields.rent;
+      
+      if (Object.keys(dealUpdates).length > 0) updateDeal(dealUpdates);
+      if (Object.keys(leaseUpdates).length > 0) updateLeaseDetails(leaseUpdates);
+    }
+  });
 
   const [activeTab, setActiveTab] = useState('property');
 
@@ -285,8 +304,18 @@ export const DealInputs: React.FC = () => {
                     placeholder="Additional notes about the deal, paste any information here and our AI will auto-populate relevant fields..."
                     rows={3}
                   />
+                  {deal?.notes && deal.notes.trim().length > 0 && (
+                    <Button
+                      onClick={() => analyzeText(deal.notes)}
+                      disabled={isAnalyzing}
+                      variant="outline"
+                      className="w-full mt-2"
+                    >
+                      {isAnalyzing ? 'Analyzing...' : '🤖 Auto-Fill Fields from Notes'}
+                    </Button>
+                  )}
                   <p className="text-xs text-muted-foreground mt-1">
-                    💡 AI auto-population requires OpenAI configuration
+                    💡 Paste deal information and click analyze to auto-populate fields
                   </p>
                 </div>
 
@@ -316,12 +345,11 @@ export const DealInputs: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor="monthlyRent">Monthly Rent</Label>
-                      <Input
+                      <CurrencyInput
                         id="monthlyRent"
-                        type="number"
-                        value={leaseDetails?.monthlyRent || ''}
-                        onChange={(e) => updateLeaseDetails({ monthlyRent: Number(e.target.value) })}
-                        placeholder="0"
+                        value={leaseDetails?.monthlyRent || 0}
+                        onChange={(value) => updateLeaseDetails({ monthlyRent: value })}
+                        placeholder="Monthly rent amount"
                       />
                     </div>
                     <div>
@@ -337,12 +365,11 @@ export const DealInputs: React.FC = () => {
                     </div>
                     <div>
                       <Label htmlFor="camCost">CAM Cost (Annual)</Label>
-                      <Input
+                      <CurrencyInput
                         id="camCost"
-                        type="number"
-                        value={leaseDetails?.camCostAnnual || ''}
-                        onChange={(e) => updateLeaseDetails({ camCostAnnual: Number(e.target.value) })}
-                        placeholder="0"
+                        value={leaseDetails?.camCostAnnual || 0}
+                        onChange={(value) => updateLeaseDetails({ camCostAnnual: value })}
+                        placeholder="Common area maintenance"
                       />
                     </div>
                   </div>
@@ -438,12 +465,10 @@ export const DealInputs: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor="monthlyRent">Monthly Rent</Label>
-                      <Input
+                      <CurrencyInput
                         id="monthlyRent"
-                        type="number"
-                        min="0"
-                        value={leaseDetails?.monthlyRent === 0 ? '' : leaseDetails?.monthlyRent || ''}
-                        onChange={(e) => updateLeaseDetails({ monthlyRent: Number(e.target.value) || 0 })}
+                        value={leaseDetails?.monthlyRent || 0}
+                        onChange={(value) => updateLeaseDetails({ monthlyRent: value })}
                         placeholder="Monthly rent amount"
                       />
                     </div>
@@ -461,12 +486,10 @@ export const DealInputs: React.FC = () => {
                     </div>
                     <div>
                       <Label htmlFor="camCost">CAM Cost (Annual)</Label>
-                      <Input
+                      <CurrencyInput
                         id="camCost"
-                        type="number"
-                        min="0"
-                        value={leaseDetails?.camCostAnnual === 0 ? '' : leaseDetails?.camCostAnnual || ''}
-                        onChange={(e) => updateLeaseDetails({ camCostAnnual: Number(e.target.value) || 0 })}
+                        value={leaseDetails?.camCostAnnual || 0}
+                        onChange={(value) => updateLeaseDetails({ camCostAnnual: value })}
                         placeholder="Common area maintenance"
                       />
                     </div>
@@ -517,8 +540,18 @@ export const DealInputs: React.FC = () => {
                       placeholder="Paste lease information here and our AI will auto-populate relevant fields..."
                       rows={4}
                     />
+                    {deal?.leaseHistory && deal.leaseHistory.trim().length > 0 && (
+                      <Button
+                        onClick={() => analyzeText(deal.leaseHistory, 'lease')}
+                        disabled={isAnalyzing}
+                        variant="outline"
+                        className="w-full mt-2"
+                      >
+                        {isAnalyzing ? 'Analyzing...' : '🤖 Auto-Fill Lease Fields'}
+                      </Button>
+                    )}
                     <p className="text-xs text-muted-foreground mt-1">
-                      💡 AI auto-population requires OpenAI configuration
+                      💡 Paste lease information and click analyze to auto-populate fields
                     </p>
                   </div>
 
@@ -576,12 +609,11 @@ export const DealInputs: React.FC = () => {
                         </TooltipContent>
                       </Tooltip>
                     </div>
-                    <Input
+                    <CurrencyInput
                       id="grossIncomeAnnual"
-                      type="number"
-                      value={deal?.grossIncomeAnnual || ''}
-                      onChange={(e) => updateDeal({ grossIncomeAnnual: Number(e.target.value) })}
-                      placeholder="0"
+                      value={deal?.grossIncomeAnnual || 0}
+                      onChange={(value) => updateDeal({ grossIncomeAnnual: value })}
+                      placeholder="Annual gross income"
                     />
                   </div>
                   <div>
@@ -696,15 +728,12 @@ export const DealInputs: React.FC = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="wdfPrice">WDF Price per Lb</Label>
-                           <Input
-                             id="wdfPrice"
-                             type="number"
-                             step="0.01"
-                             min="0"
-                             value={ancillaryIncome?.wdfPricePerLb === 0 ? '' : ancillaryIncome?.wdfPricePerLb || ''}
-                             onChange={(e) => updateAncillaryIncome({ wdfPricePerLb: Number(e.target.value) || 0 })}
-                             placeholder="Price per pound"
-                           />
+                           <CurrencyInput
+                              id="wdfPrice"
+                              value={ancillaryIncome?.wdfPricePerLb || 0}
+                              onChange={(value) => updateAncillaryIncome({ wdfPricePerLb: value })}
+                              placeholder="Price per pound"
+                            />
                         </div>
                         <div>
                           <Label htmlFor="wdfVolume">WDF Volume (Lbs per Week)</Label>
@@ -753,14 +782,12 @@ export const DealInputs: React.FC = () => {
                           </TooltipContent>
                         </Tooltip>
                       </div>
-                       <Input
-                         id="vendingIncome"
-                         type="number"
-                         min="0"
-                         value={ancillaryIncome?.vendingIncomeAnnual === 0 ? '' : ancillaryIncome?.vendingIncomeAnnual || ''}
-                         onChange={(e) => updateAncillaryIncome({ vendingIncomeAnnual: Number(e.target.value) || 0 })}
-                         placeholder="Annual vending revenue"
-                       />
+                       <CurrencyInput
+                          id="vendingIncome"
+                          value={ancillaryIncome?.vendingIncomeAnnual || 0}
+                          onChange={(value) => updateAncillaryIncome({ vendingIncomeAnnual: value })}
+                          placeholder="Annual vending revenue"
+                        />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -774,14 +801,12 @@ export const DealInputs: React.FC = () => {
                           </TooltipContent>
                         </Tooltip>
                       </div>
-                       <Input
-                         id="otherIncome"
-                         type="number"
-                         min="0"
-                         value={ancillaryIncome?.otherIncomeAnnual === 0 ? '' : ancillaryIncome?.otherIncomeAnnual || ''}
-                         onChange={(e) => updateAncillaryIncome({ otherIncomeAnnual: Number(e.target.value) || 0 })}
-                         placeholder="Other income sources"
-                       />
+                       <CurrencyInput
+                          id="otherIncome"
+                          value={ancillaryIncome?.otherIncomeAnnual || 0}
+                          onChange={(value) => updateAncillaryIncome({ otherIncomeAnnual: value })}
+                          placeholder="Other income sources"
+                        />
                     </div>
                   </div>
                 </CardContent>

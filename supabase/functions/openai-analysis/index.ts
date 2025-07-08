@@ -21,6 +21,19 @@ serve(async (req) => {
 
     let systemPrompt = '';
     switch (analysisType) {
+      case 'field-extraction':
+        systemPrompt = `You are an expert data extraction specialist for laundromat investment deals. Extract key information from the provided text and return it in this JSON format:
+        {
+          "price": number (asking price or purchase price in dollars),
+          "income": number (annual gross income in dollars),
+          "rent": number (monthly rent in dollars),
+          "size": number (facility size in square feet),
+          "machines": number (number of machines),
+          "hours": number (owner weekly hours),
+          "expenses": number (annual expenses in dollars)
+        }
+        Only include fields that you can confidently extract from the text. Return valid JSON only.`;
+        break;
       case 'deal-analysis':
         systemPrompt = `You are an expert laundromat investment analyst. Analyze the provided deal data and provide:
         1. Investment viability score (1-10)

@@ -55,11 +55,19 @@ export const useOpenAIAnalysis = ({ onFieldsPopulated }: UseOpenAIAnalysisProps 
   };
 
   const parseAIResponse = (response: string, type: 'notes' | 'lease'): Record<string, any> => {
+    try {
+      // Try to parse as JSON first (for field-extraction responses)
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const jsonData = JSON.parse(jsonMatch[0]);
+        return jsonData;
+      }
+    } catch (error) {
+      console.warn('Failed to parse JSON response, falling back to pattern matching');
+    }
+    
+    // Fallback to pattern matching for unstructured responses
     const fields: Record<string, any> = {};
-    
-    // Simple pattern matching to extract common fields
-    // This would be enhanced with better AI prompting in production
-    
     const patterns = {
       rent: /rent[:\s]*\$?([0-9,]+)/i,
       price: /price[:\s]*\$?([0-9,]+)/i,

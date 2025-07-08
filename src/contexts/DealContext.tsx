@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { Deal, LeaseDetails, ExpenseItem, MachineInventory, AncillaryIncome, UtilityAnalysis } from '@/types/deal';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { useMarketData } from '@/hooks/useMarketData';
+import { calculateMetrics } from '@/utils/calculations';
 
 interface DealContextType {
   deal: Deal | null;
