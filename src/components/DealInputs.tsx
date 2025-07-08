@@ -125,6 +125,31 @@ export const DealInputs: React.FC = () => {
     addMachine(newMachine);
   };
 
+  const addValueAddedService = () => {
+    const currentServices = deal?.valueAddedServices || [];
+    const newService = {
+      description: '',
+      potentialRevenue: 0
+    };
+    updateDeal({
+      valueAddedServices: [...currentServices, newService]
+    });
+  };
+
+  const updateValueAddedService = (index: number, field: 'description' | 'potentialRevenue', value: string | number) => {
+    const currentServices = deal?.valueAddedServices || [];
+    const updatedServices = currentServices.map((service, i) => 
+      i === index ? { ...service, [field]: value } : service
+    );
+    updateDeal({ valueAddedServices: updatedServices });
+  };
+
+  const removeValueAddedService = (index: number) => {
+    const currentServices = deal?.valueAddedServices || [];
+    const updatedServices = currentServices.filter((_, i) => i !== index);
+    updateDeal({ valueAddedServices: updatedServices });
+  };
+
   return (
     <TooltipProvider>
       <div className="space-y-6">
@@ -133,6 +158,11 @@ export const DealInputs: React.FC = () => {
           <p className="text-muted-foreground">
             Enter information if known, otherwise estimate or leave blank. Required fields: Deal Name*, Property Address*, Asking Price*
           </p>
+          <div className="mt-3 p-3 bg-muted/50 rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              📋 <strong>Key Instructions:</strong> Leave fields blank or enter 0 if unknown. The app will auto-calculate metrics and analyze market data based on the property address you enter.
+            </p>
+          </div>
         </div>
 
       <Card className="shadow-elegant">
@@ -186,24 +216,26 @@ export const DealInputs: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="askingPrice">Asking Price *</Label>
-                    <Input
-                      id="askingPrice"
-                      type="number"
-                      value={deal?.askingPrice || ''}
-                      onChange={(e) => updateDeal({ askingPrice: Number(e.target.value) })}
-                      placeholder="0"
-                      required
-                    />
+                     <Input
+                       id="askingPrice"
+                       type="number"
+                       min="0"
+                       value={deal?.askingPrice === 0 ? '' : deal?.askingPrice || ''}
+                       onChange={(e) => updateDeal({ askingPrice: Number(e.target.value) || 0 })}
+                       placeholder="Purchase price"
+                       required
+                     />
                   </div>
                   <div>
                     <Label htmlFor="facilitySizeSqft">Facility Size (sq ft)</Label>
-                    <Input
-                      id="facilitySizeSqft"
-                      type="number"
-                      value={deal?.facilitySizeSqft || ''}
-                      onChange={(e) => updateDeal({ facilitySizeSqft: Number(e.target.value) })}
-                      placeholder="0"
-                    />
+                     <Input
+                       id="facilitySizeSqft"
+                       type="number"
+                       min="0"
+                       value={deal?.facilitySizeSqft === 0 ? '' : deal?.facilitySizeSqft || ''}
+                       onChange={(e) => updateDeal({ facilitySizeSqft: Number(e.target.value) || 0 })}
+                       placeholder="Square footage"
+                     />
                   </div>
                   <div className="flex items-center space-x-2 pt-6">
                     <Switch
@@ -233,13 +265,15 @@ export const DealInputs: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="ownerWeeklyHours">Owner Weekly Hours</Label>
-                    <Input
-                      id="ownerWeeklyHours"
-                      type="number"
-                      value={deal?.ownerWeeklyHours || ''}
-                      onChange={(e) => updateDeal({ ownerWeeklyHours: Number(e.target.value) })}
-                      placeholder="0"
-                    />
+                       <Input
+                         id="ownerWeeklyHours"
+                         type="number"
+                         min="0"
+                         max="168"
+                         value={deal?.ownerWeeklyHours === 0 ? '' : deal?.ownerWeeklyHours || ''}
+                         onChange={(e) => updateDeal({ ownerWeeklyHours: Number(e.target.value) || 0 })}
+                         placeholder="Hours per week"
+                       />
                   </div>
                 </div>
 
@@ -406,17 +440,155 @@ export const DealInputs: React.FC = () => {
                   </div>
                   
                   <div>
-                    <Label htmlFor="leaseHistory">Lease History</Label>
+                    <Label htmlFor="leaseHistory">Lease Information</Label>
                     <Textarea
                       id="leaseHistory"
                       value={deal?.leaseHistory || ''}
                       onChange={(e) => updateDeal({ leaseHistory: e.target.value })}
-                      placeholder="Enter lease history and any relevant notes..."
+                      placeholder="Paste lease information here - our AI will auto-populate relevant fields..."
                       rows={3}
                     />
                   </div>
                 </CardContent>
               </Card>
+              
+              {/* Next Button */}
+              {deal?.dealName && deal?.propertyAddress && deal?.askingPrice && (
+                <div className="flex justify-end mt-6">
+                  <Button 
+                    onClick={() => setActiveTab(!deal?.isRealEstateIncluded ? 'lease' : 'income')}
+                    className="bg-success hover:bg-success/90 text-success-foreground"
+                  >
+                    Next: {!deal?.isRealEstateIncluded ? 'Lease Details' : 'Income Information'} →
+                  </Button>
+                </div>
+              )}
+            </TabsContent>
+          )}
+
+          {!deal?.isRealEstateIncluded && (
+            <TabsContent value="lease" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Lease Details</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Enter lease terms and conditions for the property rental
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="monthlyRent">Monthly Rent</Label>
+                      <Input
+                        id="monthlyRent"
+                        type="number"
+                        min="0"
+                        value={leaseDetails?.monthlyRent === 0 ? '' : leaseDetails?.monthlyRent || ''}
+                        onChange={(e) => updateLeaseDetails({ monthlyRent: Number(e.target.value) || 0 })}
+                        placeholder="Monthly rent amount"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="annualRentIncrease">Annual Rent Increase (%)</Label>
+                      <Input
+                        id="annualRentIncrease"
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        value={leaseDetails?.annualRentIncreasePercent === 0 ? '' : leaseDetails?.annualRentIncreasePercent || ''}
+                        onChange={(e) => updateLeaseDetails({ annualRentIncreasePercent: Number(e.target.value) || 0 })}
+                        placeholder="3.0"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="camCost">CAM Cost (Annual)</Label>
+                      <Input
+                        id="camCost"
+                        type="number"
+                        min="0"
+                        value={leaseDetails?.camCostAnnual === 0 ? '' : leaseDetails?.camCostAnnual || ''}
+                        onChange={(e) => updateLeaseDetails({ camCostAnnual: Number(e.target.value) || 0 })}
+                        placeholder="Common area maintenance"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="remainingLeaseTerm">Remaining Lease Term (Years)</Label>
+                      <Input
+                        id="remainingLeaseTerm"
+                        type="number"
+                        min="0"
+                        value={leaseDetails?.remainingLeaseTermYears === 0 ? '' : leaseDetails?.remainingLeaseTermYears || ''}
+                        onChange={(e) => updateLeaseDetails({ remainingLeaseTermYears: Number(e.target.value) || 0 })}
+                        placeholder="Years remaining"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="renewalOptionsCount">Renewal Options Count</Label>
+                      <Input
+                        id="renewalOptionsCount"
+                        type="number"
+                        min="0"
+                        value={leaseDetails?.renewalOptionsCount === 0 ? '' : leaseDetails?.renewalOptionsCount || ''}
+                        onChange={(e) => updateLeaseDetails({ renewalOptionsCount: Number(e.target.value) || 0 })}
+                        placeholder="Number of renewals"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="renewalOptionLength">Renewal Option Length (Years)</Label>
+                      <Input
+                        id="renewalOptionLength"
+                        type="number"
+                        min="0"
+                        value={leaseDetails?.renewalOptionLengthYears === 0 ? '' : leaseDetails?.renewalOptionLengthYears || ''}
+                        onChange={(e) => updateLeaseDetails({ renewalOptionLengthYears: Number(e.target.value) || 0 })}
+                        placeholder="5"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="leaseType">Lease Type</Label>
+                    <Select
+                      value={leaseDetails?.leaseType || 'Triple Net (NNN)'}
+                      onValueChange={(value) => updateLeaseDetails({ leaseType: value as any })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Triple Net (NNN)">Triple Net (NNN)</SelectItem>
+                        <SelectItem value="Modified Gross">Modified Gross</SelectItem>
+                        <SelectItem value="Gross Lease">Gross Lease</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="leaseHistory">Lease Information</Label>
+                    <Textarea
+                      id="leaseHistory"
+                      value={deal?.leaseHistory || ''}
+                      onChange={(e) => updateDeal({ leaseHistory: e.target.value })}
+                      placeholder="Paste lease information here - our AI will auto-populate relevant fields..."
+                      rows={3}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Next Button */}
+              <div className="flex justify-end mt-6">
+                <Button 
+                  onClick={() => setActiveTab('income')}
+                  className="bg-success hover:bg-success/90 text-success-foreground"
+                >
+                  Next: Income Information →
+                </Button>
+              </div>
             </TabsContent>
           )}
 
@@ -463,9 +635,12 @@ export const DealInputs: React.FC = () => {
                     <Input
                       id="annualNet"
                       type="number"
-                      value={deal?.annualNet || ''}
-                      onChange={(e) => updateDeal({ annualNet: Number(e.target.value) })}
-                      placeholder="0"
+                      min="0"
+                      value={deal?.annualNet === 0 ? '' : deal?.annualNet || ''}
+                      onChange={(e) => updateDeal({ annualNet: Number(e.target.value) || 0 })}
+                      placeholder="Auto-calculated from income/expenses"
+                      readOnly
+                      className="bg-muted"
                     />
                   </div>
                 </div>
@@ -483,13 +658,14 @@ export const DealInputs: React.FC = () => {
                           </TooltipContent>
                         </Tooltip>
                       </div>
-                      <Input
-                        id="fullTimeStaffCount"
-                        type="number"
-                        value={deal?.fullTimeStaffCount || ''}
-                        onChange={(e) => updateDeal({ fullTimeStaffCount: Number(e.target.value) })}
-                        placeholder="0"
-                      />
+                       <Input
+                         id="fullTimeStaffCount"
+                         type="number"
+                         min="0"
+                         value={deal?.fullTimeStaffCount === 0 ? '' : deal?.fullTimeStaffCount || ''}
+                         onChange={(e) => updateDeal({ fullTimeStaffCount: Number(e.target.value) || 0 })}
+                         placeholder="Number of full-time staff"
+                       />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -503,13 +679,14 @@ export const DealInputs: React.FC = () => {
                           </TooltipContent>
                         </Tooltip>
                       </div>
-                      <Input
-                        id="partTimeStaffCount"
-                        type="number"
-                        value={deal?.partTimeStaffCount || ''}
-                        onChange={(e) => updateDeal({ partTimeStaffCount: Number(e.target.value) })}
-                        placeholder="0"
-                      />
+                       <Input
+                         id="partTimeStaffCount"
+                         type="number"
+                         min="0"
+                         value={deal?.partTimeStaffCount === 0 ? '' : deal?.partTimeStaffCount || ''}
+                         onChange={(e) => updateDeal({ partTimeStaffCount: Number(e.target.value) || 0 })}
+                         placeholder="Number of part-time staff"
+                       />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -523,13 +700,14 @@ export const DealInputs: React.FC = () => {
                           </TooltipContent>
                         </Tooltip>
                       </div>
-                      <Input
-                        id="payrollCost"
-                        type="number"
-                        value={deal?.payrollCost || ''}
-                        onChange={(e) => updateDeal({ payrollCost: Number(e.target.value) })}
-                        placeholder="0"
-                      />
+                       <Input
+                         id="payrollCost"
+                         type="number"
+                         min="0"
+                         value={deal?.payrollCost === 0 ? '' : deal?.payrollCost || ''}
+                         onChange={(e) => updateDeal({ payrollCost: Number(e.target.value) || 0 })}
+                         placeholder="Annual payroll costs"
+                       />
                     </div>
                   </div>
                 </CardContent>
@@ -554,24 +732,26 @@ export const DealInputs: React.FC = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="wdfPrice">WDF Price per Lb</Label>
-                          <Input
-                            id="wdfPrice"
-                            type="number"
-                            step="0.01"
-                            value={ancillaryIncome?.wdfPricePerLb || ''}
-                            onChange={(e) => updateAncillaryIncome({ wdfPricePerLb: Number(e.target.value) })}
-                            placeholder="0.00"
-                          />
+                           <Input
+                             id="wdfPrice"
+                             type="number"
+                             step="0.01"
+                             min="0"
+                             value={ancillaryIncome?.wdfPricePerLb === 0 ? '' : ancillaryIncome?.wdfPricePerLb || ''}
+                             onChange={(e) => updateAncillaryIncome({ wdfPricePerLb: Number(e.target.value) || 0 })}
+                             placeholder="Price per pound"
+                           />
                         </div>
                         <div>
                           <Label htmlFor="wdfVolume">WDF Volume (Lbs per Week)</Label>
-                          <Input
-                            id="wdfVolume"
-                            type="number"
-                            value={ancillaryIncome?.wdfVolumeLbsPerWeek || ''}
-                            onChange={(e) => updateAncillaryIncome({ wdfVolumeLbsPerWeek: Number(e.target.value) })}
-                            placeholder="0"
-                          />
+                           <Input
+                             id="wdfVolume"
+                             type="number"
+                             min="0"
+                             value={ancillaryIncome?.wdfVolumeLbsPerWeek === 0 ? '' : ancillaryIncome?.wdfVolumeLbsPerWeek || ''}
+                             onChange={(e) => updateAncillaryIncome({ wdfVolumeLbsPerWeek: Number(e.target.value) || 0 })}
+                             placeholder="Pounds per week"
+                           />
                         </div>
                       </div>
                       <div>
@@ -609,13 +789,14 @@ export const DealInputs: React.FC = () => {
                           </TooltipContent>
                         </Tooltip>
                       </div>
-                      <Input
-                        id="vendingIncome"
-                        type="number"
-                        value={ancillaryIncome?.vendingIncomeAnnual || ''}
-                        onChange={(e) => updateAncillaryIncome({ vendingIncomeAnnual: Number(e.target.value) })}
-                        placeholder="0"
-                      />
+                       <Input
+                         id="vendingIncome"
+                         type="number"
+                         min="0"
+                         value={ancillaryIncome?.vendingIncomeAnnual === 0 ? '' : ancillaryIncome?.vendingIncomeAnnual || ''}
+                         onChange={(e) => updateAncillaryIncome({ vendingIncomeAnnual: Number(e.target.value) || 0 })}
+                         placeholder="Annual vending revenue"
+                       />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -629,15 +810,74 @@ export const DealInputs: React.FC = () => {
                           </TooltipContent>
                         </Tooltip>
                       </div>
-                      <Input
-                        id="otherIncome"
-                        type="number"
-                        value={ancillaryIncome?.otherIncomeAnnual || ''}
-                        onChange={(e) => updateAncillaryIncome({ otherIncomeAnnual: Number(e.target.value) })}
-                        placeholder="0"
-                      />
+                       <Input
+                         id="otherIncome"
+                         type="number"
+                         min="0"
+                         value={ancillaryIncome?.otherIncomeAnnual === 0 ? '' : ancillaryIncome?.otherIncomeAnnual || ''}
+                         onChange={(e) => updateAncillaryIncome({ otherIncomeAnnual: Number(e.target.value) || 0 })}
+                         placeholder="Other income sources"
+                       />
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <CardTitle>Value-Added Services</CardTitle>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <span className="text-xs bg-muted px-2 py-1 rounded">?</span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Additional services that can increase revenue and customer retention while differentiating your business from competitors.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Add services that generate additional revenue beyond basic laundry operations
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {(deal?.valueAddedServices || []).map((service, index) => (
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end p-4 border rounded-lg">
+                      <div>
+                        <Label>Service Description</Label>
+                        <Input
+                          value={service.description}
+                          onChange={(e) => updateValueAddedService(index, 'description', e.target.value)}
+                          placeholder="e.g., Coffee vending machine"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <div className="flex-1">
+                          <Label>Annual Revenue Potential</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            value={service.potentialRevenue === 0 ? '' : service.potentialRevenue}
+                            onChange={(e) => updateValueAddedService(index, 'potentialRevenue', Number(e.target.value) || 0)}
+                            placeholder="Expected annual revenue"
+                          />
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeValueAddedService(index)}
+                          className="mt-6"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <Button onClick={addValueAddedService} variant="outline" className="w-full">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Value-Added Service
+                  </Button>
                 </CardContent>
               </Card>
 
@@ -662,23 +902,25 @@ export const DealInputs: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="collectionPeriod">Collection Period (Weeks)</Label>
-                      <Input
-                        id="collectionPeriod"
-                        type="number"
-                        value={utilityAnalysis?.collectionPeriodWeeks || ''}
-                        onChange={(e) => updateUtilityAnalysis({ collectionPeriodWeeks: Number(e.target.value) })}
-                        placeholder="0"
-                      />
+                       <Input
+                         id="collectionPeriod"
+                         type="number"
+                         min="0"
+                         value={utilityAnalysis?.collectionPeriodWeeks === 0 ? '' : utilityAnalysis?.collectionPeriodWeeks || ''}
+                         onChange={(e) => updateUtilityAnalysis({ collectionPeriodWeeks: Number(e.target.value) || 0 })}
+                         placeholder="Number of weeks"
+                       />
                     </div>
                     <div>
                       <Label htmlFor="totalCollected">Total Collected Amount</Label>
-                      <Input
-                        id="totalCollected"
-                        type="number"
-                        value={utilityAnalysis?.totalCollectedAmount || ''}
-                        onChange={(e) => updateUtilityAnalysis({ totalCollectedAmount: Number(e.target.value) })}
-                        placeholder="0"
-                      />
+                       <Input
+                         id="totalCollected"
+                         type="number"
+                         min="0"
+                         value={utilityAnalysis?.totalCollectedAmount === 0 ? '' : utilityAnalysis?.totalCollectedAmount || ''}
+                         onChange={(e) => updateUtilityAnalysis({ totalCollectedAmount: Number(e.target.value) || 0 })}
+                         placeholder="Total dollar amount"
+                       />
                     </div>
                   </div>
 

@@ -13,30 +13,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 export const Resources: React.FC = () => {
   const { deal, updateDeal } = useDeal();
 
-  const addValueAddedService = () => {
-    const currentServices = deal?.valueAddedServices || [];
-    const newService = {
-      description: '',
-      potentialRevenue: 0
-    };
-    updateDeal({
-      valueAddedServices: [...currentServices, newService]
-    });
-  };
-
-  const updateValueAddedService = (index: number, field: 'description' | 'potentialRevenue', value: string | number) => {
-    const currentServices = deal?.valueAddedServices || [];
-    const updatedServices = currentServices.map((service, i) => 
-      i === index ? { ...service, [field]: value } : service
-    );
-    updateDeal({ valueAddedServices: updatedServices });
-  };
-
-  const removeValueAddedService = (index: number) => {
-    const currentServices = deal?.valueAddedServices || [];
-    const updatedServices = currentServices.filter((_, i) => i !== index);
-    updateDeal({ valueAddedServices: updatedServices });
-  };
 
   const suggestedServices = [
     {
@@ -105,82 +81,31 @@ export const Resources: React.FC = () => {
           </p>
         </div>
 
-        {/* Value-Added Services */}
+        {/* Business Growth Ideas */}
         <Card className="shadow-elegant">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <CardTitle>Value-Added Services</CardTitle>
+              <CardTitle>Business Growth Ideas</CardTitle>
               <Tooltip>
                 <TooltipTrigger>
                   <Lightbulb className="h-4 w-4 text-muted-foreground" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Additional services that can increase revenue and customer retention while differentiating your business from competitors.</p>
+                  <p>Ideas for growing your laundromat business beyond basic operations. Add specific services in the Deal Inputs Income section.</p>
                 </TooltipContent>
               </Tooltip>
             </div>
             <p className="text-sm text-muted-foreground">
-              Consider these services to increase revenue and customer retention
+              Popular service ideas to increase revenue (configure actual services in Deal Inputs)
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Current Services */}
-            <div className="space-y-4">
-              {(deal?.valueAddedServices || []).map((service, index) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end p-4 border rounded-lg">
-                  <div>
-                    <Label>Service Description</Label>
-                    <Input
-                      value={service.description}
-                      onChange={(e) => updateValueAddedService(index, 'description', e.target.value)}
-                      placeholder="e.g., Coffee vending machine"
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <div className="flex-1">
-                      <Label>Potential Annual Revenue</Label>
-                      <Input
-                        type="number"
-                        value={service.potentialRevenue}
-                        onChange={(e) => updateValueAddedService(index, 'potentialRevenue', Number(e.target.value))}
-                        placeholder="0"
-                      />
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeValueAddedService(index)}
-                      className="mt-6"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-              
-              <Button onClick={addValueAddedService} variant="outline" className="w-full">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Value-Added Service
-              </Button>
-            </div>
-
-            <Separator />
-
             {/* Suggested Services */}
             <div>
-              <h4 className="text-lg font-semibold mb-4">Suggested Services</h4>
+              <h4 className="text-lg font-semibold mb-4">Service Ideas</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {suggestedServices.map((service, index) => (
-                  <Card key={index} className="p-4 hover:shadow-md transition-shadow cursor-pointer" 
-                        onClick={() => {
-                          const currentServices = deal?.valueAddedServices || [];
-                          updateDeal({
-                            valueAddedServices: [...currentServices, {
-                              description: service.title,
-                              potentialRevenue: 0
-                            }]
-                          });
-                        }}>
+                  <Card key={index} className="p-4">
                     <div className="flex items-start gap-3">
                       <div className="p-2 bg-primary/10 rounded-lg">
                         {service.icon}
@@ -195,6 +120,11 @@ export const Resources: React.FC = () => {
                     </div>
                   </Card>
                 ))}
+              </div>
+              <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  💡 <strong>Tip:</strong> To add these services to your financial analysis, go to <strong>Deal Inputs → Income → Value-Added Services</strong> section.
+                </p>
               </div>
             </div>
           </CardContent>

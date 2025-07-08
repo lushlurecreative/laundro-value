@@ -33,6 +33,11 @@ export const calculateMetrics = (
     }
     totalGrossIncome += ancillaryIncome.vendingIncomeAnnual + ancillaryIncome.otherIncomeAnnual;
   }
+  
+  // Add value-added services income
+  if (deal.valueAddedServices) {
+    totalGrossIncome += deal.valueAddedServices.reduce((sum, service) => sum + service.potentialRevenue, 0);
+  }
 
   // Calculate Total Operating Expenses
   const totalOperatingExpenses = expenseItems.reduce((sum, expense) => sum + expense.amountAnnual, 0);
@@ -125,8 +130,8 @@ export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
   }).format(amount);
 };
 

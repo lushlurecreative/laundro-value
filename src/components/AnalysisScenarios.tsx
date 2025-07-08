@@ -31,7 +31,12 @@ export const AnalysisScenarios: React.FC = () => {
       ...deal,
       grossIncomeAnnual: deal.grossIncomeAnnual * (1 + turnsPerDayAdjustment[0] / 100),
       loanInterestRatePercent: Math.max(0.1, deal.loanInterestRatePercent + interestRateAdjustment[0]),
-      downPaymentPercent: Math.max(5, Math.min(50, deal.downPaymentPercent + downPaymentAdjustment[0]))
+      downPaymentPercent: Math.max(5, Math.min(50, deal.downPaymentPercent + downPaymentAdjustment[0])),
+      // Apply revenue adjustment to value-added services too
+      valueAddedServices: deal.valueAddedServices?.map(service => ({
+        ...service,
+        potentialRevenue: service.potentialRevenue * (1 + turnsPerDayAdjustment[0] / 100)
+      })) || []
     };
 
     // Adjust machine vend prices
