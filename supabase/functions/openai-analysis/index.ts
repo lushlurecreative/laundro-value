@@ -58,6 +58,9 @@ CRITICAL INSTRUCTIONS:
 9. PARSE LEASE TERMS: "Ten Years" → 10, "Two (2) five (5) year renewal terms" → renewals: 2, length: 5
 10. EXTRACT RENT INCREASES: "increase by 2.25% annually" → 2.25
 11. PARSE EQUIPMENT TABLES: Extract individual machines from tabular data with Size, Qty, Type, Brand, Model, Year columns
+12. HANDLE PREMISES ADDRESS: "Premises Address: 5435 S. Lagrange Rd., Suite B, Countryside, IL 60525"
+13. PARSE REVENUE RANGES: "Annual Revenue – $166 –172K" with em-dash characters
+14. DISTINGUISH REVENUE VS ASKING PRICE: Revenue goes to income, "Business Sell Price" goes to price
 
 LEASE DATA EXAMPLES TO HANDLE:
 - "Term: Ten Years" → 10 years
@@ -77,7 +80,10 @@ REAL-WORLD EXAMPLES TO HANDLE:
 - "Business Sell Price - $125,000" (asking price)
 - "25 washers of varied ages & sizes; 34 gas-fired dryers" (equipment counts)
 - "footprint - 3000 sq ft" (size)
-- Equipment tables with multiple rows and columns
+- "Premises Address: 5435 S. Lagrange Rd., Suite B, Countryside, IL 60525"
+- Equipment tables: "Washer	12#	5	Top Loader	Speedqueen	SWT521	2009"
+- Lease details: "Term: Ten Years. Base Rent to increase by 2.25% annually"
+- Monthly rent schedule: "Year 1 $3,998.00"
 
 Return ONLY valid JSON in this exact format:
 {
