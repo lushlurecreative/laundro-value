@@ -76,6 +76,7 @@ export const useOpenAIAnalysis = ({ onFieldsPopulated }: UseOpenAIAnalysisProps 
         if (jsonData.size) flatFields.size = jsonData.size;
         if (jsonData.machines) flatFields.machines = jsonData.machines;
         if (jsonData.hours) flatFields.hours = jsonData.hours;
+        if (jsonData.address) flatFields.address = jsonData.address;
         
         // Lease information
         if (jsonData.lease) {
@@ -129,7 +130,8 @@ export const useOpenAIAnalysis = ({ onFieldsPopulated }: UseOpenAIAnalysisProps 
       machines: /([0-9]+)\s*machine/i,
       hours: /([0-9]+)\s*hour/i,
       washers: /([0-9]+)\s*washer/i,
-      dryers: /([0-9]+)\s*dryer/i
+      dryers: /([0-9]+)\s*dryer/i,
+      address: /(?:address|location|property)[:\s]*([^\n\r]+?)(?:\s*,\s*[A-Z]{2}\s*\d{5}|\s*$)/i
     };
 
     Object.entries(patterns).forEach(([key, pattern]) => {

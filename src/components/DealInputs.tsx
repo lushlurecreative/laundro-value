@@ -14,6 +14,7 @@ import { CurrencyInput } from '@/components/ui/currency-input';
 import { useOpenAIAnalysis } from '@/hooks/useOpenAIAnalysis';
 import { Plus, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { SavedDealsSelector } from './SavedDealsSelector';
 
 export const DealInputs: React.FC = () => {
   const {
@@ -50,6 +51,7 @@ export const DealInputs: React.FC = () => {
       if (fields.size) dealUpdates.facilitySizeSqft = fields.size;
       if (fields.machines) dealUpdates.numberOfMachines = fields.machines;
       if (fields.hours) dealUpdates.ownerWeeklyHours = fields.hours;
+      if (fields.address) dealUpdates.propertyAddress = fields.address;
       if (fields.rent) leaseUpdates.monthlyRent = fields.rent;
       
       // Lease details
@@ -292,6 +294,8 @@ export const DealInputs: React.FC = () => {
           </div>
         </div>
 
+        <SavedDealsSelector />
+
       <Card className="shadow-elegant">
         <Tabs value={activeTab} onValueChange={(value) => {
           // Skip lease tab if real estate is included
@@ -315,29 +319,63 @@ export const DealInputs: React.FC = () => {
           <TabsContent value="property" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Property & Deal Information</CardTitle>
+                <CardTitle>Step 1: Deal Information & AI Auto-Fill</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="dealName">Deal Name *</Label>
-                    <Input
-                      id="dealName"
-                      value={deal?.dealName || ''}
-                      onChange={(e) => updateDeal({ dealName: e.target.value })}
-                      placeholder="e.g., 123 Main St Laundromat"
-                      required
-                    />
+              <CardContent className="space-y-6">
+                
+                {/* STEP 1: Notes & Observations - NOW AT TOP */}
+                <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                  <Label htmlFor="notes" className="text-lg font-semibold text-primary">
+                    📝 Step 1: Paste Deal Information (Auto-Fill All Fields)
+                  </Label>
+                  <div className="mt-2 mb-3 p-3 bg-muted/50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">
+                      <strong>🤖 PASTE ANY DEAL INFO HERE:</strong> Listing descriptions, financial statements, lease agreements, broker packages, emails, notes, etc. Our AI will automatically extract and populate property details, lease terms, income/expenses, equipment info, and more throughout the entire app.
+                    </p>
                   </div>
-                  <div>
-                    <Label htmlFor="propertyAddress">Property Address *</Label>
-                    <Input
-                      id="propertyAddress"
-                      value={deal?.propertyAddress || ''}
-                      onChange={(e) => updateDeal({ propertyAddress: e.target.value })}
-                      placeholder="Full property address"
-                      required
-                    />
+                  <Textarea
+                    id="notes"
+                    value={deal?.notes || ''}
+                    onChange={(e) => updateDeal({ notes: e.target.value })}
+                    placeholder="📋 COMPREHENSIVE AI AUTO-FILL: Paste ANY and ALL deal information here (lease agreements, financial statements, property listings, notes, etc.) and our AI will automatically populate ALL relevant fields throughout the entire app including property details, lease terms, income, expenses, equipment details, and more..."
+                    rows={6}
+                    className="min-h-[120px]"
+                  />
+                  {deal?.notes && deal.notes.trim().length > 0 && (
+                    <Button
+                      onClick={() => analyzeText(deal.notes)}
+                      disabled={isAnalyzing}
+                      variant="default"
+                      className="w-full mt-3 bg-gradient-primary shadow-button text-lg py-3"
+                    >
+                      {isAnalyzing ? '🔄 Analyzing & Auto-Filling ALL Fields...' : '🤖 Auto-Fill ALL Fields from Deal Information'}
+                    </Button>
+                  )}
+                </div>
+
+                <div className="border-t pt-4">
+                  <h3 className="text-lg font-semibold mb-4">Step 2: Review & Complete Basic Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="dealName">Deal Name *</Label>
+                      <Input
+                        id="dealName"
+                        value={deal?.dealName || ''}
+                        onChange={(e) => updateDeal({ dealName: e.target.value })}
+                        placeholder="e.g., 123 Main St Laundromat"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="propertyAddress">Property Address *</Label>
+                      <Input
+                        id="propertyAddress"
+                        value={deal?.propertyAddress || ''}
+                        onChange={(e) => updateDeal({ propertyAddress: e.target.value })}
+                        placeholder="Full property address"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
                 
@@ -403,35 +441,6 @@ export const DealInputs: React.FC = () => {
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="notes">Notes & Observations</Label>
-                  <Textarea
-                    id="notes"
-                    value={deal?.notes || ''}
-                    onChange={(e) => updateDeal({ notes: e.target.value })}
-                    placeholder="🤖 COMPREHENSIVE AI AUTO-FILL: Paste ANY and ALL deal information here (lease agreements, financial statements, property listings, notes, etc.) and our AI will automatically populate ALL relevant fields throughout the entire app including property details, lease terms, income, expenses, equipment details, and more..."
-                    rows={4}
-                  />
-                  {deal?.notes && deal.notes.trim().length > 0 && (
-                    <Button
-                      onClick={() => analyzeText(deal.notes)}
-                      disabled={isAnalyzing}
-                      variant="default"
-                      className="w-full mt-2 bg-gradient-primary shadow-button"
-                    >
-                      {isAnalyzing ? '🔄 Analyzing & Auto-Filling Fields...' : '🤖 Auto-Fill ALL Fields from Deal Information'}
-                    </Button>
-                  )}
-                  <div className="mt-2 p-3 bg-muted/50 rounded-lg">
-                    <p className="text-xs text-muted-foreground">
-                      <strong>💡 AI AUTO-FILL INSTRUCTIONS:</strong><br/>
-                      • Paste deal listings, financial statements, lease agreements, broker packages, etc.<br/>
-                      • AI will extract and populate: property details, lease terms, income/expenses, equipment info<br/>
-                      • Works with ANY text format - the more detail you provide, the better the results<br/>
-                      • Review and adjust auto-filled values as needed
-                    </p>
-                  </div>
-                </div>
 
                 <div className="flex justify-end pt-4">
                   <Button 
