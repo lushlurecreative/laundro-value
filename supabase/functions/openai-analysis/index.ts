@@ -48,13 +48,28 @@ serve(async (req) => {
 
 CRITICAL INSTRUCTIONS:
 1. Handle various price formats: "129k", "$129,000", "only $125,000", "Business Sell Price - $125,000"
-2. Parse tabular data (equipment lists, expense tables) intelligently
+2. Parse tabular data (equipment lists, expense tables, lease tables) intelligently
 3. For ranges like "$166-172K" or "$30-44K", extract the midpoint value
 4. Count equipment from detailed tables - sum all washers and dryers separately
 5. Map expense categories flexibly: "WATER & SEWER" → water, "REPAIRS & MAINT" → maintenance
 6. Extract addresses from various formats including partial addresses
 7. Identify revenue vs expenses vs asking price correctly
 8. Handle mixed annual/monthly values - convert monthly to annual when appropriate
+9. PARSE LEASE TERMS: "Ten Years" → 10, "Two (2) five (5) year renewal terms" → renewals: 2, length: 5
+10. EXTRACT RENT INCREASES: "increase by 2.25% annually" → 2.25
+11. PARSE EQUIPMENT TABLES: Extract individual machines from tabular data with Size, Qty, Type, Brand, Model, Year columns
+
+LEASE DATA EXAMPLES TO HANDLE:
+- "Term: Ten Years" → 10 years
+- "Two (2) five (5) year renewal terms" → 2 renewals of 5 years each
+- "rent to increase by 2.25% annually" → 2.25% increase
+- "Monthly Base Rent Year 1: $3,998.00" → $3998 monthly rent
+- Rent schedules with year-by-year breakdowns
+
+EQUIPMENT TABLE EXAMPLES:
+- "Washer	12#	5	Top Loader	Speedqueen	SWT521	2009" → 5 washers
+- "Dryer	30#	28	Doublestack	Speedqueen	STT30	2014/15" → 28 dryers
+- Sum all equipment quantities from detailed tables
 
 REAL-WORLD EXAMPLES TO HANDLE:
 - "RENT $72,999" (annual rent expense)
@@ -72,6 +87,15 @@ Return ONLY valid JSON in this exact format:
   "size": number (facility size in square feet),
   "machines": number (total machines = washers + dryers),
   "address": string (property address if mentioned),
+  "lease": {
+    "monthlyRent": number (monthly rent from lease schedule),
+    "leaseTerm": number (total lease term in years),
+    "remainingTermYears": number (remaining lease term in years),
+    "renewalOptionsCount": number (number of renewal options),
+    "renewalOptionLengthYears": number (length of each renewal option in years),
+    "annualRentIncreasePercent": number (annual rent increase percentage),
+    "leaseType": string (NNN, Modified Gross, Full Service, etc.)
+  },
   "expenses": {
     "rent": number (annual rent expense),
     "water": number (annual water & sewer costs),
@@ -83,10 +107,20 @@ Return ONLY valid JSON in this exact format:
     "other": number (other annual expenses like trash, permits, etc.)
   },
   "equipment": {
-    "washers": number (total washer count),
-    "dryers": number (total dryer count),
+    "washers": number (total washer count from detailed tables),
+    "dryers": number (total dryer count from detailed tables),
     "avgAge": number (estimated average age in years),
-    "avgCondition": number (1-5 scale, estimate from equipment info)
+    "avgCondition": number (1-5 scale, estimate from equipment info),
+    "detailedInventory": [
+      {
+        "type": string (Washer/Dryer),
+        "size": string (capacity),
+        "quantity": number,
+        "brand": string,
+        "model": string,
+        "year": number
+      }
+    ]
   },
   "ancillary": {
     "vending": number (annual vending income if mentioned),

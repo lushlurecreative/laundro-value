@@ -137,14 +137,78 @@ export const useOpenAIAnalysis = ({ onFieldsPopulated }: UseOpenAIAnalysisProps 
           }
         }
         
-        // Enhanced equipment parsing with detailed validation
+        // Enhanced lease details mapping with validation
+        if (jsonData.lease && typeof jsonData.lease === 'object') {
+          const lease: Record<string, any> = {};
+          
+          if (jsonData.lease.monthlyRent && typeof jsonData.lease.monthlyRent === 'number' && jsonData.lease.monthlyRent > 0) {
+            lease.monthlyRent = jsonData.lease.monthlyRent;
+          }
+          if (jsonData.lease.leaseTerm && typeof jsonData.lease.leaseTerm === 'number' && jsonData.lease.leaseTerm > 0) {
+            lease.leaseTerm = jsonData.lease.leaseTerm;
+          }
+          if (jsonData.lease.remainingTermYears && typeof jsonData.lease.remainingTermYears === 'number' && jsonData.lease.remainingTermYears > 0) {
+            lease.remainingTermYears = jsonData.lease.remainingTermYears;
+          }
+          if (jsonData.lease.renewalOptionsCount && typeof jsonData.lease.renewalOptionsCount === 'number' && jsonData.lease.renewalOptionsCount >= 0) {
+            lease.renewalOptionsCount = jsonData.lease.renewalOptionsCount;
+          }
+          if (jsonData.lease.renewalOptionLengthYears && typeof jsonData.lease.renewalOptionLengthYears === 'number' && jsonData.lease.renewalOptionLengthYears > 0) {
+            lease.renewalOptionLengthYears = jsonData.lease.renewalOptionLengthYears;
+          }
+          if (jsonData.lease.annualRentIncreasePercent && typeof jsonData.lease.annualRentIncreasePercent === 'number') {
+            lease.annualRentIncreasePercent = jsonData.lease.annualRentIncreasePercent;
+          }
+          if (jsonData.lease.leaseType && typeof jsonData.lease.leaseType === 'string') {
+            lease.leaseType = jsonData.lease.leaseType.trim();
+          }
+          
+          if (Object.keys(lease).length > 0) {
+            flatFields.lease = lease;
+          }
+        }
+
+        // Enhanced equipment parsing with detailed validation and table processing
         if (jsonData.equipment && typeof jsonData.equipment === 'object') {
-          const equipment = {
+          const equipment: any = {
             washers: Math.max(0, Number(jsonData.equipment.washers) || 0),
             dryers: Math.max(0, Number(jsonData.equipment.dryers) || 0),
             avgAge: Math.max(0, Number(jsonData.equipment.avgAge) || 0),
             avgCondition: Math.min(5, Math.max(1, Number(jsonData.equipment.avgCondition) || 3))
           };
+          
+          // Process detailed inventory if available
+          if (jsonData.equipment.detailedInventory && Array.isArray(jsonData.equipment.detailedInventory)) {
+            equipment.detailedInventory = jsonData.equipment.detailedInventory;
+            
+            // Recalculate totals from detailed inventory
+            let totalWashers = 0;
+            let totalDryers = 0;
+            let totalAge = 0;
+            let machineCount = 0;
+            
+            jsonData.equipment.detailedInventory.forEach((item: any) => {
+              const qty = Number(item.quantity) || 1;
+              machineCount += qty;
+              
+              if (item.type && item.type.toLowerCase().includes('washer')) {
+                totalWashers += qty;
+              } else if (item.type && item.type.toLowerCase().includes('dryer')) {
+                totalDryers += qty;
+              }
+              
+              if (item.year && !isNaN(Number(item.year))) {
+                const age = new Date().getFullYear() - Number(item.year);
+                totalAge += age * qty;
+              }
+            });
+            
+            if (totalWashers > 0) equipment.washers = totalWashers;
+            if (totalDryers > 0) equipment.dryers = totalDryers;
+            if (machineCount > 0 && totalAge > 0) {
+              equipment.avgAge = Math.round(totalAge / machineCount);
+            }
+          }
           
           if (equipment.washers > 0 || equipment.dryers > 0) {
             flatFields.equipment = equipment;
@@ -188,7 +252,7 @@ export const useOpenAIAnalysis = ({ onFieldsPopulated }: UseOpenAIAnalysisProps 
     console.log('Falling back to pattern matching');
     const fields: Record<string, any> = {};
     
-    // Enhanced patterns to handle various formats
+    // Enhanced patterns to handle various formats including lease terms
     const patterns = {
       // Price patterns (asking/selling price)
       askingPrice: [
@@ -207,7 +271,7 @@ export const useOpenAIAnalysis = ({ onFieldsPopulated }: UseOpenAIAnalysisProps 
         /([0-9,]+)\s*sq\.?\s*ft/gi,
         /([0-9,]+)\s*square\s*feet/gi
       ],
-      // Equipment patterns
+      // Equipment patterns with table parsing
       washers: [
         /([0-9]+)\s*washers?/gi,
         /washers?[:\s]*([0-9]+)/gi
@@ -220,6 +284,33 @@ export const useOpenAIAnalysis = ({ onFieldsPopulated }: UseOpenAIAnalysisProps 
       propertyAddress: [
         /([0-9]+\s+[^,\n]*(?:street|st|avenue|ave|road|rd|drive|dr|lane|ln|blvd|boulevard)[^,\n]*,\s*[^,\n]*,\s*[A-Z]{2})/gi,
         /([0-9]+\s+[^,\n]*\s+(?:street|st|avenue|ave|road|rd|drive|dr|lane|ln|blvd|boulevard))/gi
+      ],
+      // Lease term patterns
+      leaseTerm: [
+        /term[:\s]*([0-9]+)\s*years?/gi,
+        /(?:ten|10)\s*years?/gi,
+        /([0-9]+)[-\s]*year\s*lease/gi
+      ],
+      // Renewal patterns
+      renewalOptions: [
+        /(?:two|2)\s*\([0-9]+\)\s*(?:five|5)\s*\([0-9]+\)\s*year\s*renewal/gi,
+        /([0-9]+)\s*(?:\([0-9]+\))?\s*(?:five|5)[-\s]*year\s*renewal/gi,
+        /([0-9]+)\s*renewal\s*options?/gi
+      ],
+      // Renewal length patterns
+      renewalLength: [
+        /(?:five|5)\s*\([0-9]+\)\s*year\s*renewal/gi,
+        /renewal.*?([0-9]+)\s*years?/gi
+      ],
+      // Rent increase patterns
+      rentIncrease: [
+        /increase\s*by\s*([0-9.]+)%\s*annually/gi,
+        /([0-9.]+)%\s*annual(?:ly)?/gi
+      ],
+      // Monthly rent patterns
+      monthlyRent: [
+        /monthly\s*(?:base\s*)?rent[:\s]*\$?([0-9,]+)/gi,
+        /year\s*1[:\s]*\$?([0-9,]+)/gi
       ]
     };
 
@@ -254,7 +345,7 @@ export const useOpenAIAnalysis = ({ onFieldsPopulated }: UseOpenAIAnalysisProps 
       }
     });
 
-    // Extract equipment totals
+    // Extract equipment totals and parse equipment tables
     if (fields.washers || fields.dryers) {
       const equipment = {
         washers: fields.washers || 0,
@@ -266,6 +357,72 @@ export const useOpenAIAnalysis = ({ onFieldsPopulated }: UseOpenAIAnalysisProps 
       fields.totalMachines = equipment.washers + equipment.dryers;
       delete fields.washers;
       delete fields.dryers;
+    }
+
+    // Parse equipment tables from text
+    const equipmentTablePattern = /(washer|dryer)\s+([0-9#]+)\s+([0-9]+)\s+([^0-9\n]+)\s+([^0-9\n]+)\s+([^0-9\n]+)\s+([0-9]{4})/gi;
+    const equipmentMatches = [...response.matchAll(equipmentTablePattern)];
+    
+    if (equipmentMatches.length > 0) {
+      let totalWashers = 0;
+      let totalDryers = 0;
+      let totalAge = 0;
+      let machineCount = 0;
+      
+      equipmentMatches.forEach(match => {
+        const type = match[1].toLowerCase();
+        const quantity = parseInt(match[3]) || 1;
+        const year = parseInt(match[7]) || new Date().getFullYear();
+        const age = new Date().getFullYear() - year;
+        
+        if (type.includes('washer')) {
+          totalWashers += quantity;
+        } else if (type.includes('dryer')) {
+          totalDryers += quantity;
+        }
+        
+        totalAge += age * quantity;
+        machineCount += quantity;
+      });
+      
+      if (totalWashers > 0 || totalDryers > 0) {
+        fields.equipment = {
+          washers: totalWashers,
+          dryers: totalDryers,
+          avgAge: machineCount > 0 ? Math.round(totalAge / machineCount) : 10,
+          avgCondition: 3
+        };
+        fields.totalMachines = totalWashers + totalDryers;
+      }
+    }
+
+    // Extract lease details from patterns
+    if (fields.leaseTerm || fields.renewalOptions || fields.renewalLength || fields.rentIncrease || fields.monthlyRent) {
+      const lease: Record<string, any> = {};
+      
+      if (fields.leaseTerm) lease.leaseTerm = fields.leaseTerm;
+      if (fields.remainingTermYears) lease.remainingTermYears = fields.remainingTermYears;
+      if (fields.renewalOptions) lease.renewalOptionsCount = fields.renewalOptions;
+      if (fields.renewalLength) lease.renewalOptionLengthYears = fields.renewalLength;
+      if (fields.rentIncrease) lease.annualRentIncreasePercent = fields.rentIncrease;
+      if (fields.monthlyRent) lease.monthlyRent = fields.monthlyRent;
+      
+      // Special handling for "Two (2) five (5) year renewal terms"
+      const renewalPattern = /(?:two|2)\s*\([0-9]+\)\s*(?:five|5)\s*\([0-9]+\)\s*year\s*renewal/gi;
+      const renewalMatch = response.match(renewalPattern);
+      if (renewalMatch) {
+        lease.renewalOptionsCount = 2;
+        lease.renewalOptionLengthYears = 5;
+      }
+      
+      fields.lease = lease;
+      
+      // Clean up individual lease fields
+      delete fields.leaseTerm;
+      delete fields.renewalOptions;
+      delete fields.renewalLength;
+      delete fields.rentIncrease;
+      delete fields.monthlyRent;
     }
 
     console.log('Pattern matching extracted fields:', fields);
