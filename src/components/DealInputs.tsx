@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useDeal } from '@/contexts/useDeal';
 import { formatCurrency } from '@/utils/calculations';
+import { Deal, LeaseDetails, AncillaryIncome } from '@/types/deal';
 import { CurrencyInput } from '@/components/ui/currency-input';
 import { useOpenAIAnalysis } from '@/hooks/useOpenAIAnalysis';
 import { Plus, X } from 'lucide-react';
@@ -39,128 +40,55 @@ export const DealInputs: React.FC = () => {
   const { analyzeText, isAnalyzing } = useOpenAIAnalysis({
     onFieldsPopulated: (fields) => {
       console.log('AI Analysis Fields:', fields);
-      
-      // Update deal fields based on AI analysis
-      const dealUpdates: any = {};
-      const leaseUpdates: any = {};
-      const ancillaryUpdates: any = {};
-      
-      // Basic deal fields - Fix field name mapping
+
+      // Create update objects
+      const dealUpdates: Partial<Deal> = {};
+      const leaseUpdates: Partial<LeaseDetails> = {};
+      const ancillaryUpdates: Partial<AncillaryIncome> = {};
+
+      // --- CORRECTED LOGIC ---
+
+      // Top-level fields
       if (fields.askingPrice) dealUpdates.askingPrice = fields.askingPrice;
-      if (fields.price) dealUpdates.askingPrice = fields.price; // Fallback
       if (fields.grossIncome) dealUpdates.grossIncomeAnnual = fields.grossIncome;
-      if (fields.income) dealUpdates.grossIncomeAnnual = fields.income; // Fallback
-      if (fields.size) dealUpdates.facilitySizeSqft = fields.size;
-      if (fields.machines) dealUpdates.numberOfMachines = fields.machines;
-      if (fields.hours) dealUpdates.ownerWeeklyHours = fields.hours;
-      if (fields.address) dealUpdates.propertyAddress = fields.address;
-      if (fields.rent) leaseUpdates.monthlyRent = fields.rent;
-      
-      // Lease details
+      if (fields.totalSqft) dealUpdates.facilitySizeSqft = fields.totalSqft;
+      // Note: totalMachines doesn't have a direct field in Deal type, can be calculated from machineInventory
+      if (fields.ownerWeeklyHours) dealUpdates.ownerWeeklyHours = fields.ownerWeeklyHours;
+      if (fields.propertyAddress) dealUpdates.propertyAddress = fields.propertyAddress;
+
+      // Handle nested lease object
       if (fields.lease) {
         if (fields.lease.monthlyRent) leaseUpdates.monthlyRent = fields.lease.monthlyRent;
-        if (fields.lease.leaseTerm) leaseUpdates.remainingLeaseTermYears = fields.lease.leaseTerm;
-        if (fields.lease.renewalOptions) leaseUpdates.renewalOptionsCount = fields.lease.renewalOptions;
-        if (fields.lease.leaseType) leaseUpdates.leaseType = fields.lease.leaseType;
+        if (fields.lease.remainingTermYears) leaseUpdates.remainingLeaseTermYears = fields.lease.remainingTermYears;
+        if (fields.lease.renewalOptionsCount) leaseUpdates.renewalOptionsCount = fields.lease.renewalOptionsCount;
+        if (fields.lease.leaseType) leaseUpdates.leaseType = fields.lease.leaseType as any;
       }
-      
-      // Expense fields with improved mapping
+
+      // Handle nested expenses object
       if (fields.expenses) {
         Object.entries(fields.expenses).forEach(([expenseKey, value]) => {
-          const expenseMapping: Record<string, string> = {
-            rent: 'Rent',
-            water: 'Water/Sewer',
-            gas: 'Gas',
-            electricity: 'Electricity',
-            insurance: 'Insurance',
-            maintenance: 'Maintenance',
-            supplies: 'Supplies',
-            staff: 'Staff Salaries',
-            other: 'Marketing'
-          };
-          
-          const expenseName = expenseMapping[expenseKey];
-          if (expenseName && typeof value === 'number' && value > 0) {
-            const existingExpense = expenseItems.find(exp => exp.expenseName === expenseName);
-            if (existingExpense) {
-              updateExpenseItem(existingExpense.expenseId, { amountAnnual: value });
-            }
+          const expenseName = expenseKey.charAt(0).toUpperCase() + expenseKey.slice(1);
+          const existingExpense = expenseItems.find(exp => exp.expenseName.toLowerCase() === expenseKey.toLowerCase());
+          if (existingExpense && typeof value === 'number' && value > 0) {
+            updateExpenseItem(existingExpense.expenseId, { amountAnnual: value });
           }
         });
       }
       
-      // Equipment inventory auto-population
-      if (fields.equipment && (fields.equipment.washers > 0 || fields.equipment.dryers > 0)) {
-        // Add washers
-        if (fields.equipment.washers > 0) {
-          for (let i = 0; i < fields.equipment.washers; i++) {
-            addMachine({
-              machineId: `machine-washer-${Date.now()}-${i}`,
-              dealId: deal?.dealId || 'deal-1',
-              machineType: 'Front-Load Washer',
-              brand: '',
-              model: '',
-              quantity: 1,
-              ageYears: fields.equipment.avgAge || 0,
-              capacityLbs: 35,
-              vendPricePerUse: 2.50,
-              conditionRating: fields.equipment.avgCondition || 3,
-              waterConsumptionGalPerCycle: 40,
-              electricConsumptionKwh: 0,
-              gasConsumptionBtu: 0,
-              purchaseValue: 0,
-              currentValue: 0,
-              maintenanceCostAnnual: 0,
-              isCardOperated: false,
-              isCoinOperated: true,
-              isOutOfOrder: false
-            });
-          }
-        }
-        
-        // Add dryers
-        if (fields.equipment.dryers > 0) {
-          for (let i = 0; i < fields.equipment.dryers; i++) {
-            addMachine({
-              machineId: `machine-dryer-${Date.now()}-${i}`,
-              dealId: deal?.dealId || 'deal-1',
-              machineType: 'Single Dryer',
-              brand: '',
-              model: '',
-              quantity: 1,
-              ageYears: fields.equipment.avgAge || 0,
-              capacityLbs: 35,
-              vendPricePerUse: 2.00,
-              conditionRating: fields.equipment.avgCondition || 3,
-              waterConsumptionGalPerCycle: 0,
-              electricConsumptionKwh: 2.5,
-              gasConsumptionBtu: 0,
-              purchaseValue: 0,
-              currentValue: 0,
-              maintenanceCostAnnual: 0,
-              isCardOperated: false,
-              isCoinOperated: true,
-              isOutOfOrder: false
-            });
-          }
-        }
-      }
-      
-      // Ancillary income
+      // Handle nested ancillary income
       if (fields.ancillary) {
-        if (fields.ancillary.vending) ancillaryUpdates.vendingIncomeAnnual = fields.ancillary.vending;
-        if (fields.ancillary.other) ancillaryUpdates.otherIncomeAnnual = fields.ancillary.other;
-        if (fields.ancillary.wdf) {
-          ancillaryUpdates.isWDFActive = fields.ancillary.wdf.active || false;
-          if (fields.ancillary.wdf.pricePerLb) ancillaryUpdates.wdfPricePerLb = fields.ancillary.wdf.pricePerLb;
-          if (fields.ancillary.wdf.volumeWeekly) ancillaryUpdates.wdfVolumeLbsPerWeek = fields.ancillary.wdf.volumeWeekly;
-        }
+          if (fields.ancillary.vending) ancillaryUpdates.vendingIncomeAnnual = fields.ancillary.vending;
+          if (fields.ancillary.other) ancillaryUpdates.otherIncomeAnnual = fields.ancillary.other;
       }
-      
-      // Apply updates
+
+      // Apply all updates
       if (Object.keys(dealUpdates).length > 0) updateDeal(dealUpdates);
       if (Object.keys(leaseUpdates).length > 0) updateLeaseDetails(leaseUpdates);
       if (Object.keys(ancillaryUpdates).length > 0) updateAncillaryIncome(ancillaryUpdates);
+      
+      // NOTE: Equipment auto-population logic needs a more robust implementation
+      // The current approach of adding new machines for every analysis is likely not desired.
+      // A better approach would be to update or replace the existing equipment list.
     }
   });
 
