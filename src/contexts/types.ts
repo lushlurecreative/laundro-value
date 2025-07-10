@@ -16,6 +16,7 @@ export interface DealContextType {
   addMachine: (machine: MachineInventory) => void;
   updateMachine: (machineId: string, machine: Partial<MachineInventory>) => void;
   removeMachine: (machineId: string) => void;
+  clearMachineInventory: () => void;
   updateAncillaryIncome: (income: Partial<AncillaryIncome>) => void;
   updateUtilityAnalysis: (analysis: Partial<UtilityAnalysis>) => void;
   clearAllData: () => void;

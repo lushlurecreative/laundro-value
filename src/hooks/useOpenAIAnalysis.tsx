@@ -32,7 +32,7 @@ export const useOpenAIAnalysis = ({ onFieldsPopulated }: UseOpenAIAnalysisProps 
       }
 
       // Parse the AI response to extract structured data
-      const extractedFields = parseAIResponse(data.analysis, analysisType);
+      const extractedFields = parseAIResponse(data.analysis);
       
       if (extractedFields && Object.keys(extractedFields).length > 0) {
         onFieldsPopulated?.(extractedFields);

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Trash2, Download, Calendar } from 'lucide-react';
 import { useDeal } from '@/contexts/useDeal';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { formatCurrency } from '@/utils/calculations';
 
 interface SavedDeal {
   timestamp: string;
@@ -112,9 +113,9 @@ export const SavedDealsSelector: React.FC = () => {
                   {formatDate(savedDeal.timestamp)}
                 </Badge>
                 {savedDeal.deal?.askingPrice && (
-                  <Badge variant="secondary" className="text-xs">
-                    ${savedDeal.deal.askingPrice.toLocaleString()}
-                  </Badge>
+                 <Badge variant="secondary" className="text-xs">
+                   {formatCurrency(savedDeal.deal.askingPrice)}
+                 </Badge>
                 )}
               </div>
             </div>

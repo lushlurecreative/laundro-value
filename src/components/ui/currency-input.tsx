@@ -15,14 +15,14 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
       setDisplayValue('')
     } else if (typeof value === 'number' && value > 0) {
       setDisplayValue(value.toLocaleString('en-US', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
       }))
     }
   }, [value])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value.replace(/[^\d]/g, '')
+    const inputValue = e.target.value.replace(/[^\d.]/g, '') // Allow decimal point
     setDisplayValue(inputValue)
     
     if (inputValue === '') {
@@ -30,7 +30,7 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
       return
     }
 
-    const numValue = parseInt(inputValue)
+    const numValue = parseFloat(inputValue) // Use parseFloat for decimals
     if (!isNaN(numValue)) {
       onChange?.(numValue)
     }
@@ -39,8 +39,8 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
   const handleBlur = () => {
     if (displayValue && typeof value === 'number' && value > 0) {
       setDisplayValue(value.toLocaleString('en-US', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
       }))
     }
   }

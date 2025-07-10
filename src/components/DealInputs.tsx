@@ -33,6 +33,7 @@ export const DealInputs: React.FC = () => {
     addMachine,
     updateMachine,
     removeMachine,
+    clearMachineInventory,
     updateAncillaryIncome,
     updateUtilityAnalysis
   } = useDeal();
@@ -46,17 +47,15 @@ export const DealInputs: React.FC = () => {
       const leaseUpdates: Partial<LeaseDetails> = {};
       const ancillaryUpdates: Partial<AncillaryIncome> = {};
 
-      // --- CORRECTED LOGIC ---
+      // --- COMPLETE LOGIC ---
 
-      // Top-level fields
+      // 1. Handle Top-level deal fields
       if (fields.askingPrice) dealUpdates.askingPrice = fields.askingPrice;
       if (fields.grossIncome) dealUpdates.grossIncomeAnnual = fields.grossIncome;
       if (fields.totalSqft) dealUpdates.facilitySizeSqft = fields.totalSqft;
-      // Note: totalMachines doesn't have a direct field in Deal type, can be calculated from machineInventory
-      if (fields.ownerWeeklyHours) dealUpdates.ownerWeeklyHours = fields.ownerWeeklyHours;
       if (fields.propertyAddress) dealUpdates.propertyAddress = fields.propertyAddress;
 
-      // Handle nested lease object
+      // 2. Handle nested lease object
       if (fields.lease) {
         if (fields.lease.monthlyRent) leaseUpdates.monthlyRent = fields.lease.monthlyRent;
         if (fields.lease.remainingTermYears) leaseUpdates.remainingLeaseTermYears = fields.lease.remainingTermYears;
@@ -64,7 +63,7 @@ export const DealInputs: React.FC = () => {
         if (fields.lease.leaseType) leaseUpdates.leaseType = fields.lease.leaseType as any;
       }
 
-      // Handle nested expenses object
+      // 3. Handle nested expenses object
       if (fields.expenses) {
         Object.entries(fields.expenses).forEach(([expenseKey, value]) => {
           const expenseName = expenseKey.charAt(0).toUpperCase() + expenseKey.slice(1);
@@ -74,21 +73,68 @@ export const DealInputs: React.FC = () => {
           }
         });
       }
-      
-      // Handle nested ancillary income
+
+      // 4. Handle nested ancillary income
       if (fields.ancillary) {
-          if (fields.ancillary.vending) ancillaryUpdates.vendingIncomeAnnual = fields.ancillary.vending;
-          if (fields.ancillary.other) ancillaryUpdates.otherIncomeAnnual = fields.ancillary.other;
+        if (fields.ancillary.vending) ancillaryUpdates.vendingIncomeAnnual = fields.ancillary.vending;
+        if (fields.ancillary.other) ancillaryUpdates.otherIncomeAnnual = fields.ancillary.other;
+      }
+      
+      // 5. Handle nested equipment object (NEW LOGIC)
+      if (fields.equipment) {
+        // First, clear the existing machine inventory to avoid duplicates
+        clearMachineInventory();
+
+        // Use a timeout to ensure the state has cleared before adding new items
+        setTimeout(() => {
+          // Add a summary line for washers
+          if (fields.equipment.washers > 0) {
+            addMachine({
+              machineId: `machine-washers-${Date.now()}`,
+              dealId: deal?.dealId || 'deal-1',
+              machineType: 'Front-Load Washer',
+              brand: 'Various',
+              quantity: fields.equipment.washers,
+              ageYears: fields.equipment.avgAge || 8,
+              conditionRating: fields.equipment.avgCondition || 3,
+              vendPricePerUse: 3.50, // Default value
+              capacityLbs: 35, // Default value
+              isCardOperated: true, // Default value
+              isCoinOperated: true, // Default value
+              isOutOfOrder: false,
+              purchaseValue: 0,
+              currentValue: 0,
+              maintenanceCostAnnual: 0,
+            });
+          }
+          
+          // Add a summary line for dryers
+          if (fields.equipment.dryers > 0) {
+            addMachine({
+              machineId: `machine-dryers-${Date.now()}`,
+              dealId: deal?.dealId || 'deal-1',
+              machineType: 'Stacked Dryer',
+              brand: 'Various',
+              quantity: fields.equipment.dryers,
+              ageYears: fields.equipment.avgAge || 8,
+              conditionRating: fields.equipment.avgCondition || 3,
+              vendPricePerUse: 2.00, // Default value
+              capacityLbs: 50, // Default value
+              isCardOperated: true, // Default value
+              isCoinOperated: true, // Default value
+              isOutOfOrder: false,
+              purchaseValue: 0,
+              currentValue: 0,
+              maintenanceCostAnnual: 0,
+            });
+          }
+        }, 50); // A small delay is a robust way to handle this
       }
 
-      // Apply all updates
+      // 6. Apply all state updates
       if (Object.keys(dealUpdates).length > 0) updateDeal(dealUpdates);
       if (Object.keys(leaseUpdates).length > 0) updateLeaseDetails(leaseUpdates);
       if (Object.keys(ancillaryUpdates).length > 0) updateAncillaryIncome(ancillaryUpdates);
-      
-      // NOTE: Equipment auto-population logic needs a more robust implementation
-      // The current approach of adding new machines for every analysis is likely not desired.
-      // A better approach would be to update or replace the existing equipment list.
     }
   });
 
@@ -618,39 +664,50 @@ export const DealInputs: React.FC = () => {
                     </p>
                   </div>
 
-              <div className="flex justify-end pt-4">
-                <Button 
-                  onClick={() => setActiveTab('expenses')}
-                  className="bg-success hover:bg-success/90"
-                >
-                  Next: Expenses Information
-                </Button>
-              </div>
-                  
-                  <div>
-                    <Label htmlFor="leaseHistory">Lease Information</Label>
-                    <Textarea
-                      id="leaseHistory"
-                      value={deal?.leaseHistory || ''}
-                      onChange={(e) => updateDeal({ leaseHistory: e.target.value })}
-                      placeholder="Paste lease information here - our AI will auto-populate relevant fields..."
-                      rows={3}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {/* Next Button */}
-              <div className="flex justify-end mt-6">
-                <Button 
-                  onClick={() => setActiveTab('income')}
-                  className="bg-success hover:bg-success/90 text-success-foreground"
-                >
-                  Next: Income Information →
-                </Button>
-              </div>
-            </TabsContent>
-          )}
+                   <div>
+                     <Label htmlFor="leaseType">Lease Type</Label>
+                     <Select
+                       value={leaseDetails?.leaseType || 'Triple Net (NNN)'}
+                       onValueChange={(value) => updateLeaseDetails({ leaseType: value as any })}
+                     >
+                       <SelectTrigger>
+                         <SelectValue />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="Triple Net (NNN)">Triple Net (NNN)</SelectItem>
+                         <SelectItem value="Modified Gross">Modified Gross</SelectItem>
+                         <SelectItem value="Gross Lease">Gross Lease</SelectItem>
+                         <SelectItem value="Other">Other</SelectItem>
+                       </SelectContent>
+                     </Select>
+                   </div>
+
+                   <div>
+                     <Label htmlFor="leaseHistory">Additional Lease Information (Optional)</Label>
+                     <Textarea
+                       id="leaseHistory"
+                       value={deal?.leaseHistory || ''}
+                       onChange={(e) => updateDeal({ leaseHistory: e.target.value })}
+                       placeholder="Additional lease details or supplementary information (Note: Main AI analysis is done in the Notes & Observations section)"
+                       rows={2}
+                     />
+                     <p className="text-xs text-muted-foreground mt-1">
+                       💡 For comprehensive auto-fill, use the "Notes & Observations" section in Property & Deal tab
+                     </p>
+                   </div>
+                 </CardContent>
+               </Card>
+               
+               <div className="flex justify-end pt-4">
+                 <Button 
+                   onClick={() => setActiveTab('income')}
+                   className="bg-success hover:bg-success/90"
+                 >
+                   Next: Income Information
+                 </Button>
+               </div>
+             </TabsContent>
+           )}
 
           <TabsContent value="income" className="mt-6">
             <div className="space-y-6">

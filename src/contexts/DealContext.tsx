@@ -215,6 +215,10 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setMachineInventory(machines => machines.filter(machine => machine.machineId !== machineId));
   };
 
+  const clearMachineInventory = () => {
+    setMachineInventory([]);
+  };
+
   const updateAncillaryIncome = (incomeUpdate: Partial<AncillaryIncome>) => {
     if (ancillaryIncome) {
       setAncillaryIncome({ ...ancillaryIncome, ...incomeUpdate });
@@ -284,6 +288,7 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       addMachine,
       updateMachine,
       removeMachine,
+      clearMachineInventory,
       updateAncillaryIncome,
       updateUtilityAnalysis,
       clearAllData,
