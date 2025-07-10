@@ -207,9 +207,8 @@ const parseWithPatternMatching = (response: string): Record<string, any> => {
       /(?:asking|sell|sale|business\s+sell)\s*price[:\s-]*\$?([0-9,]+)(?:k|000)?/gi,
       /price[:\s-]*\$?([0-9,]+)(?:k|000)?/gi
     ],
-    // Revenue/income patterns with enhanced range support
+    // Revenue/income patterns - Simplified, skip problematic em-dash ranges
     grossIncome: [
-      /(?:annual\s+)?revenue[:\s–—-]*\$?([0-9,]+)(?:k|K)?\s*[–—-]\s*\$?([0-9,]+)(?:k|K)?/gi,
       /(?:annual\s+)?revenue[:\s-]*\$?([0-9,]+)(?:k|K|000)?/gi,
       /(?:annual\s+)?income[:\s-]*\$?([0-9,]+)(?:k|K|000)?/gi
     ],
@@ -228,11 +227,11 @@ const parseWithPatternMatching = (response: string): Record<string, any> => {
       /([0-9]+)\s*(?:gas-fired\s+)?dryers?/gi,
       /dryers?[:\s]*([0-9]+)/gi
     ],
-    // Address patterns with premises prefix support
+    // Address patterns with premises prefix support and periods
     propertyAddress: [
-      /(?:premises\s+address:\s*)?([0-9]+\s+[^,\n]*(?:street|st|avenue|ave|road|rd|drive|dr|lane|ln|blvd|boulevard)[^,\n]*(?:,\s*suite\s*[^,\n]*)?(?:,\s*[^,\n]*,\s*[A-Z]{2}\s*[0-9]{5})?)/gi,
-      /([0-9]+\s+[^,\n]*(?:street|st|avenue|ave|road|rd|drive|dr|lane|ln|blvd|boulevard)[^,\n]*,\s*[^,\n]*,\s*[A-Z]{2})/gi,
-      /([0-9]+\s+[^,\n]*\s+(?:street|st|avenue|ave|road|rd|drive|dr|lane|ln|blvd|boulevard))/gi
+      /(?:premises\s+address:\s*)?([0-9]+\s+[^,\n]*(?:street|st\.?|avenue|ave\.?|road|rd\.?|drive|dr\.?|lane|ln\.?|blvd\.?|boulevard)[^,\n]*(?:,\s*suite\s*[^,\n]*)?(?:,\s*[^,\n]*,\s*[A-Z]{2}\s*[0-9]{5})?)/gi,
+      /([0-9]+\s+[^,\n]*(?:street|st\.?|avenue|ave\.?|road|rd\.?|drive|dr\.?|lane|ln\.?|blvd\.?|boulevard)[^,\n]*,\s*[^,\n]*,\s*[A-Z]{2})/gi,
+      /([0-9]+\s+[^,\n]*\s+(?:street|st\.?|avenue|ave\.?|road|rd\.?|drive|dr\.?|lane|ln\.?|blvd\.?|boulevard))/gi
     ],
     // Lease term patterns - Enhanced for "Ten Years"
     leaseTerm: [
@@ -257,10 +256,16 @@ const parseWithPatternMatching = (response: string): Record<string, any> => {
       /increase\s*by\s*([0-9.]+)%\s*annually/gi,
       /([0-9.]+)%\s*annual(?:ly)?/gi
     ],
-    // Monthly rent patterns
+    // Monthly rent patterns - Enhanced for schedule format
     monthlyRent: [
       /monthly\s*(?:base\s*)?rent[:\s]*\$?([0-9,]+)/gi,
-      /year\s*1[:\s]*\$?([0-9,]+)/gi
+      /year\s*1[:\s]*\$?([0-9,]+)\.?[0-9]*/gi,
+      /month\s*1[:\s]*\$?([0-9,]+)/gi
+    ],
+    // Expense line patterns - NEW
+    expenseLines: [
+      /^([A-Z\s&]+?)\s+\$([0-9,]+)/gm,
+      /([A-Z\s&]+?)\s+\$([0-9,]+)/gi
     ]
   };
 
@@ -269,16 +274,8 @@ const parseWithPatternMatching = (response: string): Record<string, any> => {
     for (const pattern of patternArray) {
       const matches = [...response.matchAll(pattern)];
       if (matches.length > 0) {
-        if (fieldName === 'grossIncome' && matches[0][2]) {
-          // Handle revenue ranges - take midpoint
-          const val1 = parseInt(matches[0][1].replace(/,/g, ''));
-          const val2 = parseInt(matches[0][2].replace(/,/g, ''));
-          if (!isNaN(val1) && !isNaN(val2)) {
-            const multiplier = (matches[0][0].toLowerCase().includes('k') ? 1000 : 1);
-            fields[fieldName] = Math.round((val1 + val2) / 2) * multiplier;
-            break;
-          }
-        } else {
+        // Skip revenue range processing since we removed those patterns
+        {
           const value = parseInt(matches[0][1].replace(/,/g, ''));
           if (!isNaN(value)) {
             if (fieldName === 'askingPrice' || fieldName === 'grossIncome') {
@@ -293,6 +290,30 @@ const parseWithPatternMatching = (response: string): Record<string, any> => {
                 fields[fieldName] = 10;
               } else {
                 fields[fieldName] = value;
+              }
+            } else if (fieldName === 'expenseLines') {
+              // Handle expense parsing
+              const expenseName = matches[0][1].trim().toLowerCase();
+              const expenseValue = parseInt(matches[0][2].replace(/,/g, ''));
+              if (!fields.expenses) fields.expenses = {};
+              
+              // Map expense categories
+              if (expenseName.includes('rent')) {
+                fields.expenses.rent = expenseValue;
+              } else if (expenseName.includes('water') || expenseName.includes('sewer')) {
+                fields.expenses.water = expenseValue;
+              } else if (expenseName.includes('gas')) {
+                fields.expenses.gas = expenseValue;
+              } else if (expenseName.includes('electric')) {
+                fields.expenses.electricity = expenseValue;
+              } else if (expenseName.includes('insurance')) {
+                fields.expenses.insurance = expenseValue;
+              } else if (expenseName.includes('repair') || expenseName.includes('maint')) {
+                fields.expenses.maintenance = expenseValue;
+              } else if (expenseName.includes('supplies')) {
+                fields.expenses.supplies = expenseValue;
+              } else {
+                fields.expenses.other = (fields.expenses.other || 0) + expenseValue;
               }
             } else {
               fields[fieldName] = value;
@@ -318,8 +339,8 @@ const parseWithPatternMatching = (response: string): Record<string, any> => {
     delete fields.dryers;
   }
 
-  // Parse equipment tables from text - handle tab-separated format
-  const equipmentTablePattern = /(washer|dryer)\s+([0-9#]+)\s+([0-9]+)\s+([^\t\n]+)\s+([^\t\n]+)\s+([^\t\n]+)\s+([0-9]{4}(?:\/[0-9]{2,4})?)/gi;
+  // Parse equipment tables from text - handle actual tab characters
+  const equipmentTablePattern = /(washer|dryer)\t+([0-9#]+)\t+([0-9]+)\t+([^\t\n]+)\t+([^\t\n]+)\t+([^\t\n]+)\t+([0-9]{4}(?:\/[0-9]{2,4})?)/gi;
   const equipmentMatches = [...response.matchAll(equipmentTablePattern)];
   
   if (equipmentMatches.length > 0) {

@@ -45,9 +45,11 @@ export const DealInputs: React.FC = () => {
       const leaseUpdates: any = {};
       const ancillaryUpdates: any = {};
       
-      // Basic deal fields
-      if (fields.price) dealUpdates.askingPrice = fields.price;
-      if (fields.income) dealUpdates.grossIncomeAnnual = fields.income;
+      // Basic deal fields - Fix field name mapping
+      if (fields.askingPrice) dealUpdates.askingPrice = fields.askingPrice;
+      if (fields.price) dealUpdates.askingPrice = fields.price; // Fallback
+      if (fields.grossIncome) dealUpdates.grossIncomeAnnual = fields.grossIncome;
+      if (fields.income) dealUpdates.grossIncomeAnnual = fields.income; // Fallback
       if (fields.size) dealUpdates.facilitySizeSqft = fields.size;
       if (fields.machines) dealUpdates.numberOfMachines = fields.machines;
       if (fields.hours) dealUpdates.ownerWeeklyHours = fields.hours;
