@@ -7,12 +7,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useDeal } from '@/contexts/useDeal';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { calculateMetrics, formatCurrency, formatPercentage } from '@/utils/calculations';
 import { calculateTenYearProjection } from '@/utils/projections';
-import { FileText, Download, Building, TrendingUp, DollarSign, Calendar, Crown, Lock } from 'lucide-react';
+import { FileText, Download, Building, TrendingUp, DollarSign, Calendar, Crown, Lock, Share2, Printer, Mail } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 export const Reports: React.FC = () => {
   const { deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, utilityAnalysis } = useDeal();
@@ -24,8 +29,17 @@ export const Reports: React.FC = () => {
     executiveSummary: '',
     includeProjections: true,
     includeSensitivity: true,
-    includeComparables: false
+    includeComparables: false,
+    logoUrl: '',
+    reportTemplate: 'professional',
+    includeCharts: true,
+    includeRiskAnalysis: true,
+    includeMarketData: false,
+    includePhotos: false
   });
+  
+  const [activeTab, setActiveTab] = useState('settings');
+  const [generateLoading, setGenerateLoading] = useState<string | null>(null);
 
   const metrics = calculateMetrics(
     deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, utilityAnalysis
@@ -34,6 +48,287 @@ export const Reports: React.FC = () => {
   const tenYearProjection = deal ? calculateTenYearProjection(
     deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome
   ) : [];
+
+  const generatePDFReport = async (reportType: string) => {
+    if (!deal) {
+      toast({
+        title: "No deal data",
+        description: "Please enter deal information first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!canPerformAction('generate_report')) {
+      toast({
+        title: "Usage limit reached",
+        description: `You've reached your report generation limit this month. Upgrade to generate more reports.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setGenerateLoading(reportType);
+      
+      // Create a temporary div for PDF generation
+      const tempDiv = document.createElement('div');
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.top = '-9999px';
+      tempDiv.style.width = '210mm'; // A4 width
+      tempDiv.style.background = 'white';
+      tempDiv.style.padding = '20mm';
+      tempDiv.style.fontFamily = 'Arial, sans-serif';
+      tempDiv.innerHTML = generateReportHTML(reportType);
+      
+      document.body.appendChild(tempDiv);
+      
+      // Generate PDF using html2canvas and jsPDF
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`${deal.dealName.replace(/\s+/g, '_')}_${reportType}_Report.pdf`);
+      document.body.removeChild(tempDiv);
+      
+      await trackUsage('report_generated', deal.dealId, { reportType });
+      
+      toast({
+        title: "PDF generated successfully",
+        description: `${reportType} report has been downloaded as PDF.`,
+      });
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast({
+        title: "PDF generation failed",
+        description: "There was an error generating the PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setGenerateLoading(null);
+    }
+  };
+
+  const generateReportHTML = (reportType: string): string => {
+    const baseStyles = `
+      <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; color: #333; line-height: 1.5; }
+        .header { text-align: center; border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; }
+        .logo { max-height: 60px; margin-bottom: 15px; }
+        .section { margin-bottom: 30px; page-break-inside: avoid; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0; }
+        .kpi-card { border: 2px solid #e5e7eb; padding: 15px; border-radius: 8px; text-align: center; background: #f9fafb; }
+        .table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        .table th, .table td { border: 1px solid #d1d5db; padding: 10px; text-align: left; }
+        .table th { background-color: #f3f4f6; font-weight: bold; }
+        .highlight { color: #2563eb; font-weight: bold; }
+        .success { color: #16a34a; font-weight: bold; }
+        .danger { color: #dc2626; font-weight: bold; }
+        .chart-placeholder { height: 200px; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; background: #f9fafb; margin: 15px 0; }
+        h1 { color: #1f2937; font-size: 2em; margin-bottom: 10px; }
+        h2 { color: #374151; font-size: 1.5em; margin-bottom: 15px; }
+        h3 { color: #4b5563; font-size: 1.2em; margin-bottom: 10px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; }
+        .executive-summary { background: #f0f9ff; border-left: 4px solid #2563eb; padding: 20px; margin: 20px 0; }
+        .risk-matrix { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .risk-item { padding: 10px; border-radius: 5px; border-left: 4px solid #fbbf24; background: #fffbeb; }
+        .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 0.9em; color: #6b7280; }
+      </style>
+    `;
+
+    const headerSection = `
+      <div class="header">
+        ${reportSettings.logoUrl ? `<img src="${reportSettings.logoUrl}" alt="Logo" class="logo" />` : ''}
+        <h1>${reportType === 'investment' ? 'Investment Analysis Report' : 
+             reportType === 'financing' ? 'Bank Financing Package' : 
+             reportType === 'comprehensive' ? 'Comprehensive Deal Analysis' :
+             'Deal Comparison Report'}</h1>
+        <h2>${deal.dealName}</h2>
+        <p><strong>Property Address:</strong> ${deal.propertyAddress}</p>
+        <p><strong>Report Date:</strong> ${new Date().toLocaleDateString()}</p>
+        ${reportSettings.companyName ? `<p><strong>Prepared for:</strong> ${reportSettings.companyName}</p>` : ''}
+        ${reportSettings.preparedBy ? `<p><strong>Prepared by:</strong> ${reportSettings.preparedBy}</p>` : ''}
+      </div>
+    `;
+
+    const executiveSummarySection = `
+      <div class="section">
+        <h3>Executive Summary</h3>
+        <div class="executive-summary">
+          ${reportSettings.executiveSummary || generateAIExecutiveSummary()}
+        </div>
+      </div>
+    `;
+
+    const kpiSection = `
+      <div class="section">
+        <h3>Key Performance Indicators</h3>
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <h4>Cap Rate</h4>
+            <p class="highlight">${formatPercentage(metrics.capRate)}</p>
+          </div>
+          <div class="kpi-card">
+            <h4>Cash-on-Cash ROI</h4>
+            <p class="highlight">${formatPercentage(metrics.coCROI)}</p>
+          </div>
+          <div class="kpi-card">
+            <h4>Annual Cash Flow</h4>
+            <p class="highlight">${formatCurrency(metrics.annualCashFlow)}</p>
+          </div>
+          <div class="kpi-card">
+            <h4>DSCR</h4>
+            <p class="${metrics.dscr >= 1.25 ? 'success' : 'danger'}">${metrics.dscr.toFixed(2)}</p>
+          </div>
+          <div class="kpi-card">
+            <h4>NOI</h4>
+            <p class="highlight">${formatCurrency(metrics.noi)}</p>
+          </div>
+          <div class="kpi-card">
+            <h4>Expense Ratio</h4>
+            <p class="highlight">${formatPercentage((metrics.totalOperatingExpenses / metrics.totalGrossIncome) * 100)}</p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const financialSection = `
+      <div class="section">
+        <h3>Financial Analysis</h3>
+        <table class="table">
+          <tr><th>Item</th><th>Amount</th><th>Notes</th></tr>
+          <tr><td>Asking Price</td><td class="highlight">${formatCurrency(deal.askingPrice)}</td><td>Purchase price</td></tr>
+          <tr><td>Down Payment</td><td>${formatCurrency(deal.askingPrice * deal.downPaymentPercent / 100)}</td><td>${formatPercentage(deal.downPaymentPercent)} of purchase</td></tr>
+          <tr><td>Loan Amount</td><td>${formatCurrency(metrics.loanAmount)}</td><td>${deal.loanTermYears} years @ ${formatPercentage(deal.loanInterestRatePercent)}</td></tr>
+          <tr><td>Gross Income</td><td class="highlight">${formatCurrency(metrics.totalGrossIncome)}</td><td>Annual gross revenue</td></tr>
+          <tr><td>Operating Expenses</td><td>${formatCurrency(metrics.totalOperatingExpenses)}</td><td>Annual operating costs</td></tr>
+          <tr><td>Net Operating Income</td><td class="highlight">${formatCurrency(metrics.noi)}</td><td>After all operating expenses</td></tr>
+          <tr><td>Annual Debt Service</td><td>${formatCurrency(metrics.annualDebtService)}</td><td>Loan payments</td></tr>
+          <tr><td>Cash Flow Before Tax</td><td class="highlight">${formatCurrency(metrics.annualCashFlow)}</td><td>Available for owner</td></tr>
+        </table>
+      </div>
+    `;
+
+    const projectionSection = reportSettings.includeProjections && tenYearProjection.length > 0 ? `
+      <div class="section">
+        <h3>10-Year Cash Flow Projection</h3>
+        <table class="table">
+          <tr>
+            <th>Year</th>
+            <th>Gross Income</th>
+            <th>NOI</th>
+            <th>Cash Flow</th>
+            <th>CapEx</th>
+            <th>ROI</th>
+          </tr>
+          ${tenYearProjection.slice(0, 10).map((year, index) => `
+          <tr>
+            <td><strong>${index + 1}</strong></td>
+            <td>${formatCurrency(year.grossIncome)}</td>
+            <td>${formatCurrency(year.noi)}</td>
+            <td class="${year.cashFlow < 0 ? 'danger' : 'success'}">${formatCurrency(year.cashFlow)}</td>
+            <td>${formatCurrency(year.capEx)}</td>
+            <td>${formatPercentage((year.cashFlow / (deal.askingPrice * deal.downPaymentPercent / 100)) * 100)}</td>
+          </tr>
+          `).join('')}
+        </table>
+        ${reportSettings.includeCharts ? '<div class="chart-placeholder">10-Year Projection Chart would appear here</div>' : ''}
+      </div>
+    ` : '';
+
+    const riskSection = reportSettings.includeRiskAnalysis ? `
+      <div class="section">
+        <h3>Risk Analysis</h3>
+        <div class="risk-matrix">
+          <div class="risk-item">
+            <h4>Market Risk</h4>
+            <p>Local competition and demographic changes</p>
+          </div>
+          <div class="risk-item">
+            <h4>Equipment Risk</h4>
+            <p>Aging equipment requires ongoing maintenance</p>
+          </div>
+          <div class="risk-item">
+            <h4>Lease Risk</h4>
+            <p>Lease terms and renewal conditions</p>
+          </div>
+          <div class="risk-item">
+            <h4>Financial Risk</h4>
+            <p>DSCR of ${metrics.dscr.toFixed(2)} ${metrics.dscr >= 1.25 ? '(Strong)' : '(Requires attention)'}</p>
+          </div>
+        </div>
+      </div>
+    ` : '';
+
+    const recommendationSection = `
+      <div class="section">
+        <h3>Investment Recommendation</h3>
+        <p><strong>Overall Assessment:</strong> This investment ${
+          metrics.capRate >= (deal.targetCapRatePercent || 8) && metrics.coCROI >= (deal.targetCoCROIPercent || 15) 
+            ? '<span class="success">MEETS target criteria</span>' 
+            : '<span class="danger">DOES NOT MEET target criteria</span>'
+        } based on the financial analysis.</p>
+        
+        <p><strong>Next Steps:</strong></p>
+        <ul>
+          <li>Complete comprehensive due diligence</li>
+          <li>Verify all financial statements and tax returns</li>
+          <li>Inspect all equipment and assess replacement needs</li>
+          <li>Review lease terms and renewal options</li>
+          <li>Analyze local market conditions and competition</li>
+        </ul>
+      </div>
+    `;
+
+    const footerSection = `
+      <div class="footer">
+        <p><em>This report is for informational purposes only and should not be considered as financial advice. 
+        Please consult with qualified professionals before making investment decisions.</em></p>
+        <p>Generated by Laundromat Investment Analyzer on ${new Date().toLocaleDateString()}</p>
+      </div>
+    `;
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${reportType} Report - ${deal.dealName}</title>
+        ${baseStyles}
+      </head>
+      <body>
+        ${headerSection}
+        ${executiveSummarySection}
+        ${kpiSection}
+        ${financialSection}
+        ${projectionSection}
+        ${riskSection}
+        ${recommendationSection}
+        ${footerSection}
+      </body>
+      </html>
+    `;
+  };
 
   const generateInvestmentSummary = async () => {
     if (!deal) {
@@ -198,6 +493,21 @@ export const Reports: React.FC = () => {
       title: "Report generated",
       description: "Investment summary report has been downloaded.",
     });
+  };
+
+  const handleUpgrade = async () => {
+    try {
+      setCheckoutLoading(true);
+      await createCheckoutSession('professional', 'monthly');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to start checkout. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setCheckoutLoading(false);
+    }
   };
 
   const generateAIExecutiveSummary = () => {
