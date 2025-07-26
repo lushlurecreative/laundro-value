@@ -7,6 +7,16 @@ interface Profile {
   user_id: string;
   email: string;
   full_name: string | null;
+  phone: string | null;
+  company: string | null;
+  location: string | null;
+  bio: string | null;
+  avatar_url: string | null;
+  job_title: string | null;
+  website: string | null;
+  onboarding_completed: boolean | null;
+  preferences: any | null;
+  last_active_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -47,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
       
       if (error) throw error;
-      setProfile(data);
+      setProfile(data as Profile);
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
