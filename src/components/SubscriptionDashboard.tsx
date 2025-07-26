@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Crown, Zap, Calendar, TrendingUp } from 'lucide-react';
+import { Crown, Zap, Calendar, TrendingUp, Settings } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 const SubscriptionDashboard: React.FC = () => {
   const { 
@@ -13,8 +14,12 @@ const SubscriptionDashboard: React.FC = () => {
     usage, 
     loading,
     getUsageLimit,
-    getRemainingUsage
+    getRemainingUsage,
+    createCheckoutSession,
+    openCustomerPortal
   } = useSubscription();
+  
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
 
   if (loading) {
     return (
@@ -33,12 +38,39 @@ const SubscriptionDashboard: React.FC = () => {
   const currentPlan = plans.find(p => p.plan_id === subscription?.subscription_tier);
   const isPremium = subscription?.subscription_tier !== 'free';
 
-  const getProgressColor = (remaining: number, total: number) => {
-    if (total === Infinity) return 'bg-green-500';
-    const percentage = (remaining / total) * 100;
-    if (percentage > 50) return 'bg-green-500';
-    if (percentage > 20) return 'bg-yellow-500';
-    return 'bg-red-500';
+  const handleUpgrade = async (planId: string) => {
+    try {
+      setCheckoutLoading(planId);
+      await createCheckoutSession(planId, 'monthly');
+      toast({
+        title: "Redirecting to checkout",
+        description: "You'll be redirected to Stripe to complete your subscription.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create checkout session. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    try {
+      await openCustomerPortal();
+      toast({
+        title: "Opening customer portal",
+        description: "You'll be redirected to manage your subscription.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to open customer portal. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -64,15 +96,23 @@ const SubscriptionDashboard: React.FC = () => {
                 </p>
               )}
             </div>
-            <div className="text-right">
-              {currentPlan && (
-                <div>
-                  <p className="text-2xl font-bold">
-                    ${(currentPlan.price_monthly / 100).toFixed(0)}
-                    <span className="text-sm text-muted-foreground">/mo</span>
-                  </p>
-                </div>
+            <div className="flex items-center gap-4">
+              {isPremium && (
+                <Button variant="outline" size="sm" onClick={handleManageSubscription}>
+                  <Settings className="h-4 w-4 mr-2" />
+                  Manage
+                </Button>
               )}
+              <div className="text-right">
+                {currentPlan && (
+                  <div>
+                    <p className="text-2xl font-bold">
+                      ${(currentPlan.price_monthly / 100).toFixed(0)}
+                      <span className="text-sm text-muted-foreground">/mo</span>
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           
@@ -190,9 +230,14 @@ const SubscriptionDashboard: React.FC = () => {
                       variant={isCurrent ? "secondary" : "default"}
                       size="sm"
                       className="w-full mt-4"
-                      disabled={isCurrent}
+                      disabled={isCurrent || checkoutLoading === plan.plan_id}
+                      onClick={() => !isCurrent && handleUpgrade(plan.plan_id)}
                     >
-                      {isCurrent ? 'Current Plan' : 'Upgrade'}
+                      {checkoutLoading === plan.plan_id 
+                        ? 'Processing...' 
+                        : isCurrent 
+                          ? 'Current Plan' 
+                          : 'Upgrade'}
                     </Button>
                   </div>
                 </div>

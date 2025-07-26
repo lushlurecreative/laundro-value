@@ -38,6 +38,8 @@ interface SubscriptionContextType {
   usage: UsageStats | null;
   loading: boolean;
   refreshSubscription: () => Promise<void>;
+  createCheckoutSession: (planId: string, billingCycle?: 'monthly' | 'yearly') => Promise<any>;
+  openCustomerPortal: () => Promise<any>;
   trackUsage: (actionType: string, resourceId?: string, metadata?: any) => Promise<void>;
   canPerformAction: (action: string) => boolean;
   getUsageLimit: (limitType: string) => number;
@@ -99,6 +101,14 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!user) return;
     
     try {
+      // First sync with Stripe to get latest subscription data
+      const { data: syncData, error: syncError } = await supabase.functions.invoke('check-subscription');
+      
+      if (syncError) {
+        console.error('Error syncing subscription:', syncError);
+      }
+      
+      // Then fetch the updated subscription data
       const { data, error } = await supabase
         .from('subscribers')
         .select('*')
@@ -274,6 +284,52 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   }, [user]);
 
+  const createCheckoutSession = async (planId: string, billingCycle: 'monthly' | 'yearly' = 'monthly') => {
+    if (!user) throw new Error('User not authenticated');
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { plan_id: planId, billing_cycle: billingCycle }
+      });
+      
+      if (error) throw error;
+      
+      // Open Stripe checkout in a new tab
+      if (data?.url) {
+        window.open(data.url, '_blank');
+        // Refresh subscription after a delay to check for updates
+        setTimeout(() => {
+          refreshSubscription();
+        }, 2000);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      throw error;
+    }
+  };
+
+  const openCustomerPortal = async () => {
+    if (!user) throw new Error('User not authenticated');
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      
+      if (error) throw error;
+      
+      // Open customer portal in a new tab
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error opening customer portal:', error);
+      throw error;
+    }
+  };
+
   const value: SubscriptionContextType = {
     subscription,
     role,
@@ -281,6 +337,8 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     usage,
     loading,
     refreshSubscription,
+    createCheckoutSession,
+    openCustomerPortal,
     trackUsage,
     canPerformAction,
     getUsageLimit,
