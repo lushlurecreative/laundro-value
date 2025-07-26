@@ -1,0 +1,36 @@
+import { z } from 'zod';
+
+export const DealSchema = z.object({
+  dealId: z.string(),
+  dealName: z.string().min(1, 'Deal name is required'),
+  userId: z.string(),
+  propertyAddress: z.string(),
+  askingPrice: z.number().min(0),
+  facilitySizeSqft: z.number().min(0),
+  isRealEstateIncluded: z.boolean(),
+  grossIncomeAnnual: z.number().min(0),
+  annualNet: z.number().min(0),
+  fullTimeStaffCount: z.number().min(0),
+  partTimeStaffCount: z.number().min(0),
+  payrollCost: z.number().min(0),
+  downPaymentPercent: z.number().min(0).max(100),
+  loanInterestRatePercent: z.number().min(0),
+  loanTermYears: z.number().min(1),
+  loanType: z.string(),
+  targetCapRatePercent: z.number().min(0),
+  targetCoCROIPercent: z.number().min(0),
+  ownerWeeklyHours: z.number().min(0),
+  leaseHistory: z.string(),
+  notes: z.string(),
+  incomeGrowthRatePercent: z.number(),
+  expenseGrowthRatePercent: z.number(),
+  expansionPotential: z.object({
+    additionalMachines: z.number().min(0),
+    expansionCost: z.number().min(0),
+    potentialAdditionalIncome: z.number().min(0),
+  }),
+  valueAddedServices: z.array(z.object({
+    description: z.string(),
+    potentialRevenue: z.number().min(0),
+  })),
+});
