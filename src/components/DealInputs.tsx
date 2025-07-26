@@ -184,6 +184,11 @@ export const DealInputs = () => {
       if (Object.keys(dealUpdates).length > 0) {
         console.log('Updating deal with:', dealUpdates);
         updateDeal(dealUpdates);
+        
+        // Update form values to reflect the changes
+        Object.entries(dealUpdates).forEach(([key, value]) => {
+          form.setValue(key as any, value);
+        });
       }
       if (Object.keys(leaseUpdates).length > 0) {
         console.log('Updating lease with:', leaseUpdates);
