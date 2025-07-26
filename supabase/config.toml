@@ -1,1 +1,16 @@
 project_id = "lzokflsidobsouzqxtta"
+
+[functions.openai-analysis]
+verify_jwt = false
+
+[functions.demographics-analysis]
+verify_jwt = false
+
+[functions.energy-analysis]
+verify_jwt = false
+
+[functions.market-data]
+verify_jwt = false
+
+[functions.web-scraper]
+verify_jwt = false
