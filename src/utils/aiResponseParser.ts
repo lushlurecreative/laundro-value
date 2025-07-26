@@ -1,22 +1,63 @@
+
 // aiResponseParser.ts
 
 // Helper function to safely parse numbers from strings like "$1,234.56"
-const parseCurrency = (value: string): number => {
+const parseCurrency = (value: string | number): number => {
   if (!value) return 0;
+  if (typeof value === 'number') return value;
   return Number(String(value).replace(/[^0-9.-]+/g, '')) || 0;
 };
 
 // Main function to parse the AI's response
 export const parseAIResponse = (response: string): Record<string, any> => {
+  console.log('Raw AI response:', response);
+  
   // First, try to find and parse a clean JSON object, which is the preferred method.
   try {
     const jsonMatch = response.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      let jsonStr = jsonMatch[0].replace(/,\s*([}\]])/g, '$1'); // Fix trailing commas
+      let jsonStr = jsonMatch[0]
+        .replace(/,\s*([}\]])/g, '$1') // Fix trailing commas
+        .replace(/([{,]\s*)(\w+):/g, '$1"$2":'); // Quote unquoted keys
+      
       const jsonData = JSON.parse(jsonStr);
-      // If we get valid JSON, we can assume it's structured correctly and return it.
-      // Add any necessary transformations here if the AI's JSON schema differs from the app's.
-      return jsonData;
+      console.log('Parsed JSON data:', jsonData);
+      
+      // Normalize the parsed data to ensure numbers are properly converted
+      const normalizedData: Record<string, any> = {};
+      
+      if (jsonData.askingPrice) normalizedData.askingPrice = parseCurrency(jsonData.askingPrice);
+      if (jsonData.grossIncome) normalizedData.grossIncome = parseCurrency(jsonData.grossIncome);
+      if (jsonData.totalSqft) normalizedData.totalSqft = parseCurrency(jsonData.totalSqft);
+      if (jsonData.propertyAddress) normalizedData.propertyAddress = jsonData.propertyAddress;
+      
+      // Handle lease object
+      if (jsonData.lease && typeof jsonData.lease === 'object') {
+        normalizedData.lease = {};
+        if (jsonData.lease.monthlyRent) normalizedData.lease.monthlyRent = parseCurrency(jsonData.lease.monthlyRent);
+        if (jsonData.lease.remainingTermYears) normalizedData.lease.remainingTermYears = parseCurrency(jsonData.lease.remainingTermYears);
+        if (jsonData.lease.renewalOptionsCount) normalizedData.lease.renewalOptionsCount = parseCurrency(jsonData.lease.renewalOptionsCount);
+        if (jsonData.lease.annualRentIncreasePercent) normalizedData.lease.annualRentIncreasePercent = parseCurrency(jsonData.lease.annualRentIncreasePercent);
+      }
+      
+      // Handle equipment object
+      if (jsonData.equipment && typeof jsonData.equipment === 'object') {
+        normalizedData.equipment = {};
+        if (jsonData.equipment.washers) normalizedData.equipment.washers = parseCurrency(jsonData.equipment.washers);
+        if (jsonData.equipment.dryers) normalizedData.equipment.dryers = parseCurrency(jsonData.equipment.dryers);
+        if (jsonData.equipment.avgAge) normalizedData.equipment.avgAge = parseCurrency(jsonData.equipment.avgAge);
+      }
+      
+      // Handle expenses object
+      if (jsonData.expenses && typeof jsonData.expenses === 'object') {
+        normalizedData.expenses = {};
+        Object.entries(jsonData.expenses).forEach(([key, value]) => {
+          if (value) normalizedData.expenses[key] = parseCurrency(value as string | number);
+        });
+      }
+      
+      console.log('Normalized data:', normalizedData);
+      return normalizedData;
     }
   } catch (error) {
     console.warn('AI did not return a valid JSON object. Falling back to pattern matching.', error);
@@ -26,46 +67,59 @@ export const parseAIResponse = (response: string): Record<string, any> => {
   console.log('Falling back to pattern matching for AI response.');
   
   const fields: Record<string, any> = {};
-  const lowerCaseResponse = response.toLowerCase();
 
+  // More comprehensive patterns
   const patterns = {
-    askingPrice: /asking\s+price:?\s*\$?([\d,]+)/i,
-    grossIncome: /(?:annual|gross)\s+(?:revenue|income):?\s*\$?([\d,]+)/i,
-    totalSqft: /(\d[\d,]*)\s*sq\.?\s*ft/i,
-    propertyAddress: /(\d+\s+[\w\s.-]+(?:street|st|avenue|ave|road|rd|drive|dr|lane|ln|blvd)[.,\s\w]+(?:[A-Z]{2}\s*\d{5}))/i,
-    monthlyRent: /monthly\s+rent:?\s*\$?([\d,]+)/i,
-    leaseTerm: /(\d+)\s*-?\s*year\s+(?:lease|term)/i,
-    renewalOptions: /(\d+)\s*(?:renewal\s+option|option\s+to\s+renew)/i,
-    washers: /(\d+)\s+(?:washers|washing\s+machines)/i,
-    dryers: /(\d+)\s+(?:dryers|drying\s+machines)/i,
+    askingPrice: /(?:asking\s+price|sell\s+price|business\s+price|price)[:\s]*\$?([\d,]+)/i,
+    grossIncome: /(?:annual\s+revenue|gross\s+income|revenue)[:\s]*\$?([\d,]+)(?:\s*[-–—]\s*\$?([\d,]+))?/i,
+    totalSqft: /(?:footprint|sq\s*ft|square\s+feet)[:\s]*(\d[\d,]*)/i,
+    propertyAddress: /(?:premises\s+address|address|location)[:\s]*([^,]+(?:,[^,]+)*)/i,
+    monthlyRent: /(?:monthly\s+base\s+rent|monthly\s+rent|base\s+rent)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    leaseTerm: /(?:term|lease\s+term)[:\s]*(\d+)\s*years?/i,
+    renewalOptions: /(?:renewal\s+options|options)[:\s]*(\d+)/i,
+    rentIncrease: /(?:increase\s+by|to\s+increase\s+by)[:\s]*([\d.]+)%/i,
+    washers: /(\d+)\s+washers/i,
+    dryers: /(\d+)\s+(?:gas-fired\s+)?dryers/i,
   };
 
   // Extract simple key-value pairs
   for (const [key, regex] of Object.entries(patterns)) {
     const match = response.match(regex);
     if (match) {
-      fields[key] = key.includes('Address') ? match[1].trim() : parseCurrency(match[1]);
+      if (key.includes('Address')) {
+        fields[key] = match[1].trim();
+      } else {
+        fields[key] = parseCurrency(match[1]);
+      }
     }
   }
 
-  // More robust expense parsing
-  const expenseKeywords = ['rent', 'utilities', 'water', 'gas', 'electric', 'insurance', 'maintenance', 'repairs', 'supplies', 'payroll', 'salaries', 'taxes', 'marketing'];
+  // Enhanced expense parsing with more categories
+  const expenseCategories = {
+    'rent': /rent[:\s]*\$?([\d,]+)/i,
+    'gas': /gas[:\s]*\$?([\d,]+)/i,
+    'electricity': /(?:electric|electricity)[:\s]*\$?([\d,]+)/i,
+    'water': /(?:water\s*&?\s*sewer|water)[:\s]*\$?([\d,]+)/i,
+    'maintenance': /(?:repairs?\s*&?\s*maint|maintenance)[:\s]*\$?([\d,]+)/i,
+    'insurance': /insurance[:\s]*\$?([\d,]+)/i,
+    'trash': /trash[:\s]*\$?([\d,]+)/i,
+    'licenses': /(?:license\s*&?\s*permits?|licenses?)[:\s]*\$?([\d,]+)/i,
+    'supplies': /(?:cost\s+of\s+goods\s+sold|supplies)[:\s]*\$?([\d,]+)/i,
+    'internet': /internet[:\s]*\$?([\d,]+)/i
+  };
+
   const expenses: { [key: string]: number } = {};
-  const expenseRegex = new RegExp(`(?:${expenseKeywords.join('|')})\\s*[:\\-]?\\s*\\$?([\\d,.]+)`, 'gi');
-  let expenseMatch;
-  while ((expenseMatch = expenseRegex.exec(response)) !== null) {
-      // Find which keyword was matched to use as the key
-      const matchedKeyword = expenseKeywords.find(keyword => new RegExp(keyword, 'i').test(expenseMatch[0]));
-      if (matchedKeyword) {
-          expenses[matchedKeyword] = parseCurrency(expenseMatch[1]);
-      }
-  }
-  if (Object.keys(expenses).length > 0) {
-    fields.expenses = expenses;
-  }
   
-  // Consolidate extracted fields into the nested structure the app expects
+  Object.entries(expenseCategories).forEach(([category, regex]) => {
+    const match = response.match(regex);
+    if (match) {
+      expenses[category] = parseCurrency(match[1]);
+    }
+  });
+  
+  // Consolidate extracted fields into the expected structure
   const finalFields: Record<string, any> = {};
+  
   if (fields.askingPrice) finalFields.askingPrice = fields.askingPrice;
   if (fields.grossIncome) finalFields.grossIncome = fields.grossIncome;
   if (fields.totalSqft) finalFields.totalSqft = fields.totalSqft;
@@ -75,6 +129,7 @@ export const parseAIResponse = (response: string): Record<string, any> => {
   if (fields.monthlyRent) lease.monthlyRent = fields.monthlyRent;
   if (fields.leaseTerm) lease.remainingTermYears = fields.leaseTerm;
   if (fields.renewalOptions) lease.renewalOptionsCount = fields.renewalOptions;
+  if (fields.rentIncrease) lease.annualRentIncreasePercent = fields.rentIncrease;
   if (Object.keys(lease).length > 0) finalFields.lease = lease;
 
   const equipment: Record<string, any> = {};
@@ -82,7 +137,8 @@ export const parseAIResponse = (response: string): Record<string, any> => {
   if (fields.dryers) equipment.dryers = fields.dryers;
   if (Object.keys(equipment).length > 0) finalFields.equipment = equipment;
   
-  if (fields.expenses) finalFields.expenses = fields.expenses;
+  if (Object.keys(expenses).length > 0) finalFields.expenses = expenses;
 
+  console.log('Pattern matching result:', finalFields);
   return finalFields;
 };

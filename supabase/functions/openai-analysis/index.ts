@@ -1,3 +1,4 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -48,6 +49,14 @@ serve(async (req) => {
 
 The JSON object must conform to the following schema. If a value for a field cannot be found in the text, either omit the key entirely or set its value to null. Do not invent or guess data. All currency values should be numbers without symbols or commas.
 
+For expenses, look for annual amounts. Common expense categories include: rent, gas, electric, electricity, water, sewer, repairs, maintenance, insurance, trash, licenses, permits, supplies, internet, payroll, salaries.
+
+For lease information, extract the INITIAL or FIRST YEAR monthly rent amount, lease term in years, and number of renewal options.
+
+For equipment, count the total number of washers and dryers from equipment lists or summaries.
+
+For revenue, look for "Annual Revenue", "Gross Income", or similar terms. The asking price is the business purchase price.
+
 JSON Schema:
 
 {
@@ -58,7 +67,8 @@ JSON Schema:
   "lease": {
     "monthlyRent": Number,
     "remainingTermYears": Number,
-    "renewalOptionsCount": Number
+    "renewalOptionsCount": Number,
+    "annualRentIncreasePercent": Number
   },
   "equipment": {
     "washers": Number,
@@ -67,11 +77,15 @@ JSON Schema:
   },
   "expenses": {
     "rent": Number,
-    "water": Number,
     "gas": Number,
     "electricity": Number,
+    "water": Number,
     "insurance": Number,
     "maintenance": Number,
+    "supplies": Number,
+    "internet": Number,
+    "trash": Number,
+    "licenses": Number,
     "payroll": Number
   }
 }`;
@@ -101,12 +115,12 @@ JSON Schema:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Analyze this laundromat deal data (may contain messy formatting from spreadsheets): ${preprocessText(JSON.stringify(dealData))}` }
         ],
-        temperature: 0.7,
+        temperature: 0.1,
         max_tokens: 2000,
       }),
     });
