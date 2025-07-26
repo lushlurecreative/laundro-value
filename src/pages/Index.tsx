@@ -11,6 +11,7 @@ import { DueDiligence } from '@/components/DueDiligence';
 import { Reports } from '@/components/Reports';
 import { TenYearProjection } from '@/components/TenYearProjection';
 import UserProfile from '@/components/UserProfile';
+import SubscriptionDashboard from '@/components/SubscriptionDashboard';
 import { Button } from '@/components/ui/button';
 import { Loader2, User } from 'lucide-react';
 
@@ -54,6 +55,8 @@ const Index = () => {
         return <Reports />;
       case 'profile':
         return <UserProfile />;
+      case 'subscription':
+        return <SubscriptionDashboard />;
       default:
         return <Dashboard />;
     }

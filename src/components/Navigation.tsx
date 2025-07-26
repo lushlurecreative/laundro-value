@@ -6,7 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useDeal } from '@/contexts/useDeal';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Trash2, Plus, User } from 'lucide-react';
+import { Trash2, Plus, User, Crown } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -81,6 +81,19 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
           ))}
         </nav>
         
+        <div className="mt-6 space-y-3">
+          {/* Subscription Management */}
+          <Button
+            variant={activeTab === 'subscription' ? "default" : "outline"}
+            size="sm"
+            className="w-full"
+            onClick={() => onTabChange('subscription')}
+          >
+            <Crown className="h-4 w-4 mr-2" />
+            Subscription
+          </Button>
+        </div>
+
         <div className="mt-8 space-y-3">
           {/* New Deal Analysis Button */}
           <AlertDialog>

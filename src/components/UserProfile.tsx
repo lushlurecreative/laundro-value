@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { User, LogOut, Save, Loader2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { User, LogOut, Save, Loader2, Crown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const UserProfile: React.FC = () => {
   const { user, profile, signOut, updateProfile } = useAuth();
+  const { subscription, role } = useSubscription();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [fullName, setFullName] = useState(profile?.full_name || '');
@@ -118,6 +121,30 @@ const UserProfile: React.FC = () => {
             )}
           </Button>
         </form>
+
+        {/* Subscription Info */}
+        <div className="space-y-3 pt-4 border-t">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Subscription Plan</span>
+            <Badge variant={subscription?.subscribed ? "default" : "secondary"} className="flex items-center gap-1">
+              {subscription?.subscribed && <Crown className="h-3 w-3" />}
+              {subscription?.subscription_tier?.toUpperCase() || 'FREE'}
+            </Badge>
+          </div>
+          
+          {subscription?.subscription_end && (
+            <p className="text-xs text-muted-foreground">
+              {subscription.subscribed ? 'Renews' : 'Expires'}: {new Date(subscription.subscription_end).toLocaleDateString()}
+            </p>
+          )}
+          
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Role</span>
+            <Badge variant="outline" className="text-xs">
+              {role?.role?.toUpperCase() || 'FREE'}
+            </Badge>
+          </div>
+        </div>
 
         <div className="pt-4 border-t">
           <Button 
