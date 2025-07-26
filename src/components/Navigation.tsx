@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useDeal } from '@/contexts/useDeal';
-import { Trash2, Plus } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Trash2, Plus, User } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -23,6 +25,12 @@ const navigationItems = [
 
 export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
   const { clearAllData, saveAndStartNew } = useDeal();
+  const { user, profile } = useAuth();
+
+  const initials = profile?.full_name 
+    ? profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase()
+    : user?.email?.charAt(0).toUpperCase() || 'U';
+
   return (
     <Card className="h-full shadow-elegant bg-gradient-card border-0">
       <div className="p-6">
@@ -33,6 +41,25 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
           <p className="text-sm text-muted-foreground mt-1">
             Professional Investment Analysis Tool
           </p>
+        </div>
+
+        {/* User Profile Section */}
+        <div className="mb-6 p-3 bg-gradient-subtle rounded-lg border">
+          <Button
+            variant="ghost"
+            className="w-full justify-start p-2 h-auto"
+            onClick={() => onTabChange('profile')}
+          >
+            <Avatar className="h-8 w-8 mr-3">
+              <AvatarFallback className="text-sm font-semibold bg-primary/10 text-primary">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <div className="text-left">
+              <p className="text-sm font-medium">{profile?.full_name || 'User'}</p>
+              <p className="text-xs text-muted-foreground">{user?.email}</p>
+            </div>
+          </Button>
         </div>
         
         <nav className="space-y-2">
