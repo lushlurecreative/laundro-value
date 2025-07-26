@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { DealSchema } from '@/schemas/dealSchema';
 import { Deal, LeaseDetails, AncillaryIncome } from '@/types/deal';
 import { useDeal } from '@/contexts/useDeal';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import {
   Form,
   FormControl,
@@ -17,11 +18,16 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useOpenAIAnalysis } from '@/hooks/useOpenAIAnalysis';
+import { Crown, AlertTriangle } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 export const DealInputs = () => {
-  const { deal, updateDeal, updateLeaseDetails, expenseItems, updateExpenseItem, addMachine, clearMachineInventory, updateAncillaryIncome } = useDeal();
+  const { deal, updateDeal, updateLeaseDetails, expenseItems, updateExpenseItem, addMachine, clearMachineInventory, updateAncillaryIncome, saveAndStartNew } = useDeal();
+  const { canPerformAction, trackUsage, getRemainingUsage, subscription, createCheckoutSession } = useSubscription();
   const [isRealEstateIncluded, setIsRealEstateIncluded] = useState(deal?.isRealEstateIncluded || false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   useEffect(() => {
     if (deal) {
@@ -190,12 +196,85 @@ export const DealInputs = () => {
     }
   });
 
-  const onSubmit = (data: Deal) => {
+  const onSubmit = async (data: Deal) => {
     console.log('Form data:', data);
     updateDeal(data);
+    
+    // Track deal save usage
+    if (canPerformAction('save_deal')) {
+      await trackUsage('deal_saved', deal?.dealId, { dealName: data.dealName });
+      toast({
+        title: "Deal saved",
+        description: "Your deal has been saved successfully.",
+      });
+    }
   };
 
+  const handleStartNewDeal = async () => {
+    if (!canPerformAction('save_deal')) {
+      const remaining = getRemainingUsage('saved_deals');
+      if (remaining === 0) {
+        toast({
+          title: "Usage limit reached",
+          description: "You've reached your saved deals limit. Upgrade to save more deals.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    
+    await saveAndStartNew();
+    if (canPerformAction('save_deal')) {
+      await trackUsage('deal_saved', 'new-deal', { action: 'new_deal_started' });
+    }
+  };
+
+  const handleUpgradeClick = async () => {
+    try {
+      setCheckoutLoading(true);
+      await createCheckoutSession('professional', 'monthly');
+      toast({
+        title: "Redirecting to checkout",
+        description: "You'll be redirected to upgrade your subscription.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to start checkout. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
+  const remainingSavedDeals = getRemainingUsage('saved_deals');
+  const isFreeTier = subscription?.subscription_tier === 'free';
+
   return (
+    <div className="space-y-6">
+      {/* Usage Warning for Free Tier */}
+      {isFreeTier && (
+        <Alert className="border-warning">
+          <Crown className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>
+              Saved deals remaining: <strong>{remainingSavedDeals}</strong> 
+              {remainingSavedDeals === 0 && " - Upgrade to save more deals"}
+            </span>
+            {remainingSavedDeals <= 1 && (
+              <Button 
+                size="sm" 
+                onClick={handleUpgradeClick}
+                disabled={checkoutLoading}
+              >
+                {checkoutLoading ? 'Processing...' : 'Upgrade'}
+              </Button>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="grid grid-cols-2 gap-4">
@@ -533,8 +612,38 @@ export const DealInputs = () => {
           {isAnalyzing && <p className="text-sm text-muted-foreground">Analyzing...</p>}
         </div>
 
-        <Button type="submit">Update Deal</Button>
+        <div className="flex gap-4 pt-6 border-t">
+          <Button type="submit" disabled={!canPerformAction('save_deal')}>
+            Save Deal
+          </Button>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={handleStartNewDeal}
+            disabled={!canPerformAction('save_deal')}
+          >
+            Save & Start New
+          </Button>
+          {!canPerformAction('save_deal') && (
+            <Alert className="flex-1">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                You've reached your saved deals limit. 
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  onClick={handleUpgradeClick}
+                  disabled={checkoutLoading}
+                  className="px-1"
+                >
+                  Upgrade to save more
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
       </form>
     </Form>
+    </div>
   );
 };

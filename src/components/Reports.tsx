@@ -6,13 +6,18 @@ import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useDeal } from '@/contexts/useDeal';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { calculateMetrics, formatCurrency, formatPercentage } from '@/utils/calculations';
 import { calculateTenYearProjection } from '@/utils/projections';
-import { FileText, Download, Building, TrendingUp, DollarSign, Calendar } from 'lucide-react';
+import { FileText, Download, Building, TrendingUp, DollarSign, Calendar, Crown, Lock } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 export const Reports: React.FC = () => {
   const { deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, utilityAnalysis } = useDeal();
+  const { canPerformAction, trackUsage, getRemainingUsage, subscription, createCheckoutSession } = useSubscription();
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [reportSettings, setReportSettings] = useState({
     companyName: '',
     preparedBy: '',
@@ -30,11 +35,26 @@ export const Reports: React.FC = () => {
     deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome
   ) : [];
 
-  const generateInvestmentSummary = () => {
+  const generateInvestmentSummary = async () => {
     if (!deal) {
-      alert('Please enter deal information first');
+      toast({
+        title: "No deal data",
+        description: "Please enter deal information first",
+        variant: "destructive",
+      });
       return;
     }
+
+    if (!canPerformAction('generate_report')) {
+      toast({
+        title: "Usage limit reached",
+        description: "You've reached your report generation limit this month. Upgrade to generate more reports.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    await trackUsage('report_generated', deal.dealId, { reportType: 'investment_summary' });
 
     // This would typically generate a PDF
     // For now, we'll create a downloadable HTML report
@@ -173,6 +193,11 @@ export const Reports: React.FC = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Report generated",
+      description: "Investment summary report has been downloaded.",
+    });
   };
 
   const generateAIExecutiveSummary = () => {
@@ -230,11 +255,26 @@ ${concerns.map(concern => `• ${concern}`).join('\n')}` : ''}
     return summary.trim();
   };
 
-  const generateBankFinancingReport = () => {
+  const generateBankFinancingReport = async () => {
     if (!deal) {
-      alert('Please enter deal information first');
+      toast({
+        title: "No deal data",
+        description: "Please enter deal information first",
+        variant: "destructive",
+      });
       return;
     }
+
+    if (!canPerformAction('generate_report')) {
+      toast({
+        title: "Usage limit reached",
+        description: "You've reached your report generation limit this month. Upgrade to generate more reports.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    await trackUsage('report_generated', deal.dealId, { reportType: 'bank_financing' });
 
     const reportContent = `
 <!DOCTYPE html>
@@ -365,10 +405,60 @@ ${concerns.map(concern => `• ${concern}`).join('\n')}` : ''}
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Report generated",
+      description: "Bank financing package has been downloaded.",
+    });
   };
+
+  const handleUpgradeClick = async () => {
+    try {
+      setCheckoutLoading(true);
+      await createCheckoutSession('professional', 'monthly');
+      toast({
+        title: "Redirecting to checkout",
+        description: "You'll be redirected to upgrade your subscription.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to start checkout. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
+  const remainingReports = getRemainingUsage('reports_per_month');
+  const isFreeTier = subscription?.subscription_tier === 'free';
+  const canGeneratePDF = subscription?.subscription_tier !== 'free';
 
   return (
     <div className="space-y-6">
+      {/* Usage Alert for Free Tier */}
+      {isFreeTier && (
+        <Alert className="border-warning">
+          <Crown className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>
+              Reports remaining this month: <strong>{remainingReports}</strong>
+              {remainingReports === 0 && " - Upgrade for unlimited reports"}
+            </span>
+            {remainingReports <= 1 && (
+              <Button 
+                size="sm" 
+                onClick={handleUpgradeClick}
+                disabled={checkoutLoading}
+              >
+                {checkoutLoading ? 'Processing...' : 'Upgrade'}
+              </Button>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div>
         <h2 className="text-3xl font-bold">Reports</h2>
         <p className="text-muted-foreground">Generate professional investment and financing reports</p>
@@ -485,13 +575,28 @@ ${concerns.map(concern => `• ${concern}`).join('\n')}` : ''}
                   </div>
                 </div>
                 
-                <Button 
-                  onClick={generateInvestmentSummary}
-                  className="w-full shadow-button"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Generate Investment Summary PDF
-                </Button>
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={generateInvestmentSummary}
+                    disabled={!canPerformAction('generate_report')}
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    Generate Report
+                  </Button>
+                  {!canGeneratePDF && (
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <Lock className="w-3 h-3" />
+                      HTML Only
+                    </Badge>
+                  )}
+                  {canGeneratePDF && (
+                    <Badge variant="default" className="flex items-center gap-1">
+                      <Crown className="w-3 h-3" />
+                      PDF Available
+                    </Badge>
+                  )}
+                </div>
               </CardContent>
             </Card>
 
@@ -537,14 +642,28 @@ ${concerns.map(concern => `• ${concern}`).join('\n')}` : ''}
                   </div>
                 </div>
                 
-                <Button 
-                  onClick={generateBankFinancingReport}
-                  className="w-full shadow-button"
-                  variant={metrics.dscr >= 1.25 ? "default" : "secondary"}
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Generate Bank Financing PDF
-                </Button>
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={generateBankFinancingReport}
+                    disabled={!canPerformAction('generate_report')}
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    Generate Package
+                  </Button>
+                  {!canGeneratePDF && (
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <Lock className="w-3 h-3" />
+                      HTML Only
+                    </Badge>
+                  )}
+                  {canGeneratePDF && (
+                    <Badge variant="default" className="flex items-center gap-1">
+                      <Crown className="w-3 h-3" />
+                      PDF Available
+                    </Badge>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>

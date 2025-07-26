@@ -2,13 +2,20 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { useDeal } from '@/contexts/useDeal';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { calculateMetrics, formatCurrency, formatPercentage, calculateWaterBasedIncome, calculateCollectionBasedIncome } from '@/utils/calculations';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Crown, Lock, TrendingUp } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 export const AnalysisScenarios: React.FC = () => {
   const { deal, leaseDetails, expenseItems, machineInventory, ancillaryIncome, utilityAnalysis } = useDeal();
+  const { canPerformAction, trackUsage, getRemainingUsage, subscription, createCheckoutSession } = useSubscription();
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   
   // Sensitivity analysis sliders
   const [vendPriceAdjustment, setVendPriceAdjustment] = useState([0]);
@@ -134,9 +141,70 @@ export const AnalysisScenarios: React.FC = () => {
     }
   };
 
+  const handleRunAnalysis = async () => {
+    if (!canPerformAction('create_analysis')) {
+      toast({
+        title: "Usage limit reached",
+        description: "You've reached your analysis limit this month. Upgrade to run more analyses.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    await trackUsage('analysis_created', deal?.dealId, { analysisType: 'sensitivity' });
+    toast({
+      title: "Analysis completed",
+      description: "Sensitivity analysis has been generated.",
+    });
+  };
+
+  const handleUpgradeClick = async () => {
+    try {
+      setCheckoutLoading(true);
+      await createCheckoutSession('professional', 'monthly');
+      toast({
+        title: "Redirecting to checkout",
+        description: "You'll be redirected to upgrade your subscription.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to start checkout. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
+  const remainingAnalyses = getRemainingUsage('analyses_per_month');
+  const isFreeTier = subscription?.subscription_tier === 'free';
+
   return (
     <TooltipProvider>
       <div className="space-y-6">
+        {/* Usage Alert for Free Tier */}
+        {isFreeTier && (
+          <Alert className="border-warning">
+            <Crown className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>
+                Analyses remaining this month: <strong>{remainingAnalyses}</strong>
+                {remainingAnalyses === 0 && " - Upgrade for unlimited analyses"}
+              </span>
+              {remainingAnalyses <= 1 && (
+                <Button 
+                  size="sm" 
+                  onClick={handleUpgradeClick}
+                  disabled={checkoutLoading}
+                >
+                  {checkoutLoading ? 'Processing...' : 'Upgrade'}
+                </Button>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+
       <div>
         <h2 className="text-3xl font-bold">Analysis & Scenarios</h2>
         <p className="text-muted-foreground">
@@ -179,8 +247,24 @@ export const AnalysisScenarios: React.FC = () => {
                     Use the sliders below to test "what-if" scenarios - like increasing prices, reducing costs, or changing financing terms. 
                     This helps you understand which factors most impact profitability and assess deal risk under different conditions.
                   </p>
+                  {!canPerformAction('create_analysis') && (
+                    <Alert>
+                      <Lock className="h-4 w-4" />
+                      <AlertDescription className="flex items-center justify-between">
+                        <span>Advanced analysis features require a premium subscription</span>
+                        <Button 
+                          size="sm" 
+                          onClick={handleUpgradeClick}
+                          disabled={checkoutLoading}
+                        >
+                          Upgrade
+                        </Button>
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </CardHeader>
             <CardContent className="space-y-6">
+              {canPerformAction('create_analysis') ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <div>
@@ -342,6 +426,30 @@ export const AnalysisScenarios: React.FC = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Lock className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Premium Analysis Required</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Unlock advanced sensitivity analysis and scenario modeling
+                  </p>
+                  <Button onClick={handleUpgradeClick} disabled={checkoutLoading}>
+                    <Crown className="w-4 h-4 mr-2" />
+                    {checkoutLoading ? 'Processing...' : 'Upgrade to Professional'}
+                  </Button>
+                </div>
+              )}
+              
+              <div className="flex justify-center pt-4">
+                <Button 
+                  onClick={handleRunAnalysis}
+                  disabled={!canPerformAction('create_analysis')}
+                  className="flex items-center gap-2"
+                >
+                  <TrendingUp className="w-4 h-4" />
+                  Run Analysis
+                </Button>
               </div>
             </CardContent>
           </Card>
