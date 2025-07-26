@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Crown, Zap, Calendar, TrendingUp, Settings } from 'lucide-react';
+import { Crown, Zap, Calendar, TrendingUp, Settings, AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import SubscriptionPlans from './SubscriptionPlans';
 
 const SubscriptionDashboard: React.FC = () => {
   const { 
@@ -13,6 +14,7 @@ const SubscriptionDashboard: React.FC = () => {
     plans, 
     usage, 
     loading,
+    refreshSubscription,
     getUsageLimit,
     getRemainingUsage,
     createCheckoutSession,
@@ -20,6 +22,8 @@ const SubscriptionDashboard: React.FC = () => {
   } = useSubscription();
   
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [showPlans, setShowPlans] = useState(false);
 
   if (loading) {
     return (
@@ -73,8 +77,59 @@ const SubscriptionDashboard: React.FC = () => {
     }
   };
 
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await refreshSubscription();
+      toast({
+        title: "Subscription refreshed",
+        description: "Your subscription status has been updated.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to refresh subscription. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  if (showPlans) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Subscription Plans</h1>
+          <Button variant="outline" onClick={() => setShowPlans(false)}>
+            Back to Dashboard
+          </Button>
+        </div>
+        <SubscriptionPlans showCurrentPlan={true} />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Subscription Management</h1>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefresh}
+            disabled={refreshing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button onClick={() => setShowPlans(true)}>
+            View All Plans
+          </Button>
+        </div>
+      </div>
+
       {/* Current Plan */}
       <Card>
         <CardHeader>
@@ -118,6 +173,29 @@ const SubscriptionDashboard: React.FC = () => {
           
           {currentPlan?.description && (
             <p className="text-sm text-muted-foreground">{currentPlan.description}</p>
+          )}
+
+          {!isPremium && (
+            <div className="p-4 border border-yellow-200 bg-yellow-50 rounded-lg dark:border-yellow-800 dark:bg-yellow-900/20">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-yellow-800 dark:text-yellow-200">
+                    Upgrade for Advanced Features
+                  </h4>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                    Get unlimited AI analysis, advanced market insights, PDF exports, and more with a premium plan.
+                  </p>
+                  <Button 
+                    size="sm" 
+                    className="mt-3"
+                    onClick={() => setShowPlans(true)}
+                  >
+                    View Plans
+                  </Button>
+                </div>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -193,59 +271,54 @@ const SubscriptionDashboard: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Available Plans */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Available Plans</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            {plans.map((plan) => {
-              const isCurrent = plan.plan_id === subscription?.subscription_tier;
-              
-              return (
+      {/* Quick Upgrade Options */}
+      {!isPremium && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Upgrade Your Plan</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2">
+              {plans.filter(p => p.plan_id !== 'free').slice(0, 2).map((plan) => (
                 <div
                   key={plan.id}
-                  className={`p-4 border rounded-lg ${
-                    isCurrent ? 'border-primary bg-primary/5' : 'border-border'
-                  }`}
+                  className="p-4 border rounded-lg hover:border-primary transition-colors"
                 >
-                  <div className="text-center space-y-2">
-                    <h3 className="font-semibold">{plan.name}</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold">{plan.name}</h3>
+                      {plan.plan_id === 'professional' && (
+                        <Badge>Popular</Badge>
+                      )}
+                    </div>
                     <div className="text-2xl font-bold">
                       ${(plan.price_monthly / 100).toFixed(0)}
                       <span className="text-sm text-muted-foreground">/mo</span>
                     </div>
                     <p className="text-sm text-muted-foreground">{plan.description}</p>
                     
-                    <div className="text-left space-y-1 mt-4">
-                      {plan.features.slice(0, 3).map((feature, idx) => (
-                        <p key={idx} className="text-xs text-muted-foreground">
-                          ✓ {feature}
-                        </p>
-                      ))}
-                    </div>
-                    
                     <Button
-                      variant={isCurrent ? "secondary" : "default"}
+                      variant={plan.plan_id === 'professional' ? 'default' : 'outline'}
                       size="sm"
-                      className="w-full mt-4"
-                      disabled={isCurrent || checkoutLoading === plan.plan_id}
-                      onClick={() => !isCurrent && handleUpgrade(plan.plan_id)}
+                      className="w-full"
+                      disabled={checkoutLoading === plan.plan_id}
+                      onClick={() => handleUpgrade(plan.plan_id)}
                     >
-                      {checkoutLoading === plan.plan_id 
-                        ? 'Processing...' 
-                        : isCurrent 
-                          ? 'Current Plan' 
-                          : 'Upgrade'}
+                      {checkoutLoading === plan.plan_id ? 'Processing...' : 'Upgrade'}
                     </Button>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+            
+            <div className="mt-4 text-center">
+              <Button variant="outline" onClick={() => setShowPlans(true)}>
+                View All Plans & Features
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
