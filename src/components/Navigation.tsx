@@ -17,6 +17,7 @@ const navigationItems = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
   { id: 'deal-inputs', label: 'Deal Inputs', icon: '📝' },
   { id: 'analysis', label: 'Analysis & Scenarios', icon: '📈' },
+  { id: 'ai-insights', label: 'AI Insights', icon: '🤖' },
   { id: 'projections', label: '10-Year Projections', icon: '📅' },
   { id: 'resources', label: 'Resources', icon: '💡' },
   { id: 'due-diligence', label: 'Due Diligence', icon: '✅' },

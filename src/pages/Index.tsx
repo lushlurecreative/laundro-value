@@ -6,6 +6,7 @@ import { Navigation } from '@/components/Navigation';
 import { Dashboard } from '@/components/Dashboard';
 import { DealInputs } from '@/components/DealInputs';
 import { AnalysisScenarios } from '@/components/AnalysisScenarios';
+import { AIInsights } from '@/components/AIInsights';
 import { Resources } from '@/components/Resources';
 import { DueDiligence } from '@/components/DueDiligence';
 import { Reports } from '@/components/Reports';
@@ -45,6 +46,8 @@ const Index = () => {
         return <DealInputs />;
       case 'analysis':
         return <AnalysisScenarios />;
+      case 'ai-insights':
+        return <AIInsights />;
       case 'projections':
         return <TenYearProjection />;
       case 'resources':
