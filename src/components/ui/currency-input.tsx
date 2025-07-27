@@ -9,24 +9,29 @@ interface CurrencyInputProps extends Omit<React.ComponentProps<"input">, 'onChan
 const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
   ({ className, value, onChange, ...props }, ref) => {
     const [displayValue, setDisplayValue] = React.useState('')
+    const isTypingRef = React.useRef(false)
 
+    // Only update display value from props when not actively typing
     React.useEffect(() => {
-      if (value === undefined || value === null || value === 0 || value === '0' || value === '') {
-        setDisplayValue('')
-      } else {
-        const numValue = typeof value === 'number' ? value : parseFloat(value as string) || 0
-        if (numValue > 0) {
-          setDisplayValue(numValue.toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          }))
-        } else {
+      if (!isTypingRef.current) {
+        if (value === undefined || value === null || value === 0 || value === '0' || value === '') {
           setDisplayValue('')
+        } else {
+          const numValue = typeof value === 'number' ? value : parseFloat(value as string) || 0
+          if (numValue > 0) {
+            setDisplayValue(numValue.toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }))
+          } else {
+            setDisplayValue('')
+          }
         }
       }
     }, [value])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      isTypingRef.current = true
       const inputValue = e.target.value
       
       // Allow empty string to clear the field
@@ -36,14 +41,11 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
         return
       }
       
-      // Remove non-numeric characters except dots and commas
-      const numericValue = inputValue.replace(/[^0-9.,]/g, '')
-      
-      // Remove commas for parsing
-      const cleanValue = numericValue.replace(/,/g, '')
+      // Remove non-numeric characters except dots
+      const numericValue = inputValue.replace(/[^0-9.]/g, '')
       
       // Don't allow multiple decimal points
-      const decimalCount = (cleanValue.match(/\./g) || []).length
+      const decimalCount = (numericValue.match(/\./g) || []).length
       if (decimalCount > 1) {
         return
       }
@@ -52,22 +54,38 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
       setDisplayValue(numericValue)
       
       // Parse and send numeric value
-      const parsed = parseFloat(cleanValue) || 0
+      const parsed = parseFloat(numericValue) || 0
       onChange?.(parsed)
     }
 
     const handleBlur = () => {
+      isTypingRef.current = false
+      
+      if (displayValue === '') {
+        onChange?.(0)
+        return
+      }
+      
+      const numValue = parseFloat(displayValue) || 0
+      if (numValue > 0) {
+        const formatted = numValue.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })
+        setDisplayValue(formatted)
+        onChange?.(numValue)
+      } else {
+        setDisplayValue('')
+        onChange?.(0)
+      }
+    }
+
+    const handleFocus = () => {
+      isTypingRef.current = true
+      // Convert formatted value back to raw number for editing
       if (displayValue) {
-        const numValue = parseFloat(displayValue.replace(/,/g, '')) || 0
-        if (numValue > 0) {
-          setDisplayValue(numValue.toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          }))
-        } else {
-          setDisplayValue('')
-          onChange?.(0)
-        }
+        const rawValue = displayValue.replace(/,/g, '')
+        setDisplayValue(rawValue)
       }
     }
 
@@ -85,6 +103,7 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
           value={displayValue}
           onChange={handleChange}
           onBlur={handleBlur}
+          onFocus={handleFocus}
           ref={ref}
           {...props}
         />
