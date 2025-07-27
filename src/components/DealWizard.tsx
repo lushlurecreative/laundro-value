@@ -19,6 +19,7 @@ import { IncomeVerification } from './IncomeVerification';
 import { ComprehensiveAIAnalysis } from './ComprehensiveAIAnalysis';
 import { PremiumReports } from './PremiumReports';
 import { FormLoadingSkeleton } from './wizard/LoadingStates';
+import { DealSaveLoad } from './DealSaveLoad';
 import { useState } from 'react';
 
 interface DealWizardProps {
@@ -28,12 +29,12 @@ interface DealWizardProps {
 const steps = [
   { id: 'ai-analysis', title: 'AI Analysis', component: EnhancedAIAnalysis },
   { id: 'property', title: 'Property Info', component: PropertyInfoStep },
+  { id: 'lease', title: 'Lease Info', component: LeaseStep },
   { id: 'income', title: 'Income', component: IncomeStep },
   { id: 'future-income', title: 'Future Income', component: FutureIncomeAnalysis },
   { id: 'expenses', title: 'Expenses', component: ExpensesStep },
   { id: 'equipment', title: 'Equipment', component: EquipmentStep },
   { id: 'financing', title: 'Financing', component: FinancingStep },
-  { id: 'lease', title: 'Lease Info', component: LeaseStep },
   { id: 'expansion', title: 'Expansion Potential', component: ExpansionPotentialStep },
   { id: 'targets', title: 'Investment Targets', component: InvestmentTargetsStep },
   { id: 'income-verification', title: 'Income Verification', component: IncomeVerification },
@@ -79,7 +80,10 @@ export const DealWizard: React.FC<DealWizardProps> = ({ onComplete }) => {
       {/* Progress Header */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-center">Deal Analysis Wizard</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-center flex-1">Deal Analysis Wizard</CardTitle>
+            <DealSaveLoad />
+          </div>
           <div className="space-y-4">
             <Progress value={progress} className="w-full" />
             <div className="flex justify-between text-sm text-muted-foreground">

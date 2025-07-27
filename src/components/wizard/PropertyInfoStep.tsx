@@ -46,14 +46,32 @@ export const PropertyInfoStep: React.FC = () => {
   // Update form when deal data changes (from AI analysis)
   useEffect(() => {
     if (deal) {
-      form.setValue('dealName', deal.dealName || '');
+      // Auto-generate deal name if not set and we have address
+      let dealName = deal.dealName || '';
+      if (!dealName && deal.propertyAddress) {
+        // Extract business name or use address for deal name
+        const addressParts = deal.propertyAddress.split(',');
+        const streetAddress = addressParts[0]?.trim();
+        if (streetAddress) {
+          dealName = streetAddress.includes('Laundromat') || streetAddress.includes('laundromat') 
+            ? streetAddress 
+            : `${streetAddress} Laundromat`;
+        }
+      }
+      
+      form.setValue('dealName', dealName);
       form.setValue('propertyAddress', deal.propertyAddress || '');
       form.setValue('askingPrice', deal.askingPrice || 0);
       form.setValue('facilitySizeSqft', deal.facilitySizeSqft || 0);
       form.setValue('isRealEstateIncluded', deal.isRealEstateIncluded || false);
       setIsRealEstateIncluded(deal.isRealEstateIncluded || false);
+
+      // Update the deal with auto-generated name if needed
+      if (dealName && !deal.dealName) {
+        updateDeal({ dealName });
+      }
     }
-  }, [deal, form]);
+  }, [deal, form, updateDeal]);
 
   // Save changes on blur
   const handleFieldChange = (field: keyof PropertyInfoData, value: any) => {
@@ -167,18 +185,18 @@ export const PropertyInfoStep: React.FC = () => {
                   Facility Size (Square Feet)
                   <HelpTooltip content="Total square footage of the laundromat space. Includes customer area, equipment area, and any office/storage space. Used to calculate rent per sq ft and equipment density." />
                 </FormLabel>
-                <FormControl>
-                  <Input 
+                 <FormControl>
+                   <Input 
                     type="number"
                     placeholder="2,000"
-                    value={field.value || ''}
+                    value={field.value === 0 ? '' : field.value}
                     onChange={(e) => {
                       const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
                       field.onChange(value);
                       handleFieldChange('facilitySizeSqft', value);
                     }}
                   />
-                </FormControl>
+                 </FormControl>
                 <p className="text-sm text-muted-foreground">
                   Industry standard: 1,500-3,500 sq ft for community laundromats
                 </p>

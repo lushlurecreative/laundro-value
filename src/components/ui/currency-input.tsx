@@ -13,11 +13,19 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
   React.useEffect(() => {
     if (value === undefined || value === null || value === 0 || value === '0' || value === '') {
       setDisplayValue('')
-    } else if (typeof value === 'number' && value > 0) {
+    } else if (typeof value === 'number') {
       setDisplayValue(value.toLocaleString('en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       }))
+    } else if (typeof value === 'string' && value !== '') {
+      const numValue = parseFloat(value) || 0
+      if (numValue > 0) {
+        setDisplayValue(numValue.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }))
+      }
     }
   }, [value])
 
@@ -46,11 +54,13 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
   }
 
   const handleBlur = () => {
-    if (displayValue && typeof value === 'number' && value > 0) {
+    if (displayValue && typeof value === 'number') {
       setDisplayValue(value.toLocaleString('en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       }))
+    } else if (!displayValue) {
+      onChange?.(0)
     }
   }
 

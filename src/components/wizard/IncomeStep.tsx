@@ -146,14 +146,14 @@ export const IncomeStep: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Ancillary Income */}
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>Additional Income Sources</CardTitle>
-              <CardDescription>
-                Secondary revenue streams and ancillary services
-              </CardDescription>
-            </CardHeader>
+           {/* Ancillary Income */}
+           <Card className="md:col-span-2">
+             <CardHeader>
+               <CardTitle>Additional Income Sources</CardTitle>
+               <CardDescription>
+                 Secondary revenue streams and ancillary services. Consider machine expansion opportunities.
+               </CardDescription>
+             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Vending Income */}
               <FormField
@@ -180,32 +180,51 @@ export const IncomeStep: React.FC = () => {
                 )}
               />
 
-              {/* Other Income */}
-              <FormField
-                control={form.control}
-                name="otherIncomeAnnual"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Other Income (Annual)</FormLabel>
-                    <FormControl>
-                      <CurrencyInput
-                        placeholder="$1,000.00"
-                        value={field.value}
-                        onChange={(value) => {
-                          field.onChange(value);
-                          handleFieldChange('otherIncomeAnnual', value);
-                        }}
-                      />
-                    </FormControl>
-                    <p className="text-sm text-muted-foreground">
-                      ATM, coin exchange, dry cleaning, etc.
-                    </p>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
+               {/* Other Income */}
+               <FormField
+                 control={form.control}
+                 name="otherIncomeAnnual"
+                 render={({ field }) => (
+                   <FormItem>
+                     <FormLabel>Other Income (Annual)</FormLabel>
+                     <FormControl>
+                       <CurrencyInput
+                         placeholder="$1,000.00"
+                         value={field.value}
+                         onChange={(value) => {
+                           field.onChange(value);
+                           handleFieldChange('otherIncomeAnnual', value);
+                         }}
+                       />
+                     </FormControl>
+                     <p className="text-sm text-muted-foreground">
+                       ATM, coin exchange, dry cleaning, etc.
+                     </p>
+                     <FormMessage />
+                   </FormItem>
+                 )}
+               />
+             </CardContent>
+           </Card>
+
+           {/* Income Improvement Potential */}
+           <Card className="md:col-span-2">
+             <CardHeader>
+               <CardTitle>Income Improvement Opportunities</CardTitle>
+               <CardDescription>
+                 Consider these options to increase revenue through machine expansion
+               </CardDescription>
+             </CardHeader>
+             <CardContent>
+               <Alert>
+                 <InfoIcon className="h-4 w-4" />
+                 <AlertDescription>
+                   <strong>Machine Expansion:</strong> Adding 2-4 additional washers/dryers can increase revenue by $50,000-$150,000 annually. 
+                   Consider available space, utility capacity, and market demand. See the "Expansion Potential" step for detailed analysis.
+                 </AlertDescription>
+               </Alert>
+             </CardContent>
+           </Card>
 
 
           {/* Income Summary */}
