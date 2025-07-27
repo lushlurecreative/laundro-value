@@ -19,7 +19,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { InfoIcon, TrendingDown, Plus, Trash2 } from 'lucide-react';
 
 const ExpensesSchema = z.object({
-  expenseGrowthRatePercent: z.number().min(0).max(100, "Growth rate must be between 0-100%"),
+  incomeGrowthRatePercent: z.number().min(0).max(100, "Income growth rate must be between 0-100%"),
+  expenseGrowthRatePercent: z.number().min(0).max(100, "Expense growth rate must be between 0-100%"),
   otherExpenseAmount: z.number().min(0, "Other expense must be positive"),
 });
 
@@ -31,6 +32,7 @@ export const ExpensesStep: React.FC = () => {
   const form = useForm<ExpensesData>({
     resolver: zodResolver(ExpensesSchema),
     defaultValues: {
+      incomeGrowthRatePercent: deal?.incomeGrowthRatePercent || 2.0,
       expenseGrowthRatePercent: deal?.expenseGrowthRatePercent || 3.0,
       otherExpenseAmount: 0,
     },
@@ -38,6 +40,7 @@ export const ExpensesStep: React.FC = () => {
 
   useEffect(() => {
     if (deal) {
+      form.setValue('incomeGrowthRatePercent', deal.incomeGrowthRatePercent || 2.0);
       form.setValue('expenseGrowthRatePercent', deal.expenseGrowthRatePercent || 3.0);
     }
   }, [deal, form]);
@@ -242,20 +245,47 @@ export const ExpensesStep: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Expense Growth */}
+        {/* Growth Projections */}
         <Card>
           <CardHeader>
-            <CardTitle>Expense Growth Projections</CardTitle>
+            <CardTitle>Growth Projections</CardTitle>
             <CardDescription>
               Expected annual growth rates for financial projections
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="incomeGrowthRatePercent"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Income Growth Rate (%)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      placeholder="2.0"
+                      {...field}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value) || 0;
+                        field.onChange(value);
+                        handleFieldChange('incomeGrowthRatePercent', value);
+                      }}
+                    />
+                  </FormControl>
+                  <p className="text-sm text-muted-foreground">
+                    Industry standard: 1.5-3.0% annually *
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
             <FormField
               control={form.control}
               name="expenseGrowthRatePercent"
               render={({ field }) => (
-                <FormItem className="max-w-md">
+                <FormItem>
                   <FormLabel>Expense Growth Rate (%)</FormLabel>
                   <FormControl>
                     <Input

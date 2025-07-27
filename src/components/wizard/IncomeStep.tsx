@@ -20,7 +20,6 @@ import { InfoIcon, TrendingUp } from 'lucide-react';
 const IncomeSchema = z.object({
   grossIncomeAnnual: z.number().min(0, "Gross income must be positive"),
   annualNet: z.number().min(0, "Annual net must be positive"),
-  incomeGrowthRatePercent: z.number().min(0).max(100, "Growth rate must be between 0-100%"),
   vendingIncomeAnnual: z.number().min(0, "Vending income must be positive"),
   otherIncomeAnnual: z.number().min(0, "Other income must be positive"),
 });
@@ -35,7 +34,6 @@ export const IncomeStep: React.FC = () => {
     defaultValues: {
       grossIncomeAnnual: deal?.grossIncomeAnnual || 0,
       annualNet: deal?.annualNet || 0,
-      incomeGrowthRatePercent: deal?.incomeGrowthRatePercent || 2.0,
       vendingIncomeAnnual: ancillaryIncome?.vendingIncomeAnnual || 0,
       otherIncomeAnnual: ancillaryIncome?.otherIncomeAnnual || 0,
     },
@@ -46,7 +44,6 @@ export const IncomeStep: React.FC = () => {
     if (deal) {
       form.setValue('grossIncomeAnnual', deal.grossIncomeAnnual || 0);
       form.setValue('annualNet', deal.annualNet || 0);
-      form.setValue('incomeGrowthRatePercent', deal.incomeGrowthRatePercent || 2.0);
     }
     if (ancillaryIncome) {
       form.setValue('vendingIncomeAnnual', ancillaryIncome.vendingIncomeAnnual || 0);
@@ -211,43 +208,6 @@ export const IncomeStep: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Growth Projections */}
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>Income Growth Projections</CardTitle>
-              <CardDescription>
-                Expected annual growth rates for financial projections
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <FormField
-                control={form.control}
-                name="incomeGrowthRatePercent"
-                render={({ field }) => (
-                  <FormItem className="max-w-md">
-                    <FormLabel>Income Growth Rate (%)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.1"
-                        placeholder="2.0"
-                        {...field}
-                        onChange={(e) => {
-                          const value = parseFloat(e.target.value) || 0;
-                          field.onChange(value);
-                          handleFieldChange('incomeGrowthRatePercent', value);
-                        }}
-                      />
-                    </FormControl>
-                    <p className="text-sm text-muted-foreground">
-                      Industry standard: 1.5-3.0% annually *
-                    </p>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
 
           {/* Income Summary */}
           <Card className="md:col-span-2 bg-muted/50">

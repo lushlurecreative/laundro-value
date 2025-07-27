@@ -84,10 +84,10 @@ export const InvestmentTargetsStep: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Target className="h-5 w-5" />
-                Investment Goals
+                Investment Targets/Goals
               </CardTitle>
               <CardDescription>
-                Define your desired investment returns and performance metrics
+                Define your desired investment returns and performance metrics for this deal
               </CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">

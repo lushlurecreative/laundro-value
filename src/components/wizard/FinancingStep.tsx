@@ -318,6 +318,42 @@ export const FinancingStep: React.FC = () => {
             </CardContent>
           </Card>
 
+          {/* Other Financing Details */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle>Other Financing Details</CardTitle>
+              <CardDescription>
+                Additional financing information
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <FormField
+                control={form.control}
+                name="loanType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Other Financing Details</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter other financing information..."
+                        value={field.value === 'Other' ? field.value : ''}
+                        onChange={(e) => {
+                          field.onChange(e.target.value || 'Other');
+                          handleFieldChange('loanType', e.target.value || 'Other');
+                        }}
+                        disabled={field.value !== 'Other'}
+                      />
+                    </FormControl>
+                    <p className="text-sm text-muted-foreground">
+                      Only enabled when "Other" is selected above
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
           {/* Financing Information */}
           <Card className="md:col-span-2">
             <CardHeader>
