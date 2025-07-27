@@ -142,7 +142,7 @@ export const ExpensesStep: React.FC = () => {
                     <CurrencyInput
                       placeholder="$0.00"
                       value={expense?.amountAnnual || 0}
-                      onValueChange={(value) => {
+                      onChange={(value) => {
                         if (expense) {
                           updateExpenseItem(expense.expenseId, { amountAnnual: value });
                         }
@@ -180,7 +180,7 @@ export const ExpensesStep: React.FC = () => {
                   <div>
                     <CurrencyInput
                       value={expense.amountAnnual}
-                      onValueChange={(value) => {
+                      onChange={(value) => {
                         updateExpenseItem(expense.expenseId, { amountAnnual: value });
                       }}
                     />
@@ -215,7 +215,7 @@ export const ExpensesStep: React.FC = () => {
                         <CurrencyInput
                           placeholder="$0.00"
                           value={field.value}
-                          onValueChange={field.onChange}
+                          onChange={field.onChange}
                         />
                       </FormControl>
                       <FormMessage />

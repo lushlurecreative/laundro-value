@@ -236,7 +236,7 @@ export const EquipmentStep: React.FC = () => {
               <Label>Price per Load</Label>
               <CurrencyInput
                 value={newMachine.vendPricePerUse || 0}
-                onValueChange={(value) => setNewMachine({...newMachine, vendPricePerUse: value})}
+                onChange={(value) => setNewMachine({...newMachine, vendPricePerUse: value})}
                 placeholder="$3.50"
               />
               <p className="text-xs text-muted-foreground">Washers: $2.50-5.00, Dryers: $1.50-3.00 *</p>
@@ -267,7 +267,7 @@ export const EquipmentStep: React.FC = () => {
               <Label>Current Value (if known)</Label>
               <CurrencyInput
                 value={newMachine.currentValue || 0}
-                onValueChange={(value) => setNewMachine({...newMachine, currentValue: value})}
+                onChange={(value) => setNewMachine({...newMachine, currentValue: value})}
                 placeholder="$0.00"
               />
             </div>
@@ -277,7 +277,7 @@ export const EquipmentStep: React.FC = () => {
               <Label>Replacement Cost (if known)</Label>
               <CurrencyInput
                 value={newMachine.purchaseValue || 0}
-                onValueChange={(value) => setNewMachine({...newMachine, purchaseValue: value})}
+                onChange={(value) => setNewMachine({...newMachine, purchaseValue: value})}
                 placeholder="$0.00"
               />
             </div>

@@ -109,7 +109,7 @@ export const IncomeStep: React.FC = () => {
                       <CurrencyInput
                         placeholder="$200,000.00"
                         value={field.value}
-                        onValueChange={(value) => {
+                        onChange={(value) => {
                           field.onChange(value);
                           handleFieldChange('grossIncomeAnnual', value);
                         }}
@@ -134,7 +134,7 @@ export const IncomeStep: React.FC = () => {
                       <CurrencyInput
                         placeholder="$50,000.00"
                         value={field.value}
-                        onValueChange={(value) => {
+                        onChange={(value) => {
                           field.onChange(value);
                           handleFieldChange('annualNet', value);
                         }}
@@ -170,7 +170,7 @@ export const IncomeStep: React.FC = () => {
                       <CurrencyInput
                         placeholder="$3,000.00"
                         value={field.value}
-                        onValueChange={(value) => {
+                        onChange={(value) => {
                           field.onChange(value);
                           handleFieldChange('vendingIncomeAnnual', value);
                         }}
@@ -195,7 +195,7 @@ export const IncomeStep: React.FC = () => {
                       <CurrencyInput
                         placeholder="$1,000.00"
                         value={field.value}
-                        onValueChange={(value) => {
+                        onChange={(value) => {
                           field.onChange(value);
                           handleFieldChange('otherIncomeAnnual', value);
                         }}

@@ -142,7 +142,7 @@ export const LeaseStep: React.FC = () => {
                       <CurrencyInput
                         placeholder="$5,000.00"
                         value={field.value}
-                        onValueChange={(value) => {
+                        onChange={(value) => {
                           field.onChange(value);
                           handleFieldChange('monthlyRent', value);
                         }}
@@ -167,7 +167,7 @@ export const LeaseStep: React.FC = () => {
                       <CurrencyInput
                         placeholder="$2,000.00"
                         value={field.value}
-                        onValueChange={(value) => {
+                        onChange={(value) => {
                           field.onChange(value);
                           handleFieldChange('camCostAnnual', value);
                         }}

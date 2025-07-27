@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon } from 'lucide-react';
+import { HelpTooltip } from "@/components/ui/help-tooltip";
 
 const PropertyInfoSchema = z.object({
   dealName: z.string().min(1, "Deal name is required"),
@@ -85,7 +86,10 @@ export const PropertyInfoStep: React.FC = () => {
             name="dealName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Deal Name *</FormLabel>
+                <FormLabel className="flex items-center gap-2">
+                  Deal Name *
+                  <HelpTooltip content="A unique name to identify this deal in your analysis. Use something memorable like the business name or location." />
+                </FormLabel>
                 <FormControl>
                   <Input 
                     placeholder="e.g., The Spin Cycle Laundromat"
@@ -107,7 +111,10 @@ export const PropertyInfoStep: React.FC = () => {
             name="propertyAddress"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Property Address *</FormLabel>
+                <FormLabel className="flex items-center gap-2">
+                  Property Address *
+                  <HelpTooltip content="The complete address of the laundromat property. This is used for location-based analysis and market data." />
+                </FormLabel>
                 <FormControl>
                   <Input 
                     placeholder="e.g., 123 Main St, City, State 12345"
@@ -129,12 +136,15 @@ export const PropertyInfoStep: React.FC = () => {
             name="askingPrice"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Asking Price</FormLabel>
+                <FormLabel className="flex items-center gap-2">
+                  Asking Price
+                  <HelpTooltip content="The seller's asking price for the business. This includes equipment, customer base, and goodwill. Does not include real estate unless specified." />
+                </FormLabel>
                 <FormControl>
                   <CurrencyInput
                     placeholder="$150,000.00"
                     value={field.value}
-                    onValueChange={(value) => {
+                    onChange={(value) => {
                       field.onChange(value);
                       handleFieldChange('askingPrice', value);
                     }}
@@ -154,7 +164,10 @@ export const PropertyInfoStep: React.FC = () => {
             name="facilitySizeSqft"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Facility Size (Square Feet)</FormLabel>
+                <FormLabel className="flex items-center gap-2">
+                  Facility Size (Square Feet)
+                  <HelpTooltip content="Total square footage of the laundromat space. Includes customer area, equipment area, and any office/storage space. Used to calculate rent per sq ft and equipment density." />
+                </FormLabel>
                 <FormControl>
                   <Input 
                     type="number"
