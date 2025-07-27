@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useDeal } from '@/contexts/useDeal';
+import { ExpansionItem } from '@/types/deal';
 import {
   Form,
   FormControl,
@@ -34,7 +35,6 @@ const ExpansionSchema = z.object({
 });
 
 type ExpansionData = z.infer<typeof ExpansionSchema>;
-type ExpansionItem = z.infer<typeof ExpansionItemSchema>;
 
 const expansionTypes = [
   { value: 'vending', label: 'Vending Machines', icon: <ShoppingCart className="h-4 w-4" />, description: 'Snacks, drinks, laundry supplies' },

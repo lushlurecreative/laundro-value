@@ -32,6 +32,16 @@ export interface Deal {
     description: string;
     potentialRevenue: number;
   }[];
+  expansionItems?: ExpansionItem[];
+}
+
+export interface ExpansionItem {
+  id: string;
+  type: 'vending' | 'coffee' | 'wifi_lounge' | 'shoe_cleaning' | 'dry_cleaning' | 'wash_fold' | 'equipment_upgrade' | 'extended_hours' | 'other';
+  description: string;
+  estimatedMonthlyRevenue: number;
+  initialInvestment: number;
+  monthlyOperatingCost: number;
 }
 
 export interface LeaseDetails {
