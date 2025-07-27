@@ -68,21 +68,21 @@ export const parseAIResponse = (response: string): Record<string, any> => {
   
   const fields: Record<string, any> = {};
 
-  // More comprehensive patterns for extracting deal information
+  // Enhanced patterns for the Albany Park laundromat format and similar data
   const patterns = {
-    askingPrice: /(?:asking\s+(?:only\s+)?\$?([\d,]+)|sell\s+price|business\s+price|price)[:\s]*\$?([\d,]+)/i,
-    grossIncome: /(?:total\s+income|gross\s+income|washers?\s*[&\+]?\s*dryers?)[:\s]*\$?([\d,]+)/i,
-    totalSqft: /(?:footprint|sq\s*ft|square\s+feet)[:\s]*(\d[\d,]*)/i,
-    propertyAddress: /(?:premises\s+address|address|location)[:\s]*([^\n,]+(?:,[^,\n]+)*)/i,
-    monthlyRent: /(?:year\s+\d+|monthly\s+base\s+rent|monthly\s+rent|base\s+rent)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
-    leaseTerm: /(?:term|lease\s+term)[:\s]*(\d+)\s*years?/i,
-    renewalOptions: /(?:renewal\s+options?|options?)[:\s]*(?:two\s*\(\s*2\s*\)|two|2)\s*(?:five\s*\(\s*5\s*\)|five|5)\s*year/i,
-    renewalOptionsCount: /(?:two\s*\(\s*(\d+)\s*\)|(\d+)\s+(?:option|renewal))/i,
-    renewalTermYears: /(?:five\s*\(\s*(\d+)\s*\)|(\d+)\s*year\s*renewal)/i,
-    rentIncrease: /(?:increase\s+by|to\s+increase\s+by)[:\s]*([\d.]+)%/i,
-    washers: /(\d+)\s+(?:washers?|dual\s+stack\s+dryers)/i,
-    dryers: /(\d+)\s+(?:dual\s*stack\s+)?dryers?/i,
+    askingPrice: /(?:asking\s+\$?([\d,]+)|price\s*(?:reduced)?\s*\$?([\d,]+)|offer\s*\$?([\d,]+))/i,
+    grossIncome: /(?:total\s+income|gross\s+income|machines?\s+income)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    machineIncome: /machines?[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    dropOffIncome: /drop[-\s]?off\s+laundry[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    totalSqft: /(?:(\d+)\s*sf|(\d+)\s*sq\s*ft|(\d+)\s*square\s+feet)/i,
+    propertyAddress: /(?:(\d+\s+[NSEW]?\s*[^\n,]+(?:ave|avenue|st|street|rd|road|blvd|boulevard)[^\n,]*(?:,[^,\n]+)*)|address[:\s]*([^\n,]+(?:,[^,\n]+)*))/i,
+    monthlyRent: /(?:rent[:\s]*\$?([\d,]+(?:\.\d{2})?)|(\$[\d,]+)\/mo)/i,
+    leaseTerm: /(?:term[:\s]*(\d+)\s*years?|long\s+term)/i,
+    washers: /(\d+)\s*[-\s]*(\d+#|\d+)\s*(?:speed\s+queen\s+)?washers?/i,
+    dryers: /(\d+)\s*[-\s]*(\d+#|\d+)\s*(?:speed\s+queen\s+)?dryers?/i,
     vendingIncome: /vending[:\s]*\$?([\d,]+)/i,
+    netIncome: /net\s+income[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    ebitda: /(?:ebitda|estimated\s+actual\s+cash\s+flow)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
   };
 
   // Extract simple key-value pairs
@@ -97,26 +97,41 @@ export const parseAIResponse = (response: string): Record<string, any> => {
     }
   }
 
-  // Enhanced expense parsing with more categories
+  // Enhanced expense parsing matching Albany Park format
   const expenseCategories = {
-    'rent': /rent[:\s]*\$?([\d,]+)/i,
-    'gas': /gas[:\s]*\$?([\d,]+)/i,
-    'electricity': /(?:electric|electricity)[:\s]*\$?([\d,]+)/i,
-    'water': /(?:water\s*&?\s*sewer|water)[:\s]*\$?([\d,]+)/i,
-    'maintenance': /(?:repairs?\s*&?\s*maint|maintenance)[:\s]*\$?([\d,]+)/i,
-    'insurance': /insurance[:\s]*\$?([\d,]+)/i,
-    'trash': /trash[:\s]*\$?([\d,]+)/i,
-    'licenses': /(?:license\s*&?\s*permits?|licenses?)[:\s]*\$?([\d,]+)/i,
-    'supplies': /(?:cost\s+of\s+goods\s+sold|supplies)[:\s]*\$?([\d,]+)/i,
-    'internet': /internet[:\s]*\$?([\d,]+)/i
+    'rent': /rent[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'gas': /gas[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'electricity': /(?:electric|electricity)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'water': /water[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'maintenance': /(?:repairs?\s*&?\s*maint|maintenance|repairs?)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'insurance': /insurance[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'trash': /(?:trash|waste\s+removal)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'licenses': /(?:license\s*&?\s*permits?|licenses?)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'supplies': /(?:cost\s+of\s+goods\s+sold|supplies)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'internet': /internet[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'payroll': /payroll[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'accounting': /accounting[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'alarm': /alarm[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'depreciation': /depreciation\s+expense[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'auto': /auto\s+expense[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'bank': /bank\s+charges[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'meals': /meals[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'office': /office[:\s]*\$?([\d,]+(?:\.\d{2})?)/i
   };
 
-  // Enhanced equipment parsing for detailed inventory
+  // Enhanced equipment parsing for Albany Park format
   const equipmentPatterns = {
-    totalWashers: /(\d+)\s+washers?/i,
+    washers50lb: /(\d+)\s*[-\s]*\s*50#?\s*(?:speed\s+queen\s+)?washers?/i,
+    washers35lb: /(\d+)\s*[-\s]*\s*35#?\s*(?:speed\s+queen\s+)?washers?/i,
+    washers18lb: /(\d+)\s*[-\s]*\s*18#?\s*(?:speed\s+queen\s+)?washers?/i,
+    dryerPockets: /(\d+)\s*[-\s]*\s*35#?\s*(?:speed\s+queen\s+)?dryer\s+pockets?/i,
+    totalWashers: /total.*?(\d+)\s+washers?/i,
     totalDryers: /(\d+)\s+(?:dual\s*stack\s+)?dryers?/i,
-    changers: /(\d+)\s+coin[\s-]?(?:bill\s+)?changers?/i,
-    vending: /(\d+)\s+(?:soap\s+)?vending/i,
+    carts: /(\d+)\s*[-\s]*\s*laundry\s+carts?/i,
+    tables: /(\d+)\s*[-\s]*\s*folding\s+tables?/i,
+    changers: /(\d+)\s*[-\s]*\s*(?:bill\s+)?coin\s+changers?/i,
+    chairs: /(\d+)\s*[-\s]*\s*chairs?/i,
+    stools: /(\d+)\s*[-\s]*\s*stools?/i
   };
 
   const expenses: { [key: string]: number } = {};
@@ -132,9 +147,16 @@ export const parseAIResponse = (response: string): Record<string, any> => {
   const finalFields: Record<string, any> = {};
   
   if (fields.askingPrice) finalFields.askingPrice = fields.askingPrice;
-  if (fields.grossIncome) finalFields.grossIncome = fields.grossIncome;
-  if (fields.totalSqft) finalFields.totalSqft = fields.totalSqft;
+  if (fields.grossIncome || fields.machineIncome) {
+    finalFields.grossIncomeAnnual = fields.grossIncome || fields.machineIncome;
+    if (fields.dropOffIncome) {
+      finalFields.grossIncomeAnnual += fields.dropOffIncome;
+    }
+  }
+  if (fields.totalSqft) finalFields.facilitySizeSqft = fields.totalSqft;
   if (fields.propertyAddress) finalFields.propertyAddress = fields.propertyAddress;
+  if (fields.netIncome) finalFields.annualNet = fields.netIncome;
+  if (fields.ebitda) finalFields.ebitda = fields.ebitda;
 
   const lease: Record<string, any> = {};
   if (fields.monthlyRent) lease.monthlyRent = fields.monthlyRent;
@@ -163,10 +185,24 @@ export const parseAIResponse = (response: string): Record<string, any> => {
   });
 
   const equipment: Record<string, any> = {};
-  if (fields.washers) equipment.washers = fields.washers;
-  if (fields.dryers) equipment.dryers = fields.dryers;
-  if (equipmentData.totalWashers) equipment.washers = equipmentData.totalWashers;
-  if (equipmentData.totalDryers) equipment.dryers = equipmentData.totalDryers;
+  // Calculate total washers from different sizes
+  let totalWashers = 0;
+  if (equipmentData.washers50lb) totalWashers += equipmentData.washers50lb;
+  if (equipmentData.washers35lb) totalWashers += equipmentData.washers35lb;
+  if (equipmentData.washers18lb) totalWashers += equipmentData.washers18lb;
+  if (fields.washers) totalWashers = fields.washers;
+  if (equipmentData.totalWashers) totalWashers = equipmentData.totalWashers;
+  
+  if (totalWashers > 0) equipment.washers = totalWashers;
+  if (fields.dryers || equipmentData.dryerPockets || equipmentData.totalDryers) {
+    equipment.dryers = fields.dryers || equipmentData.dryerPockets || equipmentData.totalDryers;
+  }
+  
+  // Add detailed equipment info
+  if (equipmentData.carts) equipment.carts = equipmentData.carts;
+  if (equipmentData.tables) equipment.tables = equipmentData.tables;
+  if (equipmentData.changers) equipment.changers = equipmentData.changers;
+  
   if (Object.keys(equipment).length > 0) finalFields.equipment = equipment;
 
   // Extract ancillary income

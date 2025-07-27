@@ -7,14 +7,15 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDeal } from '@/contexts/useDeal';
 import { useOpenAIAnalysis } from '@/hooks/useOpenAIAnalysis';
-import { Lightbulb, FileText, Building2, DollarSign, Loader2, CheckCircle } from 'lucide-react';
+import { Lightbulb, FileText, Building2, DollarSign, Loader2, CheckCircle, Upload } from 'lucide-react';
 import { FormLoadingSkeleton, AnalysisLoadingSkeleton } from './LoadingStates';
 
 export const EnhancedAIAnalysis = () => {
-  const { updateDeal, updateLeaseDetails, addExpenseItem, addMachine, machineInventory, ancillaryIncome, updateAncillaryIncome } = useDeal();
-  const [text, setText] = useState('');
+  const { deal, updateDeal, updateLeaseDetails, addExpenseItem, addMachine, machineInventory, ancillaryIncome, updateAncillaryIncome } = useDeal();
+  const [text, setText] = useState(deal?.pastedInformation || '');
   const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [confidenceScores, setConfidenceScores] = useState<Record<string, number>>({});
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
   const { analyzeText, isAnalyzing } = useOpenAIAnalysis({
     onFieldsPopulated: (fields) => {
@@ -30,11 +31,13 @@ export const EnhancedAIAnalysis = () => {
       
       setConfidenceScores(scores);
 
-      // Auto-populate fields with enhanced mapping
-      if (fields.askingPrice) updateDeal({ askingPrice: fields.askingPrice });
-      if (fields.grossIncomeAnnual) updateDeal({ grossIncomeAnnual: fields.grossIncomeAnnual });
-      if (fields.facilitySizeSqft) updateDeal({ facilitySizeSqft: fields.facilitySizeSqft });
-      if (fields.propertyAddress) updateDeal({ propertyAddress: fields.propertyAddress });
+      // Auto-populate fields with enhanced mapping and save pasted info
+      const dealUpdate: any = { pastedInformation: text };
+      if (fields.askingPrice) dealUpdate.askingPrice = fields.askingPrice;
+      if (fields.grossIncomeAnnual) dealUpdate.grossIncomeAnnual = fields.grossIncomeAnnual;
+      if (fields.facilitySizeSqft) dealUpdate.facilitySizeSqft = fields.facilitySizeSqft;
+      if (fields.propertyAddress) dealUpdate.propertyAddress = fields.propertyAddress;
+      updateDeal(dealUpdate);
 
       // Enhanced lease handling
       if (fields.lease) {
@@ -129,8 +132,29 @@ export const EnhancedAIAnalysis = () => {
 
   const handleAnalysis = (analysisType: 'notes' | 'lease' = 'notes') => {
     if (text.trim()) {
+      // Save the pasted text to deal context
+      updateDeal({ pastedInformation: text });
       analyzeText(text, analysisType);
     }
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    setUploadedFiles(prev => [...prev, ...files]);
+    
+    // Process files and extract text for analysis
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        setText(prev => prev + '\n\n' + content);
+      };
+      reader.readAsText(file);
+    });
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const ConfidenceBadge = ({ score, label }: { score: number; label: string }) => {
@@ -183,6 +207,48 @@ export const EnhancedAIAnalysis = () => {
                 onChange={(e) => setText(e.target.value)}
                 className="min-h-[150px]"
               />
+              
+              <div className="space-y-2">
+                <label htmlFor="file-upload" className="block text-sm font-medium">
+                  Or upload documents (PDF, TXT, DOC)
+                </label>
+                <input
+                  id="file-upload"
+                  type="file"
+                  multiple
+                  accept=".pdf,.txt,.doc,.docx"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => document.getElementById('file-upload')?.click()}
+                  className="w-full"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload Documents
+                </Button>
+                
+                {uploadedFiles.length > 0 && (
+                  <div className="space-y-1">
+                    {uploadedFiles.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-muted rounded text-sm">
+                        <span>{file.name}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFile(index)}
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <Button 
                 onClick={() => handleAnalysis('notes')} 
                 disabled={!text.trim() || isAnalyzing}

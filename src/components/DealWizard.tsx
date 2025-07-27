@@ -12,6 +12,7 @@ import { LeaseStep } from './wizard/LeaseStep';
 import { InvestmentTargetsStep } from './wizard/InvestmentTargetsStep';
 import { ExpansionPotentialStep } from './wizard/ExpansionPotentialStep';
 import { EnhancedAIAnalysis } from './wizard/EnhancedAIAnalysis';
+import { MissingDataAnalysis } from './MissingDataAnalysis';
 import { ValidationSummary } from './wizard/ValidationSummary';
 import { FutureIncomeAnalysis } from './FutureIncomeAnalysis';
 import { IncomeVerification } from './IncomeVerification';
@@ -39,6 +40,7 @@ const steps = [
   { id: 'comprehensive-ai', title: 'AI Deal Analysis', component: ComprehensiveAIAnalysis },
   { id: 'premium-reports', title: 'Premium Reports', component: PremiumReports },
   { id: 'validation', title: 'Review & Validate', component: ValidationSummary },
+  { id: 'missing-data', title: 'Missing Data Analysis', component: MissingDataAnalysis },
 ];
 
 export const DealWizard: React.FC<DealWizardProps> = ({ onComplete }) => {

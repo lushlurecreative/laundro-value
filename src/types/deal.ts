@@ -33,6 +33,7 @@ export interface Deal {
     potentialRevenue: number;
   }[];
   expansionItems?: ExpansionItem[];
+  pastedInformation?: string;
 }
 
 export interface ExpansionItem {
