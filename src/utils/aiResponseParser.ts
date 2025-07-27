@@ -76,8 +76,9 @@ export const parseAIResponse = (response: string): Record<string, any> => {
     propertyAddress: /(?:premises\s+address|address|location)[:\s]*([^\n,]+(?:,[^,\n]+)*)/i,
     monthlyRent: /(?:year\s+\d+|monthly\s+base\s+rent|monthly\s+rent|base\s+rent)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
     leaseTerm: /(?:term|lease\s+term)[:\s]*(\d+)\s*years?/i,
-    renewalOptions: /(?:renewal\s+options|options)[:\s]*(?:two\s*\(2\)\s*|\btwo\b|\b2\b|\d+)/i,
+    renewalOptions: /(?:renewal\s+options?|options?)[:\s]*(?:two\s*\(\s*2\s*\)|two|2)\s*(?:five\s*\(\s*5\s*\)|five|5)\s*year/i,
     renewalOptionsCount: /(?:two\s*\(\s*(\d+)\s*\)|(\d+)\s+(?:option|renewal))/i,
+    renewalTermYears: /(?:five\s*\(\s*(\d+)\s*\)|(\d+)\s*year\s*renewal)/i,
     rentIncrease: /(?:increase\s+by|to\s+increase\s+by)[:\s]*([\d.]+)%/i,
     washers: /(\d+)\s+(?:washers?|dual\s+stack\s+dryers)/i,
     dryers: /(\d+)\s+(?:dual\s*stack\s+)?dryers?/i,
@@ -137,17 +138,18 @@ export const parseAIResponse = (response: string): Record<string, any> => {
 
   const lease: Record<string, any> = {};
   if (fields.monthlyRent) lease.monthlyRent = fields.monthlyRent;
-  if (fields.leaseTerm) lease.remainingTermYears = fields.leaseTerm;
-  if (fields.renewalOptions) {
-    // Parse renewal options - handle "Two (2)" format
-    const renewalMatch = response.match(/(?:two\s*\(\s*(\d+)\s*\)|(\d+)\s+(?:option|renewal))/i);
+  if (fields.leaseTerm) lease.remainingLeaseTermYears = fields.leaseTerm;
+  if (fields.renewalOptions || fields.renewalOptionsCount) {
+    // Enhanced parsing for "Two (2) five (5) year renewal" format
+    const renewalMatch = response.match(/(?:two\s*\(\s*(\d+)\s*\)|(\d+))\s*(?:five\s*\(\s*(\d+)\s*\)|(\d+))\s*year/i);
     if (renewalMatch) {
       lease.renewalOptionsCount = parseInt(renewalMatch[1] || renewalMatch[2]) || 2;
+      lease.renewalOptionLengthYears = parseInt(renewalMatch[3] || renewalMatch[4]) || 5;
     } else {
-      lease.renewalOptionsCount = fields.renewalOptions;
+      lease.renewalOptionsCount = fields.renewalOptionsCount || 2;
+      lease.renewalOptionLengthYears = 5;
     }
   }
-  if (fields.renewalOptionsCount) lease.renewalOptionsCount = fields.renewalOptionsCount;
   if (fields.rentIncrease) lease.annualRentIncreasePercent = fields.rentIncrease;
   if (Object.keys(lease).length > 0) finalFields.lease = lease;
 

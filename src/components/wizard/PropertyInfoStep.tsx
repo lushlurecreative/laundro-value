@@ -29,7 +29,7 @@ const PropertyInfoSchema = z.object({
 type PropertyInfoData = z.infer<typeof PropertyInfoSchema>;
 
 export const PropertyInfoStep: React.FC = () => {
-  const { deal, updateDeal } = useDeal();
+  const { deal, updateDeal, marketData } = useDeal();
   const [isRealEstateIncluded, setIsRealEstateIncluded] = useState(deal?.isRealEstateIncluded || false);
 
   const form = useForm<PropertyInfoData>({

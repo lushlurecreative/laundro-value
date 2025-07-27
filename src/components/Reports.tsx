@@ -794,7 +794,7 @@ ${concerns.map(concern => `• ${concern}`).join('\n')}` : ''}
             <CardHeader>
               <CardTitle>Report Configuration</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Customize your reports with additional information
+                Customize your professional reports and analysis
               </p>
             </CardHeader>
             <CardContent className="space-y-4">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Suspense } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -12,6 +12,12 @@ import { LeaseStep } from './wizard/LeaseStep';
 import { InvestmentTargetsStep } from './wizard/InvestmentTargetsStep';
 import { EnhancedAIAnalysis } from './wizard/EnhancedAIAnalysis';
 import { ValidationSummary } from './wizard/ValidationSummary';
+import { FutureIncomeAnalysis } from './FutureIncomeAnalysis';
+import { IncomeVerification } from './IncomeVerification';
+import { ComprehensiveAIAnalysis } from './ComprehensiveAIAnalysis';
+import { PremiumReports } from './PremiumReports';
+import { FormLoadingSkeleton } from './wizard/LoadingStates';
+import { useState } from 'react';
 
 interface DealWizardProps {
   onComplete?: () => void;
@@ -21,11 +27,15 @@ const steps = [
   { id: 'ai-analysis', title: 'AI Analysis', component: EnhancedAIAnalysis },
   { id: 'property', title: 'Property Info', component: PropertyInfoStep },
   { id: 'income', title: 'Income', component: IncomeStep },
+  { id: 'future-income', title: 'Future Income', component: FutureIncomeAnalysis },
   { id: 'expenses', title: 'Expenses', component: ExpensesStep },
   { id: 'equipment', title: 'Equipment', component: EquipmentStep },
   { id: 'financing', title: 'Financing', component: FinancingStep },
   { id: 'lease', title: 'Lease Info', component: LeaseStep },
   { id: 'targets', title: 'Investment Goals', component: InvestmentTargetsStep },
+  { id: 'income-verification', title: 'Income Verification', component: IncomeVerification },
+  { id: 'comprehensive-ai', title: 'AI Deal Analysis', component: ComprehensiveAIAnalysis },
+  { id: 'premium-reports', title: 'Premium Reports', component: PremiumReports },
   { id: 'validation', title: 'Review & Validate', component: ValidationSummary },
 ];
 
@@ -104,7 +114,9 @@ export const DealWizard: React.FC<DealWizardProps> = ({ onComplete }) => {
           <CardTitle>{steps[currentStep].title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <CurrentStepComponent />
+          <Suspense fallback={<FormLoadingSkeleton />}>
+            <CurrentStepComponent />
+          </Suspense>
         </CardContent>
       </Card>
 
