@@ -24,27 +24,55 @@ export const EnhancedAIAnalysis = () => {
       // Calculate confidence scores based on data completeness
       const scores: Record<string, number> = {};
       if (fields.askingPrice) scores.pricing = 95;
-      if (fields.grossIncome) scores.income = 90;
+      if (fields.grossIncomeAnnual || fields.grossIncome) scores.income = 90;
       if (fields.lease?.monthlyRent) scores.lease = 85;
       if (fields.equipment?.washers && fields.equipment?.dryers) scores.equipment = 88;
       if (fields.expenses && Object.keys(fields.expenses).length > 0) scores.expenses = 75;
       
       setConfidenceScores(scores);
 
-      // Auto-populate fields with enhanced mapping and save pasted info
+      // Extract business name from text for deal name
+      const businessNameMatch = text.match(/([A-Z\s]+(?:COIN\s+)?LAUNDRY(?:MAT)?)/i);
+      const businessName = businessNameMatch ? businessNameMatch[1].trim() : '';
+
+      // Auto-populate main deal fields with enhanced mapping
       const dealUpdate: any = { pastedInformation: text };
       if (fields.askingPrice) dealUpdate.askingPrice = fields.askingPrice;
       if (fields.grossIncomeAnnual) dealUpdate.grossIncomeAnnual = fields.grossIncomeAnnual;
+      if (fields.grossIncome) dealUpdate.grossIncomeAnnual = fields.grossIncome;
       if (fields.facilitySizeSqft) dealUpdate.facilitySizeSqft = fields.facilitySizeSqft;
       if (fields.propertyAddress) dealUpdate.propertyAddress = fields.propertyAddress;
+      if (fields.annualNet) dealUpdate.annualNet = fields.annualNet;
+      if (fields.ebitda) dealUpdate.ebitda = fields.ebitda;
+      if (businessName) dealUpdate.dealName = businessName;
+      
       updateDeal(dealUpdate);
 
-      // Enhanced lease handling
+      // Enhanced income mapping - handle the specific income types from the data
+      if (fields.machineIncome || fields.dropOffIncome || fields.vendingIncome) {
+        const incomeUpdate: any = { ...ancillaryIncome };
+        
+        // Machine income goes to main gross income if not already set
+        if (fields.machineIncome && !dealUpdate.grossIncomeAnnual) {
+          updateDeal({ ...dealUpdate, grossIncomeAnnual: fields.machineIncome });
+        }
+        
+        // Drop-off and vending are ancillary income
+        if (fields.dropOffIncome) incomeUpdate.washAndFold = fields.dropOffIncome;
+        if (fields.vendingIncome) incomeUpdate.vending = fields.vendingIncome;
+        
+        if (Object.keys(incomeUpdate).length > 0) {
+          updateAncillaryIncome(incomeUpdate);
+        }
+      }
+
+      // Enhanced lease handling with proper monthly to annual conversion
       if (fields.lease) {
         const leaseUpdate: any = {};
         if (fields.lease.monthlyRent) leaseUpdate.monthlyRent = fields.lease.monthlyRent;
         if (fields.lease.remainingTermYears) leaseUpdate.remainingLeaseTermYears = fields.lease.remainingTermYears;
         if (fields.lease.renewalOptionsCount) leaseUpdate.renewalOptionsCount = fields.lease.renewalOptionsCount;
+        if (fields.lease.renewalOptionLengthYears) leaseUpdate.renewalOptionLengthYears = fields.lease.renewalOptionLengthYears;
         if (fields.lease.annualRentIncreasePercent) leaseUpdate.annualRentIncreasePercent = fields.lease.annualRentIncreasePercent;
         
         if (Object.keys(leaseUpdate).length > 0) {
@@ -52,17 +80,56 @@ export const EnhancedAIAnalysis = () => {
         }
       }
 
-      // Enhanced equipment handling
+      // Enhanced equipment handling - add multiple machine types
       if (fields.equipment) {
-        if (fields.equipment.washers) {
+        // Add washers of different sizes
+        if (fields.equipment.washers50lb) {
           addMachine({
-            machineId: `washer-${Date.now()}`,
+            machineId: `washer-50lb-${Date.now()}`,
             dealId: '',
             machineType: 'Top-Load Washer',
-            brand: '',
-            quantity: fields.equipment.washers,
-            ageYears: fields.equipment.avgAge || 5,
-            capacityLbs: 20,
+            brand: 'Speed Queen',
+            quantity: fields.equipment.washers50lb,
+            ageYears: 5,
+            capacityLbs: 50,
+            vendPricePerUse: 4.00,
+            conditionRating: 3,
+            purchaseValue: 0,
+            currentValue: 0,
+            maintenanceCostAnnual: 0,
+            isCardOperated: false,
+            isCoinOperated: true,
+            isOutOfOrder: false
+          });
+        }
+        if (fields.equipment.washers35lb) {
+          addMachine({
+            machineId: `washer-35lb-${Date.now()}`,
+            dealId: '',
+            machineType: 'Top-Load Washer',
+            brand: 'Speed Queen',
+            quantity: fields.equipment.washers35lb,
+            ageYears: 5,
+            capacityLbs: 35,
+            vendPricePerUse: 3.00,
+            conditionRating: 3,
+            purchaseValue: 0,
+            currentValue: 0,
+            maintenanceCostAnnual: 0,
+            isCardOperated: false,
+            isCoinOperated: true,
+            isOutOfOrder: false
+          });
+        }
+        if (fields.equipment.washers18lb) {
+          addMachine({
+            machineId: `washer-18lb-${Date.now()}`,
+            dealId: '',
+            machineType: 'Top-Load Washer',
+            brand: 'Speed Queen',
+            quantity: fields.equipment.washers18lb,
+            ageYears: 5,
+            capacityLbs: 18,
             vendPricePerUse: 2.50,
             conditionRating: 3,
             purchaseValue: 0,
@@ -73,15 +140,54 @@ export const EnhancedAIAnalysis = () => {
             isOutOfOrder: false
           });
         }
-        if (fields.equipment.dryers) {
+        if (fields.equipment.dryerPockets) {
           addMachine({
-            machineId: `dryer-${Date.now()}`,
+            machineId: `dryer-pockets-${Date.now()}`,
             dealId: '',
             machineType: 'Single Dryer',
-            brand: '',
+            brand: 'Speed Queen',
+            quantity: fields.equipment.dryerPockets,
+            ageYears: 5,
+            capacityLbs: 35,
+            vendPricePerUse: 2.00,
+            conditionRating: 3,
+            purchaseValue: 0,
+            currentValue: 0,
+            maintenanceCostAnnual: 0,
+            isCardOperated: false,
+            isCoinOperated: true,
+            isOutOfOrder: false
+          });
+        }
+        // Generic washer/dryer fallback
+        if (fields.equipment.washers && !fields.equipment.washers50lb && !fields.equipment.washers35lb && !fields.equipment.washers18lb) {
+          addMachine({
+            machineId: `washer-generic-${Date.now()}`,
+            dealId: '',
+            machineType: 'Top-Load Washer',
+            brand: 'Speed Queen',
+            quantity: fields.equipment.washers,
+            ageYears: 5,
+            capacityLbs: 35,
+            vendPricePerUse: 3.00,
+            conditionRating: 3,
+            purchaseValue: 0,
+            currentValue: 0,
+            maintenanceCostAnnual: 0,
+            isCardOperated: false,
+            isCoinOperated: true,
+            isOutOfOrder: false
+          });
+        }
+        if (fields.equipment.dryers && !fields.equipment.dryerPockets) {
+          addMachine({
+            machineId: `dryer-generic-${Date.now()}`,
+            dealId: '',
+            machineType: 'Single Dryer',
+            brand: 'Speed Queen',
             quantity: fields.equipment.dryers,
-            ageYears: fields.equipment.avgAge || 5,
-            capacityLbs: 45,
+            ageYears: 5,
+            capacityLbs: 35,
             vendPricePerUse: 2.00,
             conditionRating: 3,
             purchaseValue: 0,
@@ -94,38 +200,57 @@ export const EnhancedAIAnalysis = () => {
         }
       }
 
-      // Enhanced expense handling with common categories
+      // Enhanced expense handling - use annual values directly, not multiply by 12
       if (fields.expenses) {
         const expenseMapping = {
           rent: 'Rent',
-          electricity: 'Electricity',
+          electricity: 'Electric',
+          electric: 'Electric',
           gas: 'Gas',
           water: 'Water & Sewer',
-          maintenance: 'Maintenance & Repairs',
+          maintenance: 'Repairs',
+          repairs: 'Repairs',
           insurance: 'Insurance',
-          trash: 'Trash Removal',
+          trash: 'Waste Removal',
+          'waste removal': 'Waste Removal',
           licenses: 'Licenses & Permits',
-          supplies: 'Supplies & COGS',
-          internet: 'Internet'
+          supplies: 'Cost of Goods Sold',
+          'cost of goods sold': 'Cost of Goods Sold',
+          internet: 'Internet',
+          payroll: 'Payroll',
+          accounting: 'Accounting',
+          alarm: 'Alarm',
+          depreciation: 'Depreciation Expense',
+          auto: 'Auto Expense',
+          'auto expense': 'Auto Expense',
+          bank: 'Bank Charges',
+          'bank charges': 'Bank Charges',
+          meals: 'Meals',
+          office: 'Office'
         };
 
         Object.entries(fields.expenses).forEach(([key, value]) => {
-          const displayName = expenseMapping[key as keyof typeof expenseMapping] || key;
+          const displayName = expenseMapping[key.toLowerCase() as keyof typeof expenseMapping] || 
+                              key.charAt(0).toUpperCase() + key.slice(1);
           addExpenseItem({
             expenseId: `${key}-${Date.now()}`,
             dealId: '',
             expenseName: displayName,
-            amountAnnual: (value as number) * 12,
-            expenseType: 'Fixed'
+            amountAnnual: value as number, // Use annual values directly
+            expenseType: key.toLowerCase().includes('payroll') ? 'Variable' : 'Fixed'
           });
         });
       }
 
-      // Enhanced ancillary income
+      // Enhanced ancillary income handling
       if (fields.ancillary) {
         const updates: any = { ...ancillaryIncome };
         if (fields.ancillary.vending) updates.vending = fields.ancillary.vending;
-        updateAncillaryIncome(updates);
+        if (fields.ancillary.dropOff) updates.washAndFold = fields.ancillary.dropOff;
+        
+        if (Object.keys(updates).length > 0) {
+          updateAncillaryIncome(updates);
+        }
       }
     }
   });

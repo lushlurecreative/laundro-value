@@ -71,7 +71,7 @@ export const parseAIResponse = (response: string): Record<string, any> => {
   // Enhanced patterns for the Albany Park laundromat format and similar data
   const patterns = {
     askingPrice: /(?:asking\s+\$?([\d,]+)|price\s*(?:reduced)?\s*\$?([\d,]+)|offer\s*\$?([\d,]+))/i,
-    grossIncome: /(?:total\s+income|gross\s+income|machines?\s+income)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    grossIncome: /(?:total\s+income|gross\s+income)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
     machineIncome: /machines?[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
     dropOffIncome: /drop[-\s]?off\s+laundry[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
     totalSqft: /(?:(\d+)\s*sf|(\d+)\s*sq\s*ft|(\d+)\s*square\s+feet)/i,
@@ -83,6 +83,7 @@ export const parseAIResponse = (response: string): Record<string, any> => {
     vendingIncome: /vending[:\s]*\$?([\d,]+)/i,
     netIncome: /net\s+income[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
     ebitda: /(?:ebitda|estimated\s+actual\s+cash\s+flow)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    businessName: /([A-Z\s]+(?:COIN\s+)?LAUNDRY(?:MAT)?)/i,
   };
 
   // Extract simple key-value pairs
@@ -147,16 +148,15 @@ export const parseAIResponse = (response: string): Record<string, any> => {
   const finalFields: Record<string, any> = {};
   
   if (fields.askingPrice) finalFields.askingPrice = fields.askingPrice;
-  if (fields.grossIncome || fields.machineIncome) {
-    finalFields.grossIncomeAnnual = fields.grossIncome || fields.machineIncome;
-    if (fields.dropOffIncome) {
-      finalFields.grossIncomeAnnual += fields.dropOffIncome;
-    }
-  }
+  if (fields.grossIncome) finalFields.grossIncomeAnnual = fields.grossIncome;
+  if (fields.machineIncome) finalFields.machineIncome = fields.machineIncome;
+  if (fields.dropOffIncome) finalFields.dropOffIncome = fields.dropOffIncome;
+  if (fields.vendingIncome) finalFields.vendingIncome = fields.vendingIncome;
   if (fields.totalSqft) finalFields.facilitySizeSqft = fields.totalSqft;
   if (fields.propertyAddress) finalFields.propertyAddress = fields.propertyAddress;
   if (fields.netIncome) finalFields.annualNet = fields.netIncome;
   if (fields.ebitda) finalFields.ebitda = fields.ebitda;
+  if (fields.businessName) finalFields.businessName = fields.businessName;
 
   const lease: Record<string, any> = {};
   if (fields.monthlyRent) lease.monthlyRent = fields.monthlyRent;
@@ -185,6 +185,13 @@ export const parseAIResponse = (response: string): Record<string, any> => {
   });
 
   const equipment: Record<string, any> = {};
+  
+  // Add specific washer sizes to equipment object for detailed parsing
+  if (equipmentData.washers50lb) equipment.washers50lb = equipmentData.washers50lb;
+  if (equipmentData.washers35lb) equipment.washers35lb = equipmentData.washers35lb;
+  if (equipmentData.washers18lb) equipment.washers18lb = equipmentData.washers18lb;
+  if (equipmentData.dryerPockets) equipment.dryerPockets = equipmentData.dryerPockets;
+  
   // Calculate total washers from different sizes
   let totalWashers = 0;
   if (equipmentData.washers50lb) totalWashers += equipmentData.washers50lb;
