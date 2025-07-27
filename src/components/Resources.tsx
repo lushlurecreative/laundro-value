@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useDeal } from '@/contexts/useDeal';
-import { Plus, X, Lightbulb, Coffee, Car, Shield, Wifi } from 'lucide-react';
+import { Plus, X, Lightbulb, Coffee, Car, Shield, Wifi, DollarSign, TrendingUp, Users, MapPin, Building, FileText, ExternalLink } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export const Resources: React.FC = () => {
@@ -157,20 +157,167 @@ export const Resources: React.FC = () => {
           </CardContent>
         </Card>
 
+        {/* Industry News & Market Data */}
+        <Card className="shadow-elegant">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <CardTitle>Industry News & Market Intelligence</CardTitle>
+              <TrendingUp className="h-5 w-5 text-primary" />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Stay informed about laundromat industry trends and local market conditions
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h4 className="font-semibold mb-3 flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Industry Resources
+                </h4>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">Coin Laundry Association</p>
+                      <p className="text-sm text-muted-foreground">Industry standards & best practices</p>
+                    </div>
+                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">American Coin-Op Magazine</p>
+                      <p className="text-sm text-muted-foreground">Industry news & equipment updates</p>
+                    </div>
+                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">Laundromat Resource Forums</p>
+                      <p className="text-sm text-muted-foreground">Community discussions & tips</p>
+                    </div>
+                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold mb-3 flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Location-Based Data
+                </h4>
+                <div className="space-y-3">
+                  {deal?.propertyAddress && (
+                    <div className="p-3 bg-muted/50 rounded-lg">
+                      <p className="text-sm font-medium">Market Analysis for:</p>
+                      <p className="text-sm text-muted-foreground">{deal.propertyAddress}</p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        * Data sourced from census, demographic, and market research APIs
+                      </p>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="text-center p-3 border rounded-lg">
+                      <p className="text-lg font-bold text-primary">N/A</p>
+                      <p className="text-xs text-muted-foreground">Avg Household Income</p>
+                    </div>
+                    <div className="text-center p-3 border rounded-lg">
+                      <p className="text-lg font-bold text-primary">N/A</p>
+                      <p className="text-xs text-muted-foreground">Population Density</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Financing Resources */}
+        <Card className="shadow-elegant">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <CardTitle>Financing Resources & Standards</CardTitle>
+              <DollarSign className="h-5 w-5 text-primary" />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Financing options and industry standards for laundromat acquisitions
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h4 className="font-semibold mb-3">Typical Financing Terms</h4>
+                <div className="space-y-3">
+                  <div className="p-3 border rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">Down Payment</span>
+                      <span className="text-primary font-semibold">20-30%</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Industry standard for established businesses</p>
+                  </div>
+                  <div className="p-3 border rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">Loan Term</span>
+                      <span className="text-primary font-semibold">7-10 years</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Typical SBA and conventional loans</p>
+                  </div>
+                  <div className="p-3 border rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">Interest Rate</span>
+                      <span className="text-primary font-semibold">6-12%</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Varies by credit and loan type</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold mb-3">Financing Sources</h4>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">SBA Loans</p>
+                      <p className="text-sm text-muted-foreground">7(a) and 504 programs</p>
+                    </div>
+                    <Badge variant="secondary">Popular</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">Equipment Financing</p>
+                      <p className="text-sm text-muted-foreground">For equipment-heavy deals</p>
+                    </div>
+                    <Badge variant="outline">Specialized</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">Business Lines of Credit</p>
+                      <p className="text-sm text-muted-foreground">For working capital</p>
+                    </div>
+                    <Badge variant="outline">Flexible</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">Seller Financing</p>
+                      <p className="text-sm text-muted-foreground">Owner-backed deals</p>
+                    </div>
+                    <Badge variant="secondary">Common</Badge>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Maintenance & Operations */}
         <Card className="shadow-elegant">
           <CardHeader>
             <div className="flex items-center gap-2">
               <CardTitle>Maintenance & Operations Guide</CardTitle>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Lightbulb className="h-4 w-4 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Essential maintenance tasks and operational best practices to keep your laundromat running efficiently and profitably.</p>
-                </TooltipContent>
-              </Tooltip>
+              <Building className="h-5 w-5 text-primary" />
             </div>
+            <p className="text-sm text-muted-foreground">
+              Essential maintenance tasks and operational best practices
+            </p>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -212,6 +359,45 @@ export const Resources: React.FC = () => {
                   <li>• Assess competition and market</li>
                   <li>• Plan capital improvements</li>
                   <li>• Review lease and contracts</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Legal & Compliance */}
+        <Card className="shadow-elegant">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <CardTitle>Legal & Compliance Resources</CardTitle>
+              <FileText className="h-5 w-5 text-primary" />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Important legal and regulatory considerations for laundromat operations
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h4 className="font-semibold mb-3">Required Licenses & Permits</h4>
+                <ul className="space-y-2 text-sm">
+                  <li>• Business license and tax registration</li>
+                  <li>• Water and wastewater discharge permits</li>
+                  <li>• Fire department safety inspections</li>
+                  <li>• ADA compliance certification</li>
+                  <li>• Workers' compensation insurance</li>
+                  <li>• Commercial liability insurance</li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-3">Regulatory Compliance</h4>
+                <ul className="space-y-2 text-sm">
+                  <li>• Environmental regulations (water/chemical use)</li>
+                  <li>• OSHA safety standards</li>
+                  <li>• Local zoning and signage requirements</li>
+                  <li>• Health department regulations</li>
+                  <li>• Energy efficiency standards</li>
+                  <li>• Privacy laws for security cameras</li>
                 </ul>
               </div>
             </div>

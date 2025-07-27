@@ -10,6 +10,7 @@ import { EquipmentStep } from './wizard/EquipmentStep';
 import { FinancingStep } from './wizard/FinancingStep';
 import { LeaseStep } from './wizard/LeaseStep';
 import { InvestmentTargetsStep } from './wizard/InvestmentTargetsStep';
+import { ExpansionPotentialStep } from './wizard/ExpansionPotentialStep';
 import { EnhancedAIAnalysis } from './wizard/EnhancedAIAnalysis';
 import { ValidationSummary } from './wizard/ValidationSummary';
 import { FutureIncomeAnalysis } from './FutureIncomeAnalysis';
@@ -32,7 +33,8 @@ const steps = [
   { id: 'equipment', title: 'Equipment', component: EquipmentStep },
   { id: 'financing', title: 'Financing', component: FinancingStep },
   { id: 'lease', title: 'Lease Info', component: LeaseStep },
-  { id: 'targets', title: 'Investment Goals', component: InvestmentTargetsStep },
+  { id: 'expansion', title: 'Expansion Potential', component: ExpansionPotentialStep },
+  { id: 'targets', title: 'Investment Targets', component: InvestmentTargetsStep },
   { id: 'income-verification', title: 'Income Verification', component: IncomeVerification },
   { id: 'comprehensive-ai', title: 'AI Deal Analysis', component: ComprehensiveAIAnalysis },
   { id: 'premium-reports', title: 'Premium Reports', component: PremiumReports },
