@@ -10,14 +10,15 @@ import { EquipmentStep } from './wizard/EquipmentStep';
 import { FinancingStep } from './wizard/FinancingStep';
 import { LeaseStep } from './wizard/LeaseStep';
 import { InvestmentTargetsStep } from './wizard/InvestmentTargetsStep';
-import { AIAnalysisStep } from './wizard/AIAnalysisStep';
+import { EnhancedAIAnalysis } from './wizard/EnhancedAIAnalysis';
+import { ValidationSummary } from './wizard/ValidationSummary';
 
 interface DealWizardProps {
   onComplete?: () => void;
 }
 
 const steps = [
-  { id: 'ai-analysis', title: 'AI Analysis', component: AIAnalysisStep },
+  { id: 'ai-analysis', title: 'AI Analysis', component: EnhancedAIAnalysis },
   { id: 'property', title: 'Property Info', component: PropertyInfoStep },
   { id: 'income', title: 'Income', component: IncomeStep },
   { id: 'expenses', title: 'Expenses', component: ExpensesStep },
@@ -25,6 +26,7 @@ const steps = [
   { id: 'financing', title: 'Financing', component: FinancingStep },
   { id: 'lease', title: 'Lease Info', component: LeaseStep },
   { id: 'targets', title: 'Investment Goals', component: InvestmentTargetsStep },
+  { id: 'validation', title: 'Review & Validate', component: ValidationSummary },
 ];
 
 export const DealWizard: React.FC<DealWizardProps> = ({ onComplete }) => {
