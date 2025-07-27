@@ -48,7 +48,7 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
         return
       }
       
-      // Update display value immediately for better UX
+      // Update display value without formatting while typing
       setDisplayValue(numericValue)
       
       // Parse and send numeric value
