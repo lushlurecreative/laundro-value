@@ -23,6 +23,7 @@ export interface Deal {
   // Growth assumptions for projections
   incomeGrowthRatePercent: number;
   expenseGrowthRatePercent: number;
+  projectedAdditionalMonthlyRevenue?: number;
   expansionPotential: {
     additionalMachines: number;
     expansionCost: number;

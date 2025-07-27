@@ -71,6 +71,7 @@ export const EnhancedAIAnalysis = () => {
         const leaseUpdate: any = {};
         if (fields.lease.monthlyRent) leaseUpdate.monthlyRent = fields.lease.monthlyRent;
         if (fields.lease.remainingTermYears) leaseUpdate.remainingLeaseTermYears = fields.lease.remainingTermYears;
+        if (fields.lease.remainingLeaseTermYears) leaseUpdate.remainingLeaseTermYears = fields.lease.remainingLeaseTermYears;
         if (fields.lease.renewalOptionsCount) leaseUpdate.renewalOptionsCount = fields.lease.renewalOptionsCount;
         if (fields.lease.renewalOptionLengthYears) leaseUpdate.renewalOptionLengthYears = fields.lease.renewalOptionLengthYears;
         if (fields.lease.annualRentIncreasePercent) leaseUpdate.annualRentIncreasePercent = fields.lease.annualRentIncreasePercent;

@@ -27,16 +27,10 @@ const FinancingSchema = z.object({
 type FinancingData = z.infer<typeof FinancingSchema>;
 
 const loanTypes = [
-  'SBA 7(a) Loan',
-  'SBA 504 Loan', 
-  'Conventional Bank Loan',
-  'Equipment Financing',
-  'Seller Financing',
-  'Asset-Based Loan',
-  'Business Line of Credit',
-  'Personal Loan',
-  'Cash Purchase',
-  'Other'
+  { value: 'Cash Purchase', label: 'Cash Purchase', rates: 'N/A', terms: 'Immediate ownership', description: 'Full cash payment' },
+  { value: 'Conventional Bank Loan', label: 'Conventional Bank Loan', rates: '7.0% - 12.0%', terms: '5-15 years typical', description: 'Traditional business loan from banks' },
+  { value: 'SBA 7(a) Loan', label: 'SBA 7(a) Loan', rates: '6.5% - 10.5%', terms: 'Up to 10 years for business acquisition', description: 'Most common SBA loan for business purchases' },
+  { value: 'Other', label: 'Other', rates: 'Varies', terms: 'Varies', description: 'Custom financing option' },
 ];
 
 export const FinancingStep: React.FC = () => {
@@ -100,40 +94,7 @@ export const FinancingStep: React.FC = () => {
 
   const annualDebtService = monthlyPayment * 12;
 
-  // Get loan type information
-  const getLoanTypeInfo = (type: string) => {
-    const loanInfo: { [key: string]: { description: string; rates: string; terms: string } } = {
-      'SBA 7(a) Loan': {
-        description: 'Most common SBA loan for business purchases',
-        rates: '6.5% - 10.5% *',
-        terms: 'Up to 10 years for business acquisition'
-      },
-      'SBA 504 Loan': {
-        description: 'For real estate and equipment purchases',
-        rates: '5.5% - 9.5% *',
-        terms: 'Up to 20 years for real estate'
-      },
-      'Conventional Bank Loan': {
-        description: 'Traditional business loan from banks',
-        rates: '7.0% - 12.0% *',
-        terms: '5-15 years typical'
-      },
-      'Equipment Financing': {
-        description: 'Secured by the equipment being purchased',
-        rates: '6.0% - 15.0% *',
-        terms: '3-10 years'
-      },
-      'Seller Financing': {
-        description: 'Owner finances part of the purchase',
-        rates: '5.0% - 10.0% *',
-        terms: 'Negotiable, typically 5-10 years'
-      }
-    };
-    
-    return loanInfo[type] || { description: 'Custom financing option', rates: 'Varies', terms: 'Varies' };
-  };
-
-  const selectedLoanInfo = getLoanTypeInfo(form.watch('loanType') || '');
+  const selectedLoanType = loanTypes.find(lt => lt.value === form.watch('loanType')) || loanTypes[0];
 
   return (
     <div className="space-y-6">
@@ -210,9 +171,9 @@ export const FinancingStep: React.FC = () => {
                         }}
                       />
                     </FormControl>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedLoanInfo.rates}
-                    </p>
+                     <p className="text-sm text-muted-foreground">
+                       {selectedLoanType.rates}
+                     </p>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -239,9 +200,9 @@ export const FinancingStep: React.FC = () => {
                         }}
                       />
                     </FormControl>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedLoanInfo.terms}
-                    </p>
+                     <p className="text-sm text-muted-foreground">
+                       {selectedLoanType.terms}
+                     </p>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -266,15 +227,15 @@ export const FinancingStep: React.FC = () => {
                           <SelectValue placeholder="Select loan type" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        {loanTypes.map(type => (
-                          <SelectItem key={type} value={type}>{type}</SelectItem>
-                        ))}
-                      </SelectContent>
+                       <SelectContent>
+                         {loanTypes.map(type => (
+                           <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                         ))}
+                       </SelectContent>
                     </Select>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedLoanInfo.description}
-                    </p>
+                     <p className="text-sm text-muted-foreground">
+                       {selectedLoanType.description}
+                     </p>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -363,6 +324,15 @@ export const FinancingStep: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <h4 className="font-semibold">Cash Purchase (Fastest)</h4>
+                  <p className="text-sm text-muted-foreground">
+                    • No financing delays
+                    • Immediate ownership
+                    • Stronger negotiating position
+                    • No debt service obligations
+                  </p>
+                </div>
                 <div className="space-y-2">
                   <h4 className="font-semibold">SBA Loans (Recommended)</h4>
                   <p className="text-sm text-muted-foreground">

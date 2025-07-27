@@ -31,6 +31,8 @@ const EquipmentSchema = z.object({
   conditionRating: z.number().min(1).max(5, "Condition must be 1-5"),
   currentValue: z.number().min(0, "Current value cannot be negative").optional(),
   purchaseValue: z.number().min(0, "Replacement cost cannot be negative").optional(),
+  isCoinOperated: z.boolean().optional(),
+  isCardOperated: z.boolean().optional(),
 });
 
 type EquipmentData = z.infer<typeof EquipmentSchema>;
@@ -47,16 +49,16 @@ const machineTypes = [
 ];
 
 const popularBrands = [
-  'Speed Queen',
-  'Wascomat',
-  'Maytag Commercial',
-  'Whirlpool Commercial',
-  'Huebsch',
   'Continental Girbau',
-  'UniMac',
   'Dexter',
+  'Huebsch',
+  'Maytag Commercial',
   'Milnor',
-  'Other'
+  'Other',
+  'Speed Queen',
+  'UniMac',
+  'Wascomat',
+  'Whirlpool Commercial'
 ];
 
 const conditionOptions = [
@@ -84,6 +86,8 @@ export const EquipmentStep: React.FC = () => {
       conditionRating: 3,
       currentValue: undefined,
       purchaseValue: undefined,
+      isCoinOperated: true,
+      isCardOperated: false,
     },
   });
 
@@ -105,8 +109,8 @@ export const EquipmentStep: React.FC = () => {
       purchaseValue: data.purchaseValue || 0,
       currentValue: data.currentValue || 0,
       maintenanceCostAnnual: 0,
-      isCardOperated: false,
-      isCoinOperated: true,
+      isCardOperated: data.isCardOperated || false,
+      isCoinOperated: data.isCoinOperated || true,
       isOutOfOrder: false
     };
 
@@ -127,6 +131,8 @@ export const EquipmentStep: React.FC = () => {
       form.setValue('waterUsagePerCycle', machine.waterConsumptionGalPerCycle);
       form.setValue('currentValue', machine.currentValue);
       form.setValue('purchaseValue', machine.purchaseValue);
+      form.setValue('isCoinOperated', machine.isCoinOperated);
+      form.setValue('isCardOperated', machine.isCardOperated);
       setEditingMachine(machineId);
     }
   };
@@ -144,6 +150,8 @@ export const EquipmentStep: React.FC = () => {
         waterConsumptionGalPerCycle: data.waterUsagePerCycle,
         currentValue: data.currentValue || 0,
         purchaseValue: data.purchaseValue || 0,
+        isCoinOperated: data.isCoinOperated || false,
+        isCardOperated: data.isCardOperated || false,
       });
       form.reset();
       setEditingMachine(null);
@@ -313,14 +321,27 @@ export const EquipmentStep: React.FC = () => {
                       Size/Capacity (lbs)
                       <HelpTooltip content="Load capacity in pounds" />
                     </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="1"
-                        {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                      />
-                    </FormControl>
+                    <Select 
+                      value={field.value.toString()} 
+                      onValueChange={(value) => field.onChange(parseInt(value))}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select capacity" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="18">18 lbs (Small)</SelectItem>
+                        <SelectItem value="20">20 lbs (Standard)</SelectItem>
+                        <SelectItem value="25">25 lbs (Medium)</SelectItem>
+                        <SelectItem value="30">30 lbs (Large)</SelectItem>
+                        <SelectItem value="35">35 lbs (Extra Large)</SelectItem>
+                        <SelectItem value="40">40 lbs (Commercial)</SelectItem>
+                        <SelectItem value="50">50 lbs (Super Size)</SelectItem>
+                        <SelectItem value="60">60 lbs (Mega)</SelectItem>
+                        <SelectItem value="80">80 lbs (Industrial)</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <p className="text-sm text-muted-foreground">
                       {form.watch('machineType') && getIndustryStandards(form.watch('machineType')).capacity} typical *
                     </p>
@@ -458,6 +479,47 @@ export const EquipmentStep: React.FC = () => {
                   </FormItem>
                 )}
               />
+
+              {/* Payment Type */}
+              <div className="md:col-span-3 space-y-3">
+                <FormLabel>Payment Type</FormLabel>
+                <div className="flex gap-4">
+                  <FormField
+                    control={form.control}
+                    name="isCoinOperated"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center space-x-2">
+                        <FormControl>
+                          <input
+                            type="checkbox"
+                            checked={field.value || false}
+                            onChange={(e) => field.onChange(e.target.checked)}
+                            className="rounded"
+                          />
+                        </FormControl>
+                        <FormLabel className="text-sm font-normal">Coin Operated</FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="isCardOperated"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center space-x-2">
+                        <FormControl>
+                          <input
+                            type="checkbox"
+                            checked={field.value || false}
+                            onChange={(e) => field.onChange(e.target.checked)}
+                            className="rounded"
+                          />
+                        </FormControl>
+                        <FormLabel className="text-sm font-normal">Card Operated</FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
             </CardContent>
             <div className="px-6 pb-6">
               <div className="flex gap-2">
@@ -509,6 +571,7 @@ export const EquipmentStep: React.FC = () => {
                     <div className="text-sm">
                       <p>Price: {formatCurrency(machine.vendPricePerUse)}</p>
                       <p>Condition: {machine.conditionRating}/5</p>
+                      <p>Payment: {machine.isCoinOperated && machine.isCardOperated ? 'Coin & Card' : machine.isCoinOperated ? 'Coin' : machine.isCardOperated ? 'Card' : 'N/A'}</p>
                     </div>
                     <div className="text-sm">
                       {machine.currentValue > 0 && <p>Value: {formatCurrency(machine.currentValue)}</p>}

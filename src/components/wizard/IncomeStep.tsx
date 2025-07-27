@@ -22,6 +22,7 @@ const IncomeSchema = z.object({
   annualNet: z.number().min(0, "Annual net must be positive"),
   vendingIncomeAnnual: z.number().min(0, "Vending income must be positive"),
   otherIncomeAnnual: z.number().min(0, "Other income must be positive"),
+  projectedAdditionalMonthlyRevenue: z.number().min(0, "Projected revenue must be positive").optional(),
 });
 
 type IncomeData = z.infer<typeof IncomeSchema>;
@@ -36,6 +37,7 @@ export const IncomeStep: React.FC = () => {
       annualNet: deal?.annualNet || 0,
       vendingIncomeAnnual: ancillaryIncome?.vendingIncomeAnnual || 0,
       otherIncomeAnnual: ancillaryIncome?.otherIncomeAnnual || 0,
+      projectedAdditionalMonthlyRevenue: deal?.projectedAdditionalMonthlyRevenue || 0,
     },
   });
 
@@ -44,6 +46,7 @@ export const IncomeStep: React.FC = () => {
     if (deal) {
       form.setValue('grossIncomeAnnual', deal.grossIncomeAnnual || 0);
       form.setValue('annualNet', deal.annualNet || 0);
+      form.setValue('projectedAdditionalMonthlyRevenue', deal.projectedAdditionalMonthlyRevenue || 0);
     }
     if (ancillaryIncome) {
       form.setValue('vendingIncomeAnnual', ancillaryIncome.vendingIncomeAnnual || 0);
@@ -210,17 +213,39 @@ export const IncomeStep: React.FC = () => {
            {/* Income Improvement Potential */}
            <Card className="md:col-span-2">
              <CardHeader>
-               <CardTitle>Income Improvement Opportunities</CardTitle>
+               <CardTitle>Income Improvement Strategy</CardTitle>
                <CardDescription>
-                 Consider these options to increase revenue through machine expansion
+                 Project additional monthly revenue opportunities
                </CardDescription>
              </CardHeader>
-             <CardContent>
+             <CardContent className="space-y-4">
+               <FormField
+                 control={form.control}
+                 name="projectedAdditionalMonthlyRevenue"
+                 render={({ field }) => (
+                   <FormItem>
+                     <FormLabel>Projected Additional Monthly Revenue</FormLabel>
+                     <FormControl>
+                       <CurrencyInput
+                         placeholder="$2,500.00"
+                         value={field.value || 0}
+                         onChange={(value) => {
+                           field.onChange(value);
+                           handleFieldChange('projectedAdditionalMonthlyRevenue', value);
+                         }}
+                       />
+                     </FormControl>
+                     <p className="text-sm text-muted-foreground">
+                       Potential monthly revenue increase from expansions, improvements, or operational changes
+                     </p>
+                     <FormMessage />
+                   </FormItem>
+                 )}
+               />
                <Alert>
                  <InfoIcon className="h-4 w-4" />
                  <AlertDescription>
-                   <strong>Machine Expansion:</strong> Adding 2-4 additional washers/dryers can increase revenue by $50,000-$150,000 annually. 
-                   Consider available space, utility capacity, and market demand. See the "Expansion Potential" step for detailed analysis.
+                   <strong>Ideas:</strong> Equipment additions, service improvements, pricing optimization, new revenue streams
                  </AlertDescription>
                </Alert>
              </CardContent>

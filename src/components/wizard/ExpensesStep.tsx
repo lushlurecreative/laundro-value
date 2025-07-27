@@ -247,9 +247,24 @@ export const ExpensesStep: React.FC = () => {
         {/* Growth Projections */}
         <Card>
           <CardHeader>
-            <CardTitle>Growth Projections</CardTitle>
+            <CardTitle className="flex items-center justify-between">
+              Growth Projections
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  form.setValue('incomeGrowthRatePercent', 0);
+                  form.setValue('expenseGrowthRatePercent', 0);
+                  handleFieldChange('incomeGrowthRatePercent', 0);
+                  handleFieldChange('expenseGrowthRatePercent', 0);
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </CardTitle>
             <CardDescription>
-              Expected annual growth rates for financial projections
+              Expected annual growth rates for financial projections (deletable fields)
             </CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -258,15 +273,28 @@ export const ExpensesStep: React.FC = () => {
               name="incomeGrowthRatePercent"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Income Growth Rate (%)</FormLabel>
+                  <FormLabel className="flex items-center justify-between">
+                    Income Growth Rate (%)
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        field.onChange(0);
+                        handleFieldChange('incomeGrowthRatePercent', 0);
+                      }}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       step="0.1"
                       placeholder="2.0"
-                      {...field}
+                      value={field.value === 0 ? '' : field.value}
                       onChange={(e) => {
-                        const value = parseFloat(e.target.value) || 0;
+                        const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0;
                         field.onChange(value);
                         handleFieldChange('incomeGrowthRatePercent', value);
                       }}
@@ -285,15 +313,28 @@ export const ExpensesStep: React.FC = () => {
               name="expenseGrowthRatePercent"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Expense Growth Rate (%)</FormLabel>
+                  <FormLabel className="flex items-center justify-between">
+                    Expense Growth Rate (%)
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        field.onChange(0);
+                        handleFieldChange('expenseGrowthRatePercent', 0);
+                      }}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       step="0.1"
                       placeholder="3.0"
-                      {...field}
+                      value={field.value === 0 ? '' : field.value}
                       onChange={(e) => {
-                        const value = parseFloat(e.target.value) || 0;
+                        const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0;
                         field.onChange(value);
                         handleFieldChange('expenseGrowthRatePercent', value);
                       }}

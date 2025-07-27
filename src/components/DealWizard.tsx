@@ -10,11 +10,9 @@ import { EquipmentStep } from './wizard/EquipmentStep';
 import { FinancingStep } from './wizard/FinancingStep';
 import { LeaseStep } from './wizard/LeaseStep';
 import { InvestmentTargetsStep } from './wizard/InvestmentTargetsStep';
-import { ExpansionPotentialStep } from './wizard/ExpansionPotentialStep';
 import { EnhancedAIAnalysis } from './wizard/EnhancedAIAnalysis';
 import { MissingDataAnalysis } from './MissingDataAnalysis';
 import { ValidationSummary } from './wizard/ValidationSummary';
-import { FutureIncomeAnalysis } from './FutureIncomeAnalysis';
 import { IncomeVerification } from './IncomeVerification';
 import { ComprehensiveAIAnalysis } from './ComprehensiveAIAnalysis';
 import { PremiumReports } from './PremiumReports';
@@ -31,11 +29,9 @@ const steps = [
   { id: 'property', title: 'Property Info', component: PropertyInfoStep },
   { id: 'lease', title: 'Lease Info', component: LeaseStep },
   { id: 'income', title: 'Income', component: IncomeStep },
-  { id: 'future-income', title: 'Future Income', component: FutureIncomeAnalysis },
   { id: 'expenses', title: 'Expenses', component: ExpensesStep },
   { id: 'equipment', title: 'Equipment', component: EquipmentStep },
   { id: 'financing', title: 'Financing', component: FinancingStep },
-  { id: 'expansion', title: 'Expansion Potential', component: ExpansionPotentialStep },
   { id: 'targets', title: 'Investment Targets', component: InvestmentTargetsStep },
   { id: 'income-verification', title: 'Income Verification', component: IncomeVerification },
   { id: 'comprehensive-ai', title: 'AI Deal Analysis', component: ComprehensiveAIAnalysis },
