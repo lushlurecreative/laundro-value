@@ -68,18 +68,19 @@ export const parseAIResponse = (response: string): Record<string, any> => {
   
   const fields: Record<string, any> = {};
 
-  // More comprehensive patterns
+  // More comprehensive patterns for extracting deal information
   const patterns = {
-    askingPrice: /(?:asking\s+price|sell\s+price|business\s+price|price)[:\s]*\$?([\d,]+)/i,
-    grossIncome: /(?:annual\s+revenue|gross\s+income|revenue)[:\s]*\$?([\d,]+)(?:\s*[-–—]\s*\$?([\d,]+))?/i,
+    askingPrice: /(?:asking\s+(?:only\s+)?\$?([\d,]+)|sell\s+price|business\s+price|price)[:\s]*\$?([\d,]+)/i,
+    grossIncome: /(?:total\s+income|gross\s+income|washers?\s*[&\+]?\s*dryers?)[:\s]*\$?([\d,]+)/i,
     totalSqft: /(?:footprint|sq\s*ft|square\s+feet)[:\s]*(\d[\d,]*)/i,
-    propertyAddress: /(?:premises\s+address|address|location)[:\s]*([^,]+(?:,[^,]+)*)/i,
-    monthlyRent: /(?:monthly\s+base\s+rent|monthly\s+rent|base\s+rent)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    propertyAddress: /(?:premises\s+address|address|location)[:\s]*([^\n,]+(?:,[^,\n]+)*)/i,
+    monthlyRent: /(?:year\s+\d+|monthly\s+base\s+rent|monthly\s+rent|base\s+rent)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
     leaseTerm: /(?:term|lease\s+term)[:\s]*(\d+)\s*years?/i,
     renewalOptions: /(?:renewal\s+options|options)[:\s]*(\d+)/i,
     rentIncrease: /(?:increase\s+by|to\s+increase\s+by)[:\s]*([\d.]+)%/i,
-    washers: /(\d+)\s+washers/i,
-    dryers: /(\d+)\s+(?:gas-fired\s+)?dryers/i,
+    washers: /(\d+)\s+(?:washers?|dual\s+stack\s+dryers)/i,
+    dryers: /(\d+)\s+(?:dual\s*stack\s+)?dryers?/i,
+    vendingIncome: /vending[:\s]*\$?([\d,]+)/i,
   };
 
   // Extract simple key-value pairs
@@ -108,6 +109,14 @@ export const parseAIResponse = (response: string): Record<string, any> => {
     'internet': /internet[:\s]*\$?([\d,]+)/i
   };
 
+  // Enhanced equipment parsing for detailed inventory
+  const equipmentPatterns = {
+    totalWashers: /(\d+)\s+washers?/i,
+    totalDryers: /(\d+)\s+(?:dual\s*stack\s+)?dryers?/i,
+    changers: /(\d+)\s+coin[\s-]?(?:bill\s+)?changers?/i,
+    vending: /(\d+)\s+(?:soap\s+)?vending/i,
+  };
+
   const expenses: { [key: string]: number } = {};
   
   Object.entries(expenseCategories).forEach(([category, regex]) => {
@@ -132,10 +141,26 @@ export const parseAIResponse = (response: string): Record<string, any> => {
   if (fields.rentIncrease) lease.annualRentIncreasePercent = fields.rentIncrease;
   if (Object.keys(lease).length > 0) finalFields.lease = lease;
 
+  // Extract equipment details
+  const equipmentData: { [key: string]: number } = {};
+  Object.entries(equipmentPatterns).forEach(([category, regex]) => {
+    const match = response.match(regex);
+    if (match) {
+      equipmentData[category] = parseCurrency(match[1]);
+    }
+  });
+
   const equipment: Record<string, any> = {};
   if (fields.washers) equipment.washers = fields.washers;
   if (fields.dryers) equipment.dryers = fields.dryers;
+  if (equipmentData.totalWashers) equipment.washers = equipmentData.totalWashers;
+  if (equipmentData.totalDryers) equipment.dryers = equipmentData.totalDryers;
   if (Object.keys(equipment).length > 0) finalFields.equipment = equipment;
+
+  // Extract ancillary income
+  const ancillary: Record<string, any> = {};
+  if (fields.vendingIncome) ancillary.vending = fields.vendingIncome;
+  if (Object.keys(ancillary).length > 0) finalFields.ancillary = ancillary;
   
   if (Object.keys(expenses).length > 0) finalFields.expenses = expenses;
 

@@ -24,7 +24,7 @@ import { Crown, AlertTriangle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 export const DealInputs = () => {
-  const { deal, updateDeal, updateLeaseDetails, expenseItems, updateExpenseItem, addMachine, clearMachineInventory, updateAncillaryIncome, saveAndStartNew } = useDeal();
+  const { deal, leaseDetails, updateDeal, updateLeaseDetails, expenseItems, updateExpenseItem, addMachine, clearMachineInventory, updateAncillaryIncome, saveAndStartNew, machineInventory } = useDeal();
   const { canPerformAction, trackUsage, getRemainingUsage, subscription, createCheckoutSession } = useSubscription();
   const [isRealEstateIncluded, setIsRealEstateIncluded] = useState(deal?.isRealEstateIncluded || false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
@@ -280,341 +280,471 @@ export const DealInputs = () => {
         </Alert>
       )}
 
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid grid-cols-2 gap-4">
-          {/* Deal Name */}
-          <FormField
-            control={form.control}
-            name="dealName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Deal Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="The Spin Cycle" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Property Address */}
-          <FormField
-            control={form.control}
-            name="propertyAddress"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Property Address</FormLabel>
-                <FormControl>
-                  <Input placeholder="123 Main St" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Asking Price */}
-          <FormField
-            control={form.control}
-            name="askingPrice"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Asking Price</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="150000" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Facility Size */}
-          <FormField
-            control={form.control}
-            name="facilitySizeSqft"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Facility Size (Sqft)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="2000" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Gross Income */}
-          <FormField
-            control={form.control}
-            name="grossIncomeAnnual"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Gross Income (Annual)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="200000" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Annual Net */}
-           <FormField
-            control={form.control}
-            name="annualNet"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Annual Net (NOI)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="50000" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Is Real Estate Included */}
-          <FormField
-            control={form.control}
-            name="isRealEstateIncluded"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-md border p-4">
-                <div className="space-y-0.5">
-                  <FormLabel>Real Estate Included?</FormLabel>
-                  {/* <FormDescription>
-                    Whether the real estate is included in the deal.
-                  </FormDescription> */}
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={isRealEstateIncluded}
-                    onCheckedChange={(checked) => {
-                      setIsRealEstateIncluded(checked);
-                      form.setValue("isRealEstateIncluded", checked);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          {/* Full Time Staff Count */}
-          <FormField
-            control={form.control}
-            name="fullTimeStaffCount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Full Time Staff</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="2" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Part Time Staff Count */}
-          <FormField
-            control={form.control}
-            name="partTimeStaffCount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Part Time Staff</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="3" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Payroll Cost */}
-          <FormField
-            control={form.control}
-            name="payrollCost"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Payroll Cost</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="75000" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          {/* Down Payment Percent */}
-          <FormField
-            control={form.control}
-            name="downPaymentPercent"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Down Payment (%)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="25" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Loan Interest Rate Percent */}
-          <FormField
-            control={form.control}
-            name="loanInterestRatePercent"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Interest Rate (%)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="7.5" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Loan Term Years */}
-          <FormField
-            control={form.control}
-            name="loanTermYears"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Loan Term (Years)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="10" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          {/* Target Cap Rate Percent */}
-          <FormField
-            control={form.control}
-            name="targetCapRatePercent"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Target Cap Rate (%)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="8" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Target CoC ROI Percent */}
-          <FormField
-            control={form.control}
-            name="targetCoCROIPercent"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Target CoC ROI (%)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="15" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Owner Weekly Hours */}
-          <FormField
-            control={form.control}
-            name="ownerWeeklyHours"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Owner Hours (Weekly)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="10" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          {/* Lease History */}
-          <FormField
-            control={form.control}
-            name="leaseHistory"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Lease History</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Previous lease terms..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Notes */}
-          <FormField
-            control={form.control}
-            name="notes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Notes</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Additional notes..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          {/* Income Growth Rate */}
-          <FormField
-            control={form.control}
-            name="incomeGrowthRatePercent"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Income Growth Rate (%)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="2.0" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Expense Growth Rate */}
-          <FormField
-            control={form.control}
-            name="expenseGrowthRatePercent"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Expense Growth Rate (%)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="3.0" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* AI Analysis Button */}
+      {/* AI Analysis Section */}
+      <div className="bg-card border rounded-lg p-6">
+        <h3 className="text-lg font-semibold mb-4">AI Analysis</h3>
         <div>
           <Label htmlFor="deal-notes">Deal Notes for AI Analysis</Label>
           <Textarea
             id="deal-notes"
-            placeholder="Paste deal notes here..."
+            placeholder="Paste deal notes, lease summaries, or property listings here for automatic field population..."
             className="mt-2"
             onBlur={(e) => analyzeText(e.target.value)}
           />
-          {isAnalyzing && <p className="text-sm text-muted-foreground">Analyzing...</p>}
+          {isAnalyzing && <p className="text-sm text-muted-foreground mt-2">Analyzing...</p>}
+        </div>
+      </div>
+
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        {/* Basic Property Information */}
+        <div className="bg-card border rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-4">Property Information</h3>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Deal Name */}
+            <FormField
+              control={form.control}
+              name="dealName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Deal Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="The Spin Cycle" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Property Address */}
+            <FormField
+              control={form.control}
+              name="propertyAddress"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Property Address</FormLabel>
+                  <FormControl>
+                    <Input placeholder="123 Main St" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Asking Price */}
+            <FormField
+              control={form.control}
+              name="askingPrice"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Asking Price</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="150000" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Facility Size */}
+            <FormField
+              control={form.control}
+              name="facilitySizeSqft"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Facility Size (Sqft)</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="2000" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Is Real Estate Included */}
+            <FormField
+              control={form.control}
+              name="isRealEstateIncluded"
+              render={({ field }) => (
+                <FormItem className="col-span-2 flex flex-row items-center justify-between rounded-md border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel>Real Estate Included?</FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={isRealEstateIncluded}
+                      onCheckedChange={(checked) => {
+                        setIsRealEstateIncluded(checked);
+                        form.setValue("isRealEstateIncluded", checked);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Financial Information */}
+        <div className="bg-card border rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-4">Financial Information</h3>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Gross Income */}
+            <FormField
+              control={form.control}
+              name="grossIncomeAnnual"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Gross Income (Annual)</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="200000" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Annual Net */}
+             <FormField
+              control={form.control}
+              name="annualNet"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Annual Net (NOI)</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="50000" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Staffing Information */}
+        <div className="bg-card border rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-4">Staffing Information</h3>
+          <div className="grid grid-cols-3 gap-4">
+            {/* Full Time Staff Count */}
+            <FormField
+              control={form.control}
+              name="fullTimeStaffCount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Full Time Staff</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="2" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Part Time Staff Count */}
+            <FormField
+              control={form.control}
+              name="partTimeStaffCount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Part Time Staff</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="3" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Payroll Cost */}
+            <FormField
+              control={form.control}
+              name="payrollCost"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Payroll Cost</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="75000" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Financing Information */}
+        <div className="bg-card border rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-4">Financing Information</h3>
+          <div className="grid grid-cols-3 gap-4">
+            {/* Down Payment Percent */}
+            <FormField
+              control={form.control}
+              name="downPaymentPercent"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Down Payment (%)</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="25" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Loan Interest Rate Percent */}
+            <FormField
+              control={form.control}
+              name="loanInterestRatePercent"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Interest Rate (%)</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="7.5" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Loan Term Years */}
+            <FormField
+              control={form.control}
+              name="loanTermYears"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Loan Term (Years)</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="10" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Lease Information - Only show if real estate is NOT included */}
+        {!isRealEstateIncluded && (
+          <div className="bg-card border rounded-lg p-6">
+            <h3 className="text-lg font-semibold mb-4">Lease Information</h3>
+            <div className="grid grid-cols-2 gap-4">
+              {/* Monthly Rent */}
+              <div>
+                <Label>Monthly Rent</Label>
+                <Input 
+                  type="number" 
+                  placeholder="5000"
+                  value={leaseDetails?.monthlyRent || ''}
+                  onChange={(e) => updateLeaseDetails({ monthlyRent: Number(e.target.value) })}
+                />
+              </div>
+
+              {/* Remaining Lease Term */}
+              <div>
+                <Label>Remaining Lease Term (Years)</Label>
+                <Input 
+                  type="number" 
+                  placeholder="8"
+                  value={leaseDetails?.remainingLeaseTermYears || ''}
+                  onChange={(e) => updateLeaseDetails({ remainingLeaseTermYears: Number(e.target.value) })}
+                />
+              </div>
+
+              {/* Renewal Options */}
+              <div>
+                <Label>Renewal Options Count</Label>
+                <Input 
+                  type="number" 
+                  placeholder="2"
+                  value={leaseDetails?.renewalOptionsCount || ''}
+                  onChange={(e) => updateLeaseDetails({ renewalOptionsCount: Number(e.target.value) })}
+                />
+              </div>
+
+              {/* Annual Rent Increase */}
+              <div>
+                <Label>Annual Rent Increase (%)</Label>
+                <Input 
+                  type="number" 
+                  placeholder="2.25"
+                  value={leaseDetails?.annualRentIncreasePercent || ''}
+                  onChange={(e) => updateLeaseDetails({ annualRentIncreasePercent: Number(e.target.value) })}
+                />
+              </div>
+
+              {/* Lease Terms */}
+              <div className="col-span-2">
+                <Label>Lease Terms</Label>
+                <Textarea
+                  placeholder="Enter specific lease terms, conditions, and important clauses..."
+                  value={leaseDetails?.leaseTerms || ''}
+                  onChange={(e) => updateLeaseDetails({ leaseTerms: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Equipment Section */}
+        <div className="bg-card border rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-4">Equipment Inventory</h3>
+          <div className="space-y-4">
+            {machineInventory.length > 0 ? (
+              <div className="grid gap-4">
+                {machineInventory.map((machine) => (
+                  <div key={machine.machineId} className="grid grid-cols-6 gap-2 items-center p-3 border rounded">
+                    <div>
+                      <Label className="text-xs">Type</Label>
+                      <p className="text-sm">{machine.machineType}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Brand</Label>
+                      <p className="text-sm">{machine.brand}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Quantity</Label>
+                      <p className="text-sm">{machine.quantity}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Age (Years)</Label>
+                      <p className="text-sm">{machine.ageYears}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Capacity (lbs)</Label>
+                      <p className="text-sm">{machine.capacityLbs}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Price/Use</Label>
+                      <p className="text-sm">${machine.vendPricePerUse}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No equipment added yet.</p>
+                <p className="text-sm">Use AI Analysis above to automatically populate equipment from deal notes.</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Investment Targets & Operations */}
+        <div className="bg-card border rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-4">Investment Targets & Operations</h3>
+          <div className="grid grid-cols-3 gap-4">
+            {/* Target Cap Rate Percent */}
+            <FormField
+              control={form.control}
+              name="targetCapRatePercent"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Target Cap Rate (%)</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="8" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Target CoC ROI Percent */}
+            <FormField
+              control={form.control}
+              name="targetCoCROIPercent"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Target CoC ROI (%)</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="15" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Owner Weekly Hours */}
+            <FormField
+              control={form.control}
+              name="ownerWeeklyHours"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Owner Hours (Weekly)</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="10" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Additional Information */}
+        <div className="bg-card border rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-4">Additional Information</h3>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Lease History */}
+            <FormField
+              control={form.control}
+              name="leaseHistory"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Lease History</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Previous lease terms..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Notes */}
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notes</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Additional notes..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Income Growth Rate */}
+            <FormField
+              control={form.control}
+              name="incomeGrowthRatePercent"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Income Growth Rate (%)</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="2.0" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Expense Growth Rate */}
+            <FormField
+              control={form.control}
+              name="expenseGrowthRatePercent"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Expense Growth Rate (%)</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="3.0" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
 
         <div className="flex gap-4 pt-6 border-t">

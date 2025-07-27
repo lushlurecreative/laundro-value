@@ -44,6 +44,7 @@ export interface LeaseDetails {
   renewalOptionsCount: number;
   renewalOptionLengthYears: number;
   leaseType: 'Triple Net (NNN)' | 'Modified Gross' | 'Gross Lease' | 'Other';
+  leaseTerms?: string;
 }
 
 export interface ExpenseItem {
