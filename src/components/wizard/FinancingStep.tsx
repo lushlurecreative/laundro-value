@@ -140,8 +140,7 @@ export const FinancingStep: React.FC = () => {
       <Alert>
         <InfoIcon className="h-4 w-4" />
         <AlertDescription>
-          Enter your financing details. Interest rates and terms marked with * are industry standards 
-          and current market rates - verify with your lender for actual terms.
+          Enter your financing details. If you don't have specific information, leave fields blank. Interest rates and terms shown are industry standards.
         </AlertDescription>
       </Alert>
 
@@ -181,9 +180,9 @@ export const FinancingStep: React.FC = () => {
                         }}
                       />
                     </FormControl>
-                    <p className="text-sm text-muted-foreground">
-                      SBA typical: 10-15%, Conventional: 20-30% *
-                    </p>
+                     <p className="text-sm text-muted-foreground">
+                       SBA typical: 10-15%, Conventional: 20-30%
+                     </p>
                     <FormMessage />
                   </FormItem>
                 )}

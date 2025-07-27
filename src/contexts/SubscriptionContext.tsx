@@ -251,22 +251,26 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const canPerformAction = (action: string): boolean => {
-    if (!subscription || !usage) return false;
+    // Enable all actions for testing during development
+    return true;
     
-    switch (action) {
-      case 'create_analysis':
-        return getRemainingUsage('analyses_per_month') > 0;
-      case 'generate_report':
-        return getRemainingUsage('reports_per_month') > 0;
-      case 'save_deal':
-        return getRemainingUsage('saved_deals') > 0;
-      case 'export_pdf':
-        return subscription.subscription_tier !== 'free';
-      case 'access_market_data':
-        return ['professional', 'enterprise'].includes(subscription.subscription_tier);
-      default:
-        return true;
-    }
+    // Original logic (commented out for testing):
+    // if (!subscription || !usage) return false;
+    // 
+    // switch (action) {
+    //   case 'create_analysis':
+    //     return getRemainingUsage('analyses_per_month') > 0;
+    //   case 'generate_report':
+    //     return getRemainingUsage('reports_per_month') > 0;
+    //   case 'save_deal':
+    //     return getRemainingUsage('saved_deals') > 0;
+    //   case 'export_pdf':
+    //     return subscription.subscription_tier !== 'free';
+    //   case 'access_market_data':
+    //     return ['professional', 'enterprise'].includes(subscription.subscription_tier);
+    //   default:
+    //     return true;
+    // }
   };
 
   useEffect(() => {

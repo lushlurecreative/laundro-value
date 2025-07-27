@@ -115,8 +115,7 @@ export const ExpensesStep: React.FC = () => {
       <Alert>
         <InfoIcon className="h-4 w-4" />
         <AlertDescription>
-          Enter all operating expenses for the laundromat. Industry standard ranges are provided as reference * 
-          and should be verified based on your specific location and deal terms.
+          Enter all operating expenses for the laundromat. If you don't have specific information, leave fields blank. Industry standard ANNUAL ranges are provided for reference.
         </AlertDescription>
       </Alert>
 
@@ -154,7 +153,7 @@ export const ExpensesStep: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      Industry range: {stdExpense.industry} *
+                      ANNUAL industry range: {stdExpense.industry}
                     </p>
                   </div>
                 </div>
@@ -273,9 +272,9 @@ export const ExpensesStep: React.FC = () => {
                       }}
                     />
                   </FormControl>
-                  <p className="text-sm text-muted-foreground">
-                    Industry standard: 1.5-3.0% annually *
-                  </p>
+                   <p className="text-sm text-muted-foreground">
+                     ANNUAL industry standard: 1.5-3.0%
+                   </p>
                   <FormMessage />
                 </FormItem>
               )}
@@ -300,9 +299,9 @@ export const ExpensesStep: React.FC = () => {
                       }}
                     />
                   </FormControl>
-                  <p className="text-sm text-muted-foreground">
-                    Industry standard: 2.5-4.0% annually *
-                  </p>
+                   <p className="text-sm text-muted-foreground">
+                     ANNUAL industry standard: 2.5-4.0%
+                   </p>
                   <FormMessage />
                 </FormItem>
               )}

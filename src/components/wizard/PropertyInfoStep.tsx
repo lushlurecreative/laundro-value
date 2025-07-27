@@ -73,8 +73,7 @@ export const PropertyInfoStep: React.FC = () => {
       <Alert>
         <InfoIcon className="h-4 w-4" />
         <AlertDescription>
-          Enter the basic property information for your laundromat deal. Fields marked with * are pre-filled with 
-          industry standards based on location when available.
+          Enter the basic property information for your laundromat deal. If you don't have specific information, leave fields blank.
         </AlertDescription>
       </Alert>
 
@@ -172,9 +171,9 @@ export const PropertyInfoStep: React.FC = () => {
                   <Input 
                     type="number"
                     placeholder="2,000"
-                    {...field}
+                    value={field.value || ''}
                     onChange={(e) => {
-                      const value = parseInt(e.target.value) || 0;
+                      const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
                       field.onChange(value);
                       handleFieldChange('facilitySizeSqft', value);
                     }}

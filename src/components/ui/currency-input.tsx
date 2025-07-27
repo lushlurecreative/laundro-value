@@ -22,18 +22,27 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
   }, [value])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value.replace(/[^\d.]/g, '') // Allow decimal point
-    setDisplayValue(inputValue)
+    const inputValue = e.target.value
     
+    // Allow empty string to clear the field
     if (inputValue === '') {
+      setDisplayValue('')
       onChange?.(0)
       return
     }
-
-    const numValue = parseFloat(inputValue) // Use parseFloat for decimals
-    if (!isNaN(numValue)) {
-      onChange?.(numValue)
-    }
+    
+    // Remove non-numeric characters except dots and commas
+    const numericValue = inputValue.replace(/[^0-9.,]/g, '')
+    
+    // Remove commas for parsing
+    const cleanValue = numericValue.replace(/,/g, '')
+    
+    // Update display value
+    setDisplayValue(numericValue)
+    
+    // Parse and send numeric value
+    const parsed = parseFloat(cleanValue) || 0
+    onChange?.(parsed)
   }
 
   const handleBlur = () => {

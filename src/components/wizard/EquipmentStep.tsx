@@ -181,8 +181,7 @@ export const EquipmentStep: React.FC = () => {
       <Alert>
         <InfoIcon className="h-4 w-4" />
         <AlertDescription>
-          Add all equipment in your laundromat. Industry standards marked with * are provided for reference 
-          based on current market data and should be verified for your specific market.
+          Add all equipment in your laundromat. If you don't have specific information, leave fields blank. Industry standards are provided for reference.
         </AlertDescription>
       </Alert>
 

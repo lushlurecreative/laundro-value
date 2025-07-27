@@ -76,8 +76,7 @@ export const IncomeStep: React.FC = () => {
       <Alert>
         <InfoIcon className="h-4 w-4" />
         <AlertDescription>
-          Enter all sources of income for the laundromat. Fields marked with * are pre-filled with 
-          industry standards and should be verified for accuracy.
+          Enter all sources of income for the laundromat. If you don't have specific information, leave fields blank. Industry standards are provided for reference.
         </AlertDescription>
       </Alert>
 
