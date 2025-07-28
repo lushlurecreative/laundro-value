@@ -27,10 +27,18 @@ const FinancingSchema = z.object({
 type FinancingData = z.infer<typeof FinancingSchema>;
 
 const loanTypes = [
-  { value: 'Cash Purchase', label: 'Cash Purchase', rates: 'N/A', terms: 'Immediate ownership', description: 'Full cash payment' },
-  { value: 'Conventional Bank Loan', label: 'Conventional Bank Loan', rates: '7.0% - 12.0%', terms: '5-15 years typical', description: 'Traditional business loan from banks' },
-  { value: 'SBA 7(a) Loan', label: 'SBA 7(a) Loan', rates: '6.5% - 10.5%', terms: 'Up to 10 years for business acquisition', description: 'Most common SBA loan for business purchases' },
-  { value: 'Other', label: 'Other', rates: 'Varies', terms: 'Varies', description: 'Custom financing option' },
+  { value: 'Business Line of Credit', label: 'Business Line of Credit', rates: '8.0% - 15.0%', terms: 'Revolving credit', description: 'Flexible credit line for business needs', downPayment: 0, interestRate: 12.0, term: 0 },
+  { value: 'Cash', label: 'Cash', rates: 'N/A', terms: 'Immediate ownership', description: 'Full cash payment', downPayment: 100, interestRate: 0, term: 0 },
+  { value: 'Commercial Real Estate Loan', label: 'Commercial Real Estate Loan', rates: '6.0% - 9.0%', terms: '10-25 years', description: 'For real estate purchase', downPayment: 25, interestRate: 7.5, term: 20 },
+  { value: 'Conventional', label: 'Conventional', rates: '7.0% - 12.0%', terms: '5-15 years typical', description: 'Traditional business loan from banks', downPayment: 25, interestRate: 9.0, term: 10 },
+  { value: 'Custom', label: 'Custom', rates: 'Varies', terms: 'Varies', description: 'Custom financing option', downPayment: 20, interestRate: 8.0, term: 10 },
+  { value: 'Equipment Financing', label: 'Equipment Financing', rates: '5.0% - 12.0%', terms: '3-7 years', description: 'Financing for equipment purchase', downPayment: 10, interestRate: 8.0, term: 5 },
+  { value: 'Invoice Financing', label: 'Invoice Financing', rates: '10.0% - 30.0%', terms: '30-90 days', description: 'Short-term financing against invoices', downPayment: 0, interestRate: 20.0, term: 1 },
+  { value: 'Merchant Cash Advance', label: 'Merchant Cash Advance', rates: '20.0% - 50.0%', terms: '3-24 months', description: 'Advance against future sales', downPayment: 0, interestRate: 35.0, term: 1 },
+  { value: 'SBA 504 Loan', label: 'SBA 504 Loan', rates: '5.5% - 8.5%', terms: '10-20 years', description: 'SBA loan for real estate and equipment', downPayment: 10, interestRate: 7.0, term: 20 },
+  { value: 'SBA 7(a) Loan', label: 'SBA 7(a) Loan', rates: '6.5% - 10.5%', terms: 'Up to 10 years for business acquisition', description: 'Most common SBA loan for business purchases', downPayment: 10, interestRate: 8.5, term: 10 },
+  { value: 'SBA Microloan', label: 'SBA Microloan', rates: '8.0% - 13.0%', terms: 'Up to 6 years', description: 'Small SBA loan up to $50,000', downPayment: 10, interestRate: 10.5, term: 6 },
+  { value: 'Short-Term Loan', label: 'Short-Term Loan', rates: '15.0% - 35.0%', terms: '3-24 months', description: 'Quick funding for short-term needs', downPayment: 0, interestRate: 25.0, term: 2 },
 ];
 
 export const FinancingStep: React.FC = () => {
@@ -208,38 +216,49 @@ export const FinancingStep: React.FC = () => {
                 )}
               />
 
-              {/* Loan Type */}
-              <FormField
-                control={form.control}
-                name="loanType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Loan Type</FormLabel>
-                    <Select 
-                      value={field.value} 
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        handleFieldChange('loanType', value);
-                      }}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select loan type" />
-                        </SelectTrigger>
-                      </FormControl>
-                       <SelectContent>
-                         {loanTypes.map(type => (
-                           <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-                         ))}
-                       </SelectContent>
-                    </Select>
-                     <p className="text-sm text-muted-foreground">
-                       {selectedLoanType.description}
-                     </p>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+               {/* Loan Type */}
+               <FormField
+                 control={form.control}
+                 name="loanType"
+                 render={({ field }) => (
+                   <FormItem>
+                     <FormLabel>Loan Type</FormLabel>
+                     <Select 
+                       value={field.value} 
+                       onValueChange={(value) => {
+                         field.onChange(value);
+                         handleFieldChange('loanType', value);
+                         
+                         // Auto-fill loan parameters based on selection
+                         const selectedType = loanTypes.find(lt => lt.value === value);
+                         if (selectedType && 'downPayment' in selectedType) {
+                           form.setValue('downPaymentPercent', selectedType.downPayment);
+                           form.setValue('loanInterestRatePercent', selectedType.interestRate);
+                           form.setValue('loanTermYears', selectedType.term);
+                           handleFieldChange('downPaymentPercent', selectedType.downPayment);
+                           handleFieldChange('loanInterestRatePercent', selectedType.interestRate);
+                           handleFieldChange('loanTermYears', selectedType.term);
+                         }
+                       }}
+                     >
+                       <FormControl>
+                         <SelectTrigger>
+                           <SelectValue placeholder="Select loan type" />
+                         </SelectTrigger>
+                       </FormControl>
+                        <SelectContent>
+                          {loanTypes.map(type => (
+                            <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                     </Select>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedLoanType.description}
+                      </p>
+                     <FormMessage />
+                   </FormItem>
+                 )}
+               />
             </CardContent>
           </Card>
 
@@ -278,41 +297,6 @@ export const FinancingStep: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Other Financing Details */}
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>Other Financing Details</CardTitle>
-              <CardDescription>
-                Additional financing information
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <FormField
-                control={form.control}
-                name="loanType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Other Financing Details</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter other financing information..."
-                        value={field.value === 'Other' ? field.value : ''}
-                        onChange={(e) => {
-                          field.onChange(e.target.value || 'Other');
-                          handleFieldChange('loanType', e.target.value || 'Other');
-                        }}
-                        disabled={field.value !== 'Other'}
-                      />
-                    </FormControl>
-                    <p className="text-sm text-muted-foreground">
-                      Only enabled when "Other" is selected above
-                    </p>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
 
           {/* Financing Information */}
           <Card className="md:col-span-2">
@@ -323,9 +307,9 @@ export const FinancingStep: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <h4 className="font-semibold">Cash Purchase (Fastest)</h4>
+                  <h4 className="font-semibold">Cash Purchase</h4>
                   <p className="text-sm text-muted-foreground">
                     • No financing delays
                     • Immediate ownership
@@ -334,21 +318,48 @@ export const FinancingStep: React.FC = () => {
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <h4 className="font-semibold">SBA Loans (Recommended)</h4>
+                  <h4 className="font-semibold">SBA 7(a) Loan</h4>
                   <p className="text-sm text-muted-foreground">
-                    • Lower down payments (10-15%)
-                    • Competitive interest rates
-                    • Longer repayment terms
+                    • 10% down payment
+                    • 6.5%-10.5% interest rates
+                    • Up to 10 years for business acquisition
                     • Government backing reduces lender risk
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <h4 className="font-semibold">Conventional Loans</h4>
+                  <h4 className="font-semibold">SBA 504 Loan</h4>
                   <p className="text-sm text-muted-foreground">
-                    • Higher down payments (20-30%)
+                    • 10% down payment
+                    • 5.5%-8.5% interest rates
+                    • 10-20 year terms
+                    • For real estate and equipment
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-semibold">SBA Microloan</h4>
+                  <p className="text-sm text-muted-foreground">
+                    • Up to $50,000
+                    • 8.0%-13.0% interest rates
+                    • Up to 6 years
+                    • Good for smaller purchases
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-semibold">Conventional Bank Loan</h4>
+                  <p className="text-sm text-muted-foreground">
+                    • 20-30% down payment
+                    • 7.0%-12.0% interest rates
                     • Faster approval process
-                    • More flexible terms
                     • Good for strong borrowers
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-semibold">Equipment Financing</h4>
+                  <p className="text-sm text-muted-foreground">
+                    • 10% down payment
+                    • 5.0%-12.0% interest rates
+                    • 3-7 year terms
+                    • Equipment as collateral
                   </p>
                 </div>
               </div>

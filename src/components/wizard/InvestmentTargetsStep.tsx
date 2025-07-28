@@ -12,9 +12,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { InfoIcon, Target, TrendingUp } from 'lucide-react';
+import { InfoIcon, Target, TrendingUp, Trash2 } from 'lucide-react';
 
 const InvestmentTargetsSchema = z.object({
   targetCapRatePercent: z.number().min(0).max(50, "Cap rate must be between 0-50%"),
@@ -58,7 +59,6 @@ export const InvestmentTargetsStep: React.FC = () => {
   };
 
   const getCoCROIContext = (cocRoi: number) => {
-    if (cocRoi < 10) return { level: 'Conservative', description: 'Lower risk, stable returns', color: 'text-blue-600' };
     if (cocRoi < 15) return { level: 'Moderate', description: 'Balanced risk/return', color: 'text-green-600' };
     if (cocRoi < 20) return { level: 'Good', description: 'Strong returns', color: 'text-yellow-600' };
     return { level: 'Aggressive', description: 'High returns target', color: 'text-red-600' };
@@ -97,7 +97,20 @@ export const InvestmentTargetsStep: React.FC = () => {
                 name="targetCapRatePercent"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Target Capitalization Rate (%)</FormLabel>
+                    <FormLabel className="flex items-center justify-between">
+                      Target Capitalization Rate (%)
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          field.onChange(0);
+                          handleFieldChange('targetCapRatePercent', 0);
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -105,9 +118,9 @@ export const InvestmentTargetsStep: React.FC = () => {
                         min="0"
                         max="50"
                         placeholder="8.0"
-                        {...field}
+                        value={field.value === 0 ? '' : field.value}
                         onChange={(e) => {
-                          const value = parseFloat(e.target.value) || 0;
+                          const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0;
                           field.onChange(value);
                           handleFieldChange('targetCapRatePercent', value);
                         }}
@@ -132,7 +145,20 @@ export const InvestmentTargetsStep: React.FC = () => {
                 name="targetCoCROIPercent"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Target Cash-on-Cash ROI (%)</FormLabel>
+                    <FormLabel className="flex items-center justify-between">
+                      Target Cash-on-Cash ROI (%)
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          field.onChange(0);
+                          handleFieldChange('targetCoCROIPercent', 0);
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -140,9 +166,9 @@ export const InvestmentTargetsStep: React.FC = () => {
                         min="0"
                         max="100"
                         placeholder="15.0"
-                        {...field}
+                        value={field.value === 0 ? '' : field.value}
                         onChange={(e) => {
-                          const value = parseFloat(e.target.value) || 0;
+                          const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0;
                           field.onChange(value);
                           handleFieldChange('targetCoCROIPercent', value);
                         }}

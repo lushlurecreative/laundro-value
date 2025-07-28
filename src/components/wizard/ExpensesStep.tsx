@@ -85,6 +85,7 @@ export const ExpensesStep: React.FC = () => {
     { name: 'Licenses & Permits', industry: '$500-2,000', description: 'Business licenses and permits' },
     { name: 'Supplies', industry: '$2,000-5,000', description: 'Cleaning supplies, soap, etc.' },
     { name: 'Internet', industry: '$500-1,200', description: 'Internet and phone services' },
+    { name: 'Payroll', industry: '$30,000-70,000', description: 'Employee wages and benefits' },
   ];
 
   // Ensure all standard expenses exist

@@ -122,39 +122,51 @@ export const IncomeStep: React.FC = () => {
                 )}
               />
 
-              {/* Annual Net */}
-              <FormField
-                control={form.control}
-                name="annualNet"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Annual Net Income (NOI)</FormLabel>
-                    <FormControl>
-                      <CurrencyInput
-                        placeholder="$50,000.00"
-                        value={field.value}
-                        onChange={(value) => {
-                          field.onChange(value);
-                          handleFieldChange('annualNet', value);
-                        }}
-                      />
-                    </FormControl>
-                    <p className="text-sm text-muted-foreground">
-                      Typically 25-35% of gross income
-                    </p>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                {/* Annual Net */}
+               <FormField
+                 control={form.control}
+                 name="annualNet"
+                 render={({ field }) => {
+                   const grossIncome = form.watch('grossIncomeAnnual') || 0;
+                   const netPercentage = grossIncome > 0 ? ((field.value || 0) / grossIncome * 100) : 0;
+                   
+                   return (
+                     <FormItem>
+                       <FormLabel>Annual Net Income (NOI)</FormLabel>
+                       <FormControl>
+                         <CurrencyInput
+                           placeholder="$50,000.00"
+                           value={field.value}
+                           onChange={(value) => {
+                             field.onChange(value);
+                             handleFieldChange('annualNet', value);
+                           }}
+                         />
+                       </FormControl>
+                       <div className="space-y-1">
+                         <p className="text-sm text-muted-foreground">
+                           Typically 25-35% of gross income
+                         </p>
+                         {grossIncome > 0 && (
+                           <p className="text-sm font-medium text-primary">
+                             Current: {netPercentage.toFixed(1)}% of gross income
+                           </p>
+                         )}
+                       </div>
+                       <FormMessage />
+                     </FormItem>
+                   );
+                 }}
+               />
             </CardContent>
           </Card>
 
            {/* Ancillary Income */}
            <Card className="md:col-span-2">
              <CardHeader>
-               <CardTitle>Additional Income Sources</CardTitle>
+               <CardTitle>In Place Additional Income Sources</CardTitle>
                <CardDescription>
-                 Secondary revenue streams and ancillary services. Consider machine expansion opportunities.
+                 Secondary revenue streams and ancillary services.
                </CardDescription>
              </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
