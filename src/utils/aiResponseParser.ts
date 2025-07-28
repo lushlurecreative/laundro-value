@@ -27,8 +27,9 @@ export const parseAIResponse = (response: string): Record<string, any> => {
       const normalizedData: Record<string, any> = {};
       
       if (jsonData.askingPrice) normalizedData.askingPrice = parseCurrency(jsonData.askingPrice);
-      if (jsonData.grossIncome) normalizedData.grossIncome = parseCurrency(jsonData.grossIncome);
-      if (jsonData.totalSqft) normalizedData.totalSqft = parseCurrency(jsonData.totalSqft);
+      if (jsonData.grossIncome) normalizedData.grossIncomeAnnual = parseCurrency(jsonData.grossIncome);
+      if (jsonData.totalSqft) normalizedData.facilitySizeSqft = parseCurrency(jsonData.totalSqft);
+      if (jsonData.facilitySizeSqft) normalizedData.facilitySizeSqft = parseCurrency(jsonData.facilitySizeSqft);
       if (jsonData.propertyAddress) normalizedData.propertyAddress = jsonData.propertyAddress;
       
       // Handle lease object

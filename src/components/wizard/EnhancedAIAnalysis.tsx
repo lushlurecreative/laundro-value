@@ -11,7 +11,7 @@ import { Lightbulb, FileText, Building2, DollarSign, Loader2, CheckCircle, Uploa
 import { FormLoadingSkeleton, AnalysisLoadingSkeleton } from './LoadingStates';
 
 export const EnhancedAIAnalysis = () => {
-  const { deal, updateDeal, updateLeaseDetails, addExpenseItem, addMachine, machineInventory, ancillaryIncome, updateAncillaryIncome } = useDeal();
+  const { deal, updateDeal, updateLeaseDetails, addExpenseItem, addMachine, machineInventory, ancillaryIncome, updateAncillaryIncome, expenseItems, removeExpenseItem, removeMachine } = useDeal();
   const [text, setText] = useState(deal?.pastedInformation || '');
   const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [confidenceScores, setConfidenceScores] = useState<Record<string, number>>({});
@@ -19,7 +19,25 @@ export const EnhancedAIAnalysis = () => {
 
   const { analyzeText, isAnalyzing } = useOpenAIAnalysis({
     onFieldsPopulated: (fields) => {
+      console.log('AI fields populated:', fields);
       setAnalysisResults(fields);
+      
+      // Clear existing auto-generated data before updating to avoid duplication
+      if (expenseItems.length > 0) {
+        expenseItems.forEach(expense => {
+          if (expense.expenseId) {
+            removeExpenseItem(expense.expenseId);
+          }
+        });
+      }
+      
+      if (machineInventory.length > 0) {
+        machineInventory.forEach(machine => {
+          if (machine.machineId) {
+            removeMachine(machine.machineId);
+          }
+        });
+      }
       
       // Calculate confidence scores based on data completeness
       const scores: Record<string, number> = {};
@@ -81,167 +99,195 @@ export const EnhancedAIAnalysis = () => {
         }
       }
 
-      // Enhanced equipment handling - add multiple machine types
-      if (fields.equipment) {
-        // Add washers of different sizes
-        if (fields.equipment.washers50lb) {
-          addMachine({
-            machineId: `washer-50lb-${Date.now()}`,
-            dealId: '',
-            machineType: 'Top-Load Washer',
-            brand: 'Speed Queen',
-            quantity: fields.equipment.washers50lb,
-            ageYears: 5,
-            capacityLbs: 50,
-            vendPricePerUse: 4.00,
-            conditionRating: 3,
-            purchaseValue: 0,
-            currentValue: 0,
-            maintenanceCostAnnual: 0,
-            isCardOperated: false,
-            isCoinOperated: true,
-            isOutOfOrder: false
-          });
+      // Enhanced equipment handling with delay to ensure clearing is complete
+      setTimeout(() => {
+        if (fields.equipment) {
+          // Add washers of different sizes
+          if (fields.equipment.washers50lb) {
+            addMachine({
+              machineId: `washer-50lb-${Date.now()}-${Math.random()}`,
+              dealId: '',
+              machineType: 'Front-Load Washer',
+              brand: 'Speed Queen',
+              model: '',
+              quantity: fields.equipment.washers50lb,
+              ageYears: 5,
+              capacityLbs: 50,
+              vendPricePerUse: 4.50,
+              conditionRating: 3,
+              waterConsumptionGalPerCycle: 25,
+              electricConsumptionKwh: undefined,
+              gasConsumptionBtu: undefined,
+              purchaseValue: 0,
+              currentValue: 0,
+              maintenanceCostAnnual: 0,
+              isCardOperated: true,
+              isCoinOperated: false,
+              isOutOfOrder: false
+            });
+          }
+          if (fields.equipment.washers35lb) {
+            addMachine({
+              machineId: `washer-35lb-${Date.now()}-${Math.random()}`,
+              dealId: '',
+              machineType: 'Front-Load Washer',
+              brand: 'Speed Queen',
+              model: '',
+              quantity: fields.equipment.washers35lb,
+              ageYears: 5,
+              capacityLbs: 35,
+              vendPricePerUse: 3.50,
+              conditionRating: 3,
+              waterConsumptionGalPerCycle: 22,
+              electricConsumptionKwh: undefined,
+              gasConsumptionBtu: undefined,
+              purchaseValue: 0,
+              currentValue: 0,
+              maintenanceCostAnnual: 0,
+              isCardOperated: true,
+              isCoinOperated: false,
+              isOutOfOrder: false
+            });
+          }
+          if (fields.equipment.washers18lb) {
+            addMachine({
+              machineId: `washer-18lb-${Date.now()}-${Math.random()}`,
+              dealId: '',
+              machineType: 'Top-Load Washer',
+              brand: 'Speed Queen',
+              model: '',
+              quantity: fields.equipment.washers18lb,
+              ageYears: 5,
+              capacityLbs: 18,
+              vendPricePerUse: 2.50,
+              conditionRating: 3,
+              waterConsumptionGalPerCycle: 30,
+              electricConsumptionKwh: undefined,
+              gasConsumptionBtu: undefined,
+              purchaseValue: 0,
+              currentValue: 0,
+              maintenanceCostAnnual: 0,
+              isCardOperated: true,
+              isCoinOperated: false,
+              isOutOfOrder: false
+            });
+          }
+          if (fields.equipment.dryerPockets) {
+            addMachine({
+              machineId: `dryer-pockets-${Date.now()}-${Math.random()}`,
+              dealId: '',
+              machineType: 'Single Dryer',
+              brand: 'Speed Queen',
+              model: '',
+              quantity: fields.equipment.dryerPockets,
+              ageYears: 5,
+              capacityLbs: 35,
+              vendPricePerUse: 2.50,
+              conditionRating: 3,
+              waterConsumptionGalPerCycle: undefined,
+              electricConsumptionKwh: undefined,
+              gasConsumptionBtu: undefined,
+              purchaseValue: 0,
+              currentValue: 0,
+              maintenanceCostAnnual: 0,
+              isCardOperated: true,
+              isCoinOperated: false,
+              isOutOfOrder: false
+            });
+          }
+          // Generic washer/dryer fallback
+          if (fields.equipment.washers && !fields.equipment.washers50lb && !fields.equipment.washers35lb && !fields.equipment.washers18lb) {
+            addMachine({
+              machineId: `washer-generic-${Date.now()}-${Math.random()}`,
+              dealId: '',
+              machineType: 'Front-Load Washer',
+              brand: 'Speed Queen',
+              model: '',
+              quantity: fields.equipment.washers,
+              ageYears: 5,
+              capacityLbs: 25,
+              vendPricePerUse: 3.00,
+              conditionRating: 3,
+              waterConsumptionGalPerCycle: 25,
+              electricConsumptionKwh: undefined,
+              gasConsumptionBtu: undefined,
+              purchaseValue: 0,
+              currentValue: 0,
+              maintenanceCostAnnual: 0,
+              isCardOperated: true,
+              isCoinOperated: false,
+              isOutOfOrder: false
+            });
+          }
+          if (fields.equipment.dryers && !fields.equipment.dryerPockets) {
+            addMachine({
+              machineId: `dryer-generic-${Date.now()}-${Math.random()}`,
+              dealId: '',
+              machineType: 'Single Dryer',
+              brand: 'Speed Queen',
+              model: '',
+              quantity: fields.equipment.dryers,
+              ageYears: 5,
+              capacityLbs: 35,
+              vendPricePerUse: 2.50,
+              conditionRating: 3,
+              waterConsumptionGalPerCycle: undefined,
+              electricConsumptionKwh: undefined,
+              gasConsumptionBtu: undefined,
+              purchaseValue: 0,
+              currentValue: 0,
+              maintenanceCostAnnual: 0,
+              isCardOperated: true,
+              isCoinOperated: false,
+              isOutOfOrder: false
+            });
+          }
         }
-        if (fields.equipment.washers35lb) {
-          addMachine({
-            machineId: `washer-35lb-${Date.now()}`,
-            dealId: '',
-            machineType: 'Top-Load Washer',
-            brand: 'Speed Queen',
-            quantity: fields.equipment.washers35lb,
-            ageYears: 5,
-            capacityLbs: 35,
-            vendPricePerUse: 3.00,
-            conditionRating: 3,
-            purchaseValue: 0,
-            currentValue: 0,
-            maintenanceCostAnnual: 0,
-            isCardOperated: false,
-            isCoinOperated: true,
-            isOutOfOrder: false
-          });
-        }
-        if (fields.equipment.washers18lb) {
-          addMachine({
-            machineId: `washer-18lb-${Date.now()}`,
-            dealId: '',
-            machineType: 'Top-Load Washer',
-            brand: 'Speed Queen',
-            quantity: fields.equipment.washers18lb,
-            ageYears: 5,
-            capacityLbs: 18,
-            vendPricePerUse: 2.50,
-            conditionRating: 3,
-            purchaseValue: 0,
-            currentValue: 0,
-            maintenanceCostAnnual: 0,
-            isCardOperated: false,
-            isCoinOperated: true,
-            isOutOfOrder: false
-          });
-        }
-        if (fields.equipment.dryerPockets) {
-          addMachine({
-            machineId: `dryer-pockets-${Date.now()}`,
-            dealId: '',
-            machineType: 'Single Dryer',
-            brand: 'Speed Queen',
-            quantity: fields.equipment.dryerPockets,
-            ageYears: 5,
-            capacityLbs: 35,
-            vendPricePerUse: 2.00,
-            conditionRating: 3,
-            purchaseValue: 0,
-            currentValue: 0,
-            maintenanceCostAnnual: 0,
-            isCardOperated: false,
-            isCoinOperated: true,
-            isOutOfOrder: false
-          });
-        }
-        // Generic washer/dryer fallback
-        if (fields.equipment.washers && !fields.equipment.washers50lb && !fields.equipment.washers35lb && !fields.equipment.washers18lb) {
-          addMachine({
-            machineId: `washer-generic-${Date.now()}`,
-            dealId: '',
-            machineType: 'Top-Load Washer',
-            brand: 'Speed Queen',
-            quantity: fields.equipment.washers,
-            ageYears: 5,
-            capacityLbs: 35,
-            vendPricePerUse: 3.00,
-            conditionRating: 3,
-            purchaseValue: 0,
-            currentValue: 0,
-            maintenanceCostAnnual: 0,
-            isCardOperated: false,
-            isCoinOperated: true,
-            isOutOfOrder: false
-          });
-        }
-        if (fields.equipment.dryers && !fields.equipment.dryerPockets) {
-          addMachine({
-            machineId: `dryer-generic-${Date.now()}`,
-            dealId: '',
-            machineType: 'Single Dryer',
-            brand: 'Speed Queen',
-            quantity: fields.equipment.dryers,
-            ageYears: 5,
-            capacityLbs: 35,
-            vendPricePerUse: 2.00,
-            conditionRating: 3,
-            purchaseValue: 0,
-            currentValue: 0,
-            maintenanceCostAnnual: 0,
-            isCardOperated: false,
-            isCoinOperated: true,
-            isOutOfOrder: false
-          });
-        }
-      }
+      }, 150);  // Slightly longer delay to ensure clearing is complete
 
-      // Enhanced expense handling - use annual values directly, not multiply by 12
-      if (fields.expenses) {
-        const expenseMapping = {
-          rent: 'Rent',
-          electricity: 'Electric',
-          electric: 'Electric',
-          gas: 'Gas',
-          water: 'Water & Sewer',
-          maintenance: 'Repairs',
-          repairs: 'Repairs',
-          insurance: 'Insurance',
-          trash: 'Waste Removal',
-          'waste removal': 'Waste Removal',
-          licenses: 'Licenses & Permits',
-          supplies: 'Cost of Goods Sold',
-          'cost of goods sold': 'Cost of Goods Sold',
-          internet: 'Internet',
-          payroll: 'Payroll',
-          accounting: 'Accounting',
-          alarm: 'Alarm',
-          depreciation: 'Depreciation Expense',
-          auto: 'Auto Expense',
-          'auto expense': 'Auto Expense',
-          bank: 'Bank Charges',
-          'bank charges': 'Bank Charges',
-          meals: 'Meals',
-          office: 'Office'
-        };
+      // Enhanced expense handling with delay to ensure clearing is complete
+      setTimeout(() => {
+        if (fields.expenses) {
+          const expenseMapping = {
+            rent: 'Rent',
+            electricity: 'Electricity',
+            electric: 'Electricity',
+            gas: 'Gas',
+            water: 'Water & Sewer',
+            maintenance: 'Repairs & Maintenance',
+            repairs: 'Repairs & Maintenance',
+            insurance: 'Insurance',
+            trash: 'Trash & Waste Removal',
+            'waste removal': 'Trash & Waste Removal',
+            licenses: 'Licenses & Permits',
+            supplies: 'Supplies',
+            'cost of goods sold': 'Supplies',
+            internet: 'Internet',
+            payroll: 'Payroll',
+            accounting: 'Accounting',
+            alarm: 'Security & Alarm',
+            depreciation: 'Depreciation',
+            auto: 'Auto Expense',
+            'auto expense': 'Auto Expense',
+            bank: 'Bank Charges',
+            'bank charges': 'Bank Charges',
+            meals: 'Meals & Entertainment',
+            office: 'Office Expenses'
+          };
 
-        Object.entries(fields.expenses).forEach(([key, value]) => {
-          const displayName = expenseMapping[key.toLowerCase() as keyof typeof expenseMapping] || 
-                              key.charAt(0).toUpperCase() + key.slice(1);
-          addExpenseItem({
-            expenseId: `${key}-${Date.now()}`,
-            dealId: '',
-            expenseName: displayName,
-            amountAnnual: value as number, // Use annual values directly
-            expenseType: key.toLowerCase().includes('payroll') ? 'Variable' : 'Fixed'
+          Object.entries(fields.expenses).forEach(([key, value]) => {
+            const displayName = expenseMapping[key.toLowerCase() as keyof typeof expenseMapping] || 
+                                key.charAt(0).toUpperCase() + key.slice(1);
+            addExpenseItem({
+              expenseId: `${key}-${Date.now()}-${Math.random()}`,
+              dealId: '',
+              expenseName: displayName,
+              amountAnnual: value as number,
+              expenseType: key.toLowerCase().includes('payroll') ? 'Variable' : 'Fixed'
+            });
           });
-        });
-      }
+        }
+      }, 100);
 
       // Enhanced ancillary income handling
       if (fields.ancillary) {
