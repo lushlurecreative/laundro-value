@@ -222,19 +222,19 @@ export const IncomeStep: React.FC = () => {
              </CardContent>
            </Card>
 
-           {/* Income Improvement Potential */}
-           <Card className="md:col-span-2">
-             <CardHeader>
-               <CardTitle>Income Improvement Strategy</CardTitle>
-               <CardDescription>
-                 Project additional monthly revenue opportunities
-               </CardDescription>
-             </CardHeader>
-             <CardContent className="space-y-4">
-               <FormField
-                 control={form.control}
-                 name="projectedAdditionalMonthlyRevenue"
-                 render={({ field }) => (
+            {/* Income Improvement Potential */}
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle>Income Improvement Strategy</CardTitle>
+                <CardDescription>
+                  Project additional monthly revenue opportunities
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="projectedAdditionalMonthlyRevenue"
+                  render={({ field }) => (
                    <FormItem>
                      <FormLabel>Projected Additional Monthly Revenue</FormLabel>
                      <FormControl>
@@ -254,6 +254,20 @@ export const IncomeStep: React.FC = () => {
                    </FormItem>
                  )}
                />
+               
+               {/* Notes Section */}
+               <div className="space-y-2">
+                 <FormLabel>Notes</FormLabel>
+                 <textarea
+                   className="w-full min-h-[100px] p-3 border border-input rounded-md bg-background text-sm resize-vertical"
+                   placeholder="Add notes about your income improvement strategy, expansion plans, market opportunities, or other relevant details..."
+                   value={deal?.notes || ''}
+                   onChange={(e) => handleFieldChange('notes', e.target.value)}
+                 />
+                 <p className="text-sm text-muted-foreground">
+                   Document your strategy for increasing revenue and any relevant market insights
+                 </p>
+               </div>
                <Alert>
                  <InfoIcon className="h-4 w-4" />
                  <AlertDescription>

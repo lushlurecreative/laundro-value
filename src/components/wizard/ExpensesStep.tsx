@@ -106,9 +106,7 @@ export const ExpensesStep: React.FC = () => {
 
   // Initialize standard expenses on component mount
   useEffect(() => {
-    if (expenseItems.length === 0) {
-      ensureStandardExpenses();
-    }
+    ensureStandardExpenses();
   }, []);
 
   return (
