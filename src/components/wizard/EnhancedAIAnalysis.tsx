@@ -245,49 +245,58 @@ export const EnhancedAIAnalysis = () => {
         }
       }, 150);  // Slightly longer delay to ensure clearing is complete
 
-      // Enhanced expense handling with delay to ensure clearing is complete
-      setTimeout(() => {
-        if (fields.expenses) {
-          const expenseMapping = {
-            rent: 'Rent',
-            electricity: 'Electricity',
-            electric: 'Electricity',
-            gas: 'Gas',
-            water: 'Water & Sewer',
-            maintenance: 'Repairs & Maintenance',
-            repairs: 'Repairs & Maintenance',
-            insurance: 'Insurance',
-            trash: 'Trash & Waste Removal',
-            'waste removal': 'Trash & Waste Removal',
-            licenses: 'Licenses & Permits',
-            supplies: 'Supplies',
-            'cost of goods sold': 'Supplies',
-            internet: 'Internet',
-            payroll: 'Payroll',
-            accounting: 'Accounting',
-            alarm: 'Security & Alarm',
-            depreciation: 'Depreciation',
-            auto: 'Auto Expense',
-            'auto expense': 'Auto Expense',
-            bank: 'Bank Charges',
-            'bank charges': 'Bank Charges',
-            meals: 'Meals & Entertainment',
-            office: 'Office Expenses'
-          };
+      // Enhanced expense handling with EXACT standard expense name mapping
+      console.log('Processing expenses from AI:', fields.expenses);
+      
+      if (fields.expenses) {
+        // Use EXACT names from ExpensesStep standardExpenses
+        const expenseMapping: Record<string, string> = {
+          'rent': 'Rent',
+          'utilities': 'Utilities - Electric',
+          'gas': 'Utilities - Gas',
+          'electricity': 'Utilities - Electric',
+          'electric': 'Utilities - Electric',
+          'utilities - gas': 'Utilities - Gas',
+          'utilities - electric': 'Utilities - Electric',
+          'water': 'Water & Sewer',
+          'sewer': 'Water & Sewer',
+          'water & sewer': 'Water & Sewer',
+          'maintenance': 'Maintenance & Repairs',
+          'repairs': 'Maintenance & Repairs',
+          'maintenance & repairs': 'Maintenance & Repairs',
+          'insurance': 'Insurance',
+          'trash': 'Trash',
+          'waste': 'Trash',
+          'garbage': 'Trash',
+          'licenses': 'Licenses & Permits',
+          'permits': 'Licenses & Permits',
+          'licenses & permits': 'Licenses & Permits',
+          'supplies': 'Supplies',
+          'internet': 'Internet',
+          'phone': 'Internet',
+          'payroll': 'Payroll',
+          'wages': 'Payroll',
+          'salary': 'Payroll'
+        };
 
-          Object.entries(fields.expenses).forEach(([key, value]) => {
-            const displayName = expenseMapping[key.toLowerCase() as keyof typeof expenseMapping] || 
-                                key.charAt(0).toUpperCase() + key.slice(1);
+        Object.entries(fields.expenses).forEach(([key, value]) => {
+          const amount = typeof value === 'number' ? value : parseFloat(value.toString().replace(/[^0-9.-]/g, '')) || 0;
+          if (amount > 0) {
+            const normalizedKey = key.toLowerCase().trim();
+            const standardName = expenseMapping[normalizedKey] || key;
+            
+            console.log(`Mapping expense: "${key}" -> "${standardName}" with amount: ${amount}`);
+            
             addExpenseItem({
-              expenseId: `${key}-${Date.now()}-${Math.random()}`,
-              dealId: '',
-              expenseName: displayName,
-              amountAnnual: value as number,
-              expenseType: key.toLowerCase().includes('payroll') ? 'Variable' : 'Fixed'
+              expenseId: `expense-${standardName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now()}-${Math.random()}`,
+              dealId: deal?.dealId || 'deal-1',
+              expenseName: standardName,
+              amountAnnual: amount,
+              expenseType: 'Fixed' as const,
             });
-          });
-        }
-      }, 100);
+          }
+        });
+      }
 
       // Enhanced ancillary income handling
       if (fields.ancillary) {
