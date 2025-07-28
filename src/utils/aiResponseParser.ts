@@ -99,26 +99,31 @@ export const parseAIResponse = (response: string): Record<string, any> => {
     }
   }
 
-  // Enhanced expense parsing matching Albany Park format
+  // Dynamic expense parsing - extract ALL expenses regardless of name
   const expenseCategories = {
-    'rent': /rent[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
-    'gas': /gas[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
-    'electricity': /(?:electric|electricity)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
-    'water': /water[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
-    'maintenance': /(?:repairs?\s*&?\s*maint|maintenance|repairs?)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'costOfGoodsSold': /(?:cost\s+of\s+goods\s+sold|cogs)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'autoExpense': /auto\s+expense[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'bankCharges': /bank\s+charges[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'depreciationExpense': /depreciation\s+expense[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
     'insurance': /insurance[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
-    'trash': /(?:trash|waste\s+removal)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
-    'licenses': /(?:license\s*&?\s*permits?|licenses?)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
-    'supplies': /(?:cost\s+of\s+goods\s+sold|supplies)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'meals': /meals[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
     'internet': /internet[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'alarm': /alarm[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'office': /office[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
     'payroll': /payroll[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
     'accounting': /accounting[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
-    'alarm': /alarm[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
-    'depreciation': /depreciation\s+expense[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
-    'auto': /auto\s+expense[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
-    'bank': /bank\s+charges[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
-    'meals': /meals[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
-    'office': /office[:\s]*\$?([\d,]+(?:\.\d{2})?)/i
+    'rent': /rent[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'repairs': /repairs?[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'wasteRemoval': /waste\s+removal[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'electric': /electric[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'gas': /gas[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'water': /water[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    // Additional fallback patterns
+    'maintenance': /(?:repairs?\s*&?\s*maint|maintenance)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'electricity': /electricity[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'trash': /trash[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'licenses': /(?:license\s*&?\s*permits?|licenses?)[:\s]*\$?([\d,]+(?:\.\d{2})?)/i,
+    'supplies': /supplies[:\s]*\$?([\d,]+(?:\.\d{2})?)/i
   };
 
   // Enhanced equipment parsing for Albany Park format

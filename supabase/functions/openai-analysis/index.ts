@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -49,7 +48,7 @@ serve(async (req) => {
 
 The JSON object must conform to the following schema. If a value for a field cannot be found in the text, either omit the key entirely or set its value to null. Do not invent or guess data. All currency values should be numbers without symbols or commas.
 
-For expenses, look for annual amounts. Common expense categories include: rent, gas, electric, electricity, water, sewer, repairs, maintenance, insurance, trash, licenses, permits, supplies, internet, payroll, salaries.
+For expenses, extract ALL expense items regardless of name. Look for any line item with a name and dollar amount. Include EVERY expense found in the text including: cost of goods sold, auto expense, bank charges, depreciation, insurance, meals, internet, alarm, office, payroll, accounting, rent, repairs, waste removal, electric, gas, water, and ANY OTHER expenses listed.
 
 For lease information, extract the INITIAL or FIRST YEAR monthly rent amount, lease term in years, and number of renewal options.
 
@@ -57,7 +56,7 @@ For equipment, count the total number of washers and dryers from equipment lists
 
 For revenue, look for "Annual Revenue", "Gross Income", or similar terms. The asking price is the business purchase price.
 
-JSON Schema:
+JSON Schema (extract ALL expenses dynamically):
 
 {
   "askingPrice": Number,
@@ -76,17 +75,23 @@ JSON Schema:
     "avgAge": Number
   },
   "expenses": {
-    "rent": Number,
-    "gas": Number,
-    "electricity": Number,
-    "water": Number,
+    "costOfGoodsSold": Number,
+    "autoExpense": Number,
+    "bankCharges": Number,
+    "depreciationExpense": Number,
     "insurance": Number,
-    "maintenance": Number,
-    "supplies": Number,
+    "meals": Number,
     "internet": Number,
-    "trash": Number,
-    "licenses": Number,
-    "payroll": Number
+    "alarm": Number,
+    "office": Number,
+    "payroll": Number,
+    "accounting": Number,
+    "rent": Number,
+    "repairs": Number,
+    "wasteRemoval": Number,
+    "electric": Number,
+    "gas": Number,
+    "water": Number
   }
 }`;
         break;
@@ -115,7 +120,7 @@ JSON Schema:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Analyze this laundromat deal data (may contain messy formatting from spreadsheets): ${preprocessText(JSON.stringify(dealData))}` }
