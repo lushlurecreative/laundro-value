@@ -10,6 +10,11 @@ import { calculateMetrics } from '@/utils/calculations';
 import { supabase } from '@/integrations/supabase/client';
 import { Brain, TrendingUp, Shield, DollarSign, MapPin, Crown, Lock, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { ComprehensiveAIAnalysis } from './ComprehensiveAIAnalysis';
+import { MissingDataAnalysis } from './MissingDataAnalysis';
+import { FutureIncomeAnalysis } from './FutureIncomeAnalysis';
+import { PremiumReports } from './PremiumReports';
+import { CompetitionAnalysis } from './CompetitionAnalysis';
 
 interface AIAnalysisResult {
   analysis: string;

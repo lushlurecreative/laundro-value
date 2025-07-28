@@ -170,3 +170,43 @@ export const calculateCollectionBasedIncome = (
   
   return (utilityAnalysis.totalCollectedAmount / utilityAnalysis.collectionPeriodWeeks) * 52;
 };
+
+export const calculateBreakevenAnalysis = (
+  deal: Deal | null,
+  expenseItems: ExpenseItem[],
+  ancillaryIncome: AncillaryIncome | null
+): {
+  monthlyBreakevenRevenue: number;
+  breakevenOccupancy: number;
+  monthsToBreakeven: number;
+} => {
+  if (!deal) {
+    return {
+      monthlyBreakevenRevenue: 0,
+      breakevenOccupancy: 0,
+      monthsToBreakeven: 0
+    };
+  }
+
+  const monthlyExpenses = expenseItems.reduce((sum, expense) => sum + expense.amountAnnual, 0) / 12;
+  const monthlyDebtService = deal.askingPrice > 0 ? 
+    ((deal.askingPrice - (deal.askingPrice * deal.downPaymentPercent / 100)) * 
+     (deal.loanInterestRatePercent / 100 / 12) * 
+     Math.pow(1 + deal.loanInterestRatePercent / 100 / 12, deal.loanTermYears * 12)) / 
+    (Math.pow(1 + deal.loanInterestRatePercent / 100 / 12, deal.loanTermYears * 12) - 1) : 0;
+
+  const monthlyBreakevenRevenue = monthlyExpenses + monthlyDebtService;
+  
+  const currentMonthlyRevenue = deal.grossIncomeAnnual / 12;
+  const breakevenOccupancy = currentMonthlyRevenue > 0 ? (monthlyBreakevenRevenue / currentMonthlyRevenue) * 100 : 0;
+  
+  const initialInvestment = deal.askingPrice * deal.downPaymentPercent / 100;
+  const monthlyProfit = currentMonthlyRevenue - monthlyBreakevenRevenue;
+  const monthsToBreakeven = monthlyProfit > 0 ? initialInvestment / monthlyProfit : 0;
+
+  return {
+    monthlyBreakevenRevenue,
+    breakevenOccupancy,
+    monthsToBreakeven
+  };
+};

@@ -60,8 +60,47 @@ export const useOpenAIAnalysis = ({ onFieldsPopulated }: UseOpenAIAnalysisProps 
     }
   };
 
+  const analyzeAllFields = async (dealData: any) => {
+    setIsAnalyzing(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('openai-analysis', {
+        body: {
+          dealData,
+          analysisType: 'comprehensive-field-extraction'
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      const extractedFields = parseAIResponse(data.analysis);
+      
+      if (extractedFields && Object.keys(extractedFields).length > 0) {
+        onFieldsPopulated?.(extractedFields);
+        
+        toast({
+          title: "Comprehensive AI Analysis Complete",
+          description: `Analyzed all available data and populated ${Object.keys(extractedFields).length} fields`,
+        });
+      }
+
+    } catch (error) {
+      console.error('Comprehensive AI Analysis error:', error);
+      toast({
+        title: "Analysis Error",
+        description: "Unable to perform comprehensive analysis.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   return {
     analyzeText,
+    analyzeAllFields,
     isAnalyzing
   };
 };
