@@ -11,7 +11,7 @@ import { Lightbulb, FileText, Building2, DollarSign, Loader2, CheckCircle, Uploa
 import { FormLoadingSkeleton, AnalysisLoadingSkeleton } from './LoadingStates';
 
 export const EnhancedAIAnalysis = () => {
-  const { deal, updateDeal, updateLeaseDetails, addExpenseItem, addMachine, machineInventory, ancillaryIncome, updateAncillaryIncome, expenseItems, removeExpenseItem, removeMachine } = useDeal();
+  const { deal, updateDeal, updateLeaseDetails, addExpenseItem, updateExpenseItem, addMachine, machineInventory, ancillaryIncome, updateAncillaryIncome, expenseItems, removeExpenseItem, removeMachine } = useDeal();
   const [text, setText] = useState(deal?.pastedInformation || '');
   const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [confidenceScores, setConfidenceScores] = useState<Record<string, number>>({});
@@ -245,58 +245,82 @@ export const EnhancedAIAnalysis = () => {
         }
       }, 150);  // Slightly longer delay to ensure clearing is complete
 
-      // Enhanced expense handling with EXACT standard expense name mapping
-      console.log('Processing expenses from AI:', fields.expenses);
-      
-      if (fields.expenses) {
-        // Use EXACT names from ExpensesStep standardExpenses
-        const expenseMapping: Record<string, string> = {
-          'rent': 'Rent',
-          'utilities': 'Utilities - Electric',
-          'gas': 'Utilities - Gas',
-          'electricity': 'Utilities - Electric',
-          'electric': 'Utilities - Electric',
-          'utilities - gas': 'Utilities - Gas',
-          'utilities - electric': 'Utilities - Electric',
-          'water': 'Water & Sewer',
-          'sewer': 'Water & Sewer',
-          'water & sewer': 'Water & Sewer',
-          'maintenance': 'Maintenance & Repairs',
-          'repairs': 'Maintenance & Repairs',
-          'maintenance & repairs': 'Maintenance & Repairs',
-          'insurance': 'Insurance',
-          'trash': 'Trash',
-          'waste': 'Trash',
-          'garbage': 'Trash',
-          'licenses': 'Licenses & Permits',
-          'permits': 'Licenses & Permits',
-          'licenses & permits': 'Licenses & Permits',
-          'supplies': 'Supplies',
-          'internet': 'Internet',
-          'phone': 'Internet',
-          'payroll': 'Payroll',
-          'wages': 'Payroll',
-          'salary': 'Payroll'
-        };
+      // Enhanced expense handling with delay to ensure clearing is complete
+      setTimeout(() => {
+        console.log('Processing expenses from AI:', fields.expenses);
+        
+        if (fields.expenses) {
+          // Use EXACT names from ExpensesStep standardExpenses
+          const expenseMapping: Record<string, string> = {
+            'rent': 'Rent',
+            'utilities': 'Utilities - Electric',
+            'gas': 'Utilities - Gas',
+            'electricity': 'Utilities - Electric',
+            'electric': 'Utilities - Electric',
+            'utilities - gas': 'Utilities - Gas',
+            'utilities - electric': 'Utilities - Electric',
+            'water': 'Water & Sewer',
+            'sewer': 'Water & Sewer',
+            'water & sewer': 'Water & Sewer',
+            'maintenance': 'Maintenance & Repairs',
+            'repairs': 'Maintenance & Repairs',
+            'maintenance & repairs': 'Maintenance & Repairs',
+            'insurance': 'Insurance',
+            'trash': 'Trash',
+            'waste': 'Trash',
+            'waste removal': 'Trash',
+            'garbage': 'Trash',
+            'licenses': 'Licenses & Permits',
+            'permits': 'Licenses & Permits',
+            'licenses & permits': 'Licenses & Permits',
+            'supplies': 'Supplies',
+            'cost of goods sold': 'Supplies',
+            'internet': 'Internet',
+            'phone': 'Internet',
+            'payroll': 'Payroll',
+            'wages': 'Payroll',
+            'salary': 'Payroll',
+            'auto expense': 'Auto Expense',
+            'auto': 'Auto Expense',
+            'bank charges': 'Bank Charges',
+            'bank': 'Bank Charges',
+            'depreciation expense': 'Depreciation',
+            'depreciation': 'Depreciation',
+            'meals': 'Meals & Entertainment',
+            'alarm': 'Security & Alarm',
+            'office': 'Office Expenses',
+            'accounting': 'Accounting'
+          };
 
-        Object.entries(fields.expenses).forEach(([key, value]) => {
-          const amount = typeof value === 'number' ? value : parseFloat(value.toString().replace(/[^0-9.-]/g, '')) || 0;
-          if (amount > 0) {
-            const normalizedKey = key.toLowerCase().trim();
-            const standardName = expenseMapping[normalizedKey] || key;
-            
-            console.log(`Mapping expense: "${key}" -> "${standardName}" with amount: ${amount}`);
-            
-            addExpenseItem({
-              expenseId: `expense-${standardName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now()}-${Math.random()}`,
-              dealId: deal?.dealId || 'deal-1',
-              expenseName: standardName,
-              amountAnnual: amount,
-              expenseType: 'Fixed' as const,
-            });
-          }
-        });
-      }
+          console.log('Current expense items before clearing:', expenseItems);
+          
+          Object.entries(fields.expenses).forEach(([key, value]) => {
+            const amount = typeof value === 'number' ? value : parseFloat(value.toString().replace(/[^0-9.-]/g, '')) || 0;
+            if (amount > 0) {
+              const normalizedKey = key.toLowerCase().trim();
+              const standardName = expenseMapping[normalizedKey] || key;
+              
+              console.log(`Mapping expense: "${key}" -> "${standardName}" with amount: ${amount}`);
+              
+              // Check if this expense already exists to avoid duplication
+              const existingExpense = expenseItems.find(item => item.expenseName === standardName);
+              if (existingExpense) {
+                console.log(`Updating existing expense: ${standardName}`);
+                updateExpenseItem(existingExpense.expenseId, { amountAnnual: amount });
+              } else {
+                console.log(`Adding new expense: ${standardName}`);
+                addExpenseItem({
+                  expenseId: `expense-${standardName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now()}-${Math.random()}`,
+                  dealId: deal?.dealId || 'deal-1',
+                  expenseName: standardName,
+                  amountAnnual: amount,
+                  expenseType: 'Fixed' as const,
+                });
+              }
+            }
+          });
+        }
+      }, 200);  // Delay to ensure clearing is complete
 
       // Enhanced ancillary income handling
       if (fields.ancillary) {
