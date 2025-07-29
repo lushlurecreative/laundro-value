@@ -73,14 +73,31 @@ export const LeaseStep: React.FC = () => {
 
   useEffect(() => {
     if (leaseDetails) {
-      form.setValue('monthlyRent', leaseDetails.monthlyRent || 0);
-      form.setValue('annualRentIncreasePercent', leaseDetails.annualRentIncreasePercent || 2.25);
-      form.setValue('camCostAnnual', leaseDetails.camCostAnnual || 0);
-      form.setValue('remainingLeaseTermYears', leaseDetails.remainingLeaseTermYears || 0);
-      form.setValue('renewalOptionsCount', leaseDetails.renewalOptionsCount || 0);
-      form.setValue('renewalOptionLengthYears', leaseDetails.renewalOptionLengthYears || 5);
-      form.setValue('leaseType', leaseDetails.leaseType || 'Triple Net (NNN)');
-      form.setValue('leaseTerms', leaseDetails.leaseTerms || '');
+      // Only update if the value is actually different to avoid loops
+      if (form.getValues('monthlyRent') !== (leaseDetails.monthlyRent || 0)) {
+        form.setValue('monthlyRent', leaseDetails.monthlyRent || 0);
+      }
+      if (form.getValues('annualRentIncreasePercent') !== (leaseDetails.annualRentIncreasePercent || 2.25)) {
+        form.setValue('annualRentIncreasePercent', leaseDetails.annualRentIncreasePercent || 2.25);
+      }
+      if (form.getValues('camCostAnnual') !== (leaseDetails.camCostAnnual || 0)) {
+        form.setValue('camCostAnnual', leaseDetails.camCostAnnual || 0);
+      }
+      if (form.getValues('remainingLeaseTermYears') !== (leaseDetails.remainingLeaseTermYears || 0)) {
+        form.setValue('remainingLeaseTermYears', leaseDetails.remainingLeaseTermYears || 0);
+      }
+      if (form.getValues('renewalOptionsCount') !== (leaseDetails.renewalOptionsCount || 0)) {
+        form.setValue('renewalOptionsCount', leaseDetails.renewalOptionsCount || 0);
+      }
+      if (form.getValues('renewalOptionLengthYears') !== (leaseDetails.renewalOptionLengthYears || 5)) {
+        form.setValue('renewalOptionLengthYears', leaseDetails.renewalOptionLengthYears || 5);
+      }
+      if (form.getValues('leaseType') !== (leaseDetails.leaseType || 'Triple Net (NNN)')) {
+        form.setValue('leaseType', leaseDetails.leaseType || 'Triple Net (NNN)');
+      }
+      if (form.getValues('leaseTerms') !== (leaseDetails.leaseTerms || '')) {
+        form.setValue('leaseTerms', leaseDetails.leaseTerms || '');
+      }
     }
   }, [leaseDetails, form]);
 

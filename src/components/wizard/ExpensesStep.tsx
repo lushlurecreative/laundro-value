@@ -104,10 +104,7 @@ export const ExpensesStep: React.FC = () => {
     });
   };
 
-  // Initialize standard expenses on component mount
-  useEffect(() => {
-    ensureStandardExpenses();
-  }, []);
+  // No longer auto-populate standard expenses - let AI create them dynamically
 
   return (
     <div className="space-y-6">
@@ -119,64 +116,24 @@ export const ExpensesStep: React.FC = () => {
       </Alert>
 
       <Form {...form}>
-        {/* Operating Expenses */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingDown className="h-5 w-5" />
-              Operating Expenses
-            </CardTitle>
-            <CardDescription>
-              Regular monthly and annual operating costs
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {standardExpenses.map(stdExpense => {
-              const expense = expenseItems.find(item => item.expenseName === stdExpense.name);
-              return (
-                <div key={stdExpense.name} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end p-4 border rounded-lg">
-                  <div>
-                    <FormLabel>{stdExpense.name}</FormLabel>
-                    <p className="text-sm text-muted-foreground">{stdExpense.description}</p>
-                  </div>
-                  <div>
-                    <CurrencyInput
-                      placeholder="$0.00"
-                      value={expense?.amountAnnual || 0}
-                      onChange={(value) => {
-                        if (expense) {
-                          updateExpenseItem(expense.expenseId, { amountAnnual: value });
-                        }
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      ANNUAL industry range: {stdExpense.industry}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-
-        {/* Additional Expenses */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Additional Expenses</CardTitle>
-            <CardDescription>
-              Add any other expenses not covered above
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Other expenses that aren't in standard list */}
-            {expenseItems
-              .filter(expense => !standardExpenses.some(std => std.name === expense.expenseName))
-              .map(expense => (
+        {/* AI-Populated Expenses */}
+        {expenseItems.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingDown className="h-5 w-5" />
+                AI-Populated Expenses
+              </CardTitle>
+              <CardDescription>
+                Expenses extracted from your data analysis
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {expenseItems.map(expense => (
                 <div key={expense.expenseId} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center p-4 border rounded-lg">
                   <div>
                     <FormLabel>{expense.expenseName}</FormLabel>
+                    <p className="text-sm text-muted-foreground">AI-extracted</p>
                   </div>
                   <div>
                     <CurrencyInput
@@ -187,7 +144,7 @@ export const ExpensesStep: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Custom expense</p>
+                    <p className="text-sm text-muted-foreground">Annual amount</p>
                   </div>
                   <div>
                     <Button
@@ -200,11 +157,91 @@ export const ExpensesStep: React.FC = () => {
                   </div>
                 </div>
               ))}
+            </CardContent>
+          </Card>
+        )}
 
+        {/* Standard Expense Categories (Manual Entry) */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingDown className="h-5 w-5" />
+              Standard Expense Categories
+            </CardTitle>
+            <CardDescription>
+              Common laundromat expenses you can add manually if not captured by AI
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {standardExpenses.map(stdExpense => {
+              // Only show if not already populated by AI
+              const alreadyExists = expenseItems.find(item => item.expenseName === stdExpense.name);
+              if (alreadyExists) return null;
+              
+              return (
+                <div key={stdExpense.name} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end p-4 border-2 border-dashed rounded-lg">
+                  <div>
+                    <FormLabel>{stdExpense.name}</FormLabel>
+                    <p className="text-sm text-muted-foreground">{stdExpense.description}</p>
+                  </div>
+                  <div>
+                    <CurrencyInput
+                      placeholder="$0.00"
+                      value={0}
+                      onChange={(value) => {
+                        if (value > 0) {
+                          addExpenseItem({
+                            expenseId: `expense-${stdExpense.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now()}`,
+                            dealId: deal?.dealId || 'deal-1',
+                            expenseName: stdExpense.name,
+                            amountAnnual: value,
+                            expenseType: 'Fixed' as const,
+                          });
+                        }
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Industry range: {stdExpense.industry}
+                    </p>
+                  </div>
+                  <div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        addExpenseItem({
+                          expenseId: `expense-${stdExpense.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now()}`,
+                          dealId: deal?.dealId || 'deal-1',
+                          expenseName: stdExpense.name,
+                          amountAnnual: 0,
+                          expenseType: 'Fixed' as const,
+                        });
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+
+        {/* Custom Expenses */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Custom Expenses</CardTitle>
+            <CardDescription>
+              Add any other expenses not covered above
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
             {/* Add new other expense */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end p-4 border-2 border-dashed rounded-lg">
               <div>
-                <FormLabel>Add Other Expense</FormLabel>
+                <FormLabel>Add Custom Expense</FormLabel>
               </div>
               <div>
                 <FormField
