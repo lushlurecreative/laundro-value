@@ -73,20 +73,51 @@ export const ExpensesStep: React.FC = () => {
 
   const totalExpenses = expenseItems.reduce((sum, expense) => sum + expense.amountAnnual, 0);
 
-  // Standard expense categories with industry averages
+  // Standard expense categories with industry averages (as percentage of gross income)
   const standardExpenses = [
-    { name: 'Rent', industry: '$40,000-80,000', description: 'Monthly lease payments' },
-    { name: 'Utilities - Gas', industry: '$8,000-15,000', description: 'Heating and hot water' },
-    { name: 'Utilities - Electric', industry: '$10,000-20,000', description: 'Lighting and equipment power' },
-    { name: 'Water & Sewer', industry: '$15,000-30,000', description: 'Water usage and sewer fees' },
-    { name: 'Maintenance & Repairs', industry: '$5,000-12,000', description: 'Equipment repairs and facility maintenance' },
-    { name: 'Insurance', industry: '$2,500-5,000', description: 'General liability and property insurance' },
-    { name: 'Trash', industry: '$1,200-2,500', description: 'Waste disposal services' },
-    { name: 'Licenses & Permits', industry: '$500-2,000', description: 'Business licenses and permits' },
-    { name: 'Supplies', industry: '$2,000-5,000', description: 'Cleaning supplies, soap, etc.' },
-    { name: 'Internet', industry: '$500-1,200', description: 'Internet and phone services' },
-    { name: 'Payroll', industry: '$30,000-70,000', description: 'Employee wages and benefits' },
+    { name: 'Rent', industryPercent: '25-35%', description: 'Monthly lease payments' },
+    { name: 'Utilities - Electric', industryPercent: '4-8%', description: 'Lighting and equipment power' },
+    { name: 'Utilities - Gas', industryPercent: '3-6%', description: 'Heating and hot water' },
+    { name: 'Water & Sewer', industryPercent: '6-12%', description: 'Water usage and sewer fees' },
+    { name: 'Insurance', industryPercent: '1-3%', description: 'General liability and property insurance' },
+    { name: 'Repairs & Maintenance', industryPercent: '2-5%', description: 'Equipment repairs and facility maintenance' },
+    { name: 'Waste Removal', industryPercent: '0.5-2%', description: 'Waste disposal services' },
+    { name: 'Internet', industryPercent: '0.2-1%', description: 'Internet and phone services' },
+    { name: 'Payroll', industryPercent: '12-25%', description: 'Employee wages and benefits' },
+    { name: 'Accounting', industryPercent: '0.5-2%', description: 'Bookkeeping and tax preparation' },
+    { name: 'Bank Charges', industryPercent: '0.2-1%', description: 'Banking and transaction fees' },
+    { name: 'Office Supplies', industryPercent: '0.5-1.5%', description: 'Supplies and materials' },
+    { name: 'Security', industryPercent: '0.5-2%', description: 'Alarm and monitoring services' },
+    { name: 'Property Tax', industryPercent: '2-5%', description: 'Real estate taxes' },
+    { name: 'CAM Charges', industryPercent: '2-6%', description: 'Common area maintenance (if applicable)' },
   ];
+
+  // Helper function to get industry standard percentage for an expense
+  const getIndustryStandardPercent = (expenseName: string): string => {
+    const expense = standardExpenses.find(e => e.name === expenseName);
+    if (expense) return expense.industryPercent.replace('%', '');
+    
+    // Fallback mapping for common variations
+    const mappings: { [key: string]: string } = {
+      'Electric': '4-8',
+      'Electricity': '4-8',
+      'Gas': '3-6',
+      'Water': '6-12',
+      'Sewer': '6-12',
+      'Trash': '0.5-2',
+      'Garbage': '0.5-2',
+      'Phone': '0.2-1',
+      'Telecommunications': '0.2-1',
+    };
+    
+    for (const [key, value] of Object.entries(mappings)) {
+      if (expenseName.toLowerCase().includes(key.toLowerCase())) {
+        return value;
+      }
+    }
+    
+    return '1-3'; // Default range
+  };
 
   // Ensure all standard expenses exist
   const ensureStandardExpenses = () => {
@@ -111,65 +142,77 @@ export const ExpensesStep: React.FC = () => {
       <Alert>
         <InfoIcon className="h-4 w-4" />
         <AlertDescription>
-          Enter all operating expenses for the laundromat. If you don't have specific information, leave fields blank. Industry standard ANNUAL ranges are provided for reference.
+          <strong>Important:</strong> The goal is to run the deal accurately for <strong>YOUR</strong> operation. While seller-reported expenses are important reference points, analyze how <strong>YOU</strong> would run this business. Consider whether expenses like meals, travel, excessive cleaning costs, or personal vehicle insurance are reasonable for your operation. Run the numbers based on industry standards and your business plan.
         </AlertDescription>
       </Alert>
 
       <Form {...form}>
-        {/* AI-Populated Expenses */}
+        {/* Reported Expenses */}
         {expenseItems.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingDown className="h-5 w-5" />
-                AI-Populated Expenses
+                Reported Expenses
               </CardTitle>
               <CardDescription>
                 Expenses extracted from your data analysis
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {expenseItems.map(expense => (
-                <div key={expense.expenseId} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center p-4 border rounded-lg">
-                  <div>
-                    <FormLabel>{expense.expenseName}</FormLabel>
-                    <p className="text-sm text-muted-foreground">AI-extracted</p>
+              {expenseItems.map(expense => {
+                const percentOfGrossIncome = deal?.grossIncomeAnnual ? (expense.amountAnnual / deal.grossIncomeAnnual * 100) : 0;
+                const industryStandardPercent = getIndustryStandardPercent(expense.expenseName);
+                
+                return (
+                  <div key={expense.expenseId} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center p-4 border rounded-lg">
+                    <div>
+                      <FormLabel>{expense.expenseName}</FormLabel>
+                    </div>
+                    <div>
+                      <CurrencyInput
+                        value={expense.amountAnnual}
+                        onChange={(value) => {
+                          updateExpenseItem(expense.expenseId, { amountAnnual: value });
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        Industry: {industryStandardPercent}% of gross income
+                      </p>
+                      <p className="text-sm font-medium">
+                        Current: {percentOfGrossIncome.toFixed(1)}% of gross income
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Annual amount</p>
+                    </div>
+                    <div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeExpenseItem(expense.expenseId)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <div>
-                    <CurrencyInput
-                      value={expense.amountAnnual}
-                      onChange={(value) => {
-                        updateExpenseItem(expense.expenseId, { amountAnnual: value });
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Annual amount</p>
-                  </div>
-                  <div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeExpenseItem(expense.expenseId)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </CardContent>
           </Card>
         )}
 
-        {/* Standard Expense Categories (Manual Entry) */}
+        {/* Additional Recommended Categories */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingDown className="h-5 w-5" />
-              Standard Expense Categories
+              Recommended Additional Categories
             </CardTitle>
             <CardDescription>
-              Common laundromat expenses you can add manually if not captured by AI
+              Missing standard expense categories that should be considered for accurate analysis
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -203,7 +246,7 @@ export const ExpensesStep: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      Industry range: {stdExpense.industry}
+                      Industry: {stdExpense.industryPercent} of gross income
                     </p>
                   </div>
                   <div>

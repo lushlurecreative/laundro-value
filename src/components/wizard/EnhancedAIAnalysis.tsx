@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDeal } from '@/contexts/useDeal';
 import { useOpenAIAnalysis } from '@/hooks/useOpenAIAnalysis';
 import { parseAndClassifyExpenses, classifyExpense } from '@/utils/expenseClassifier';
+import { parseAndClassifyMachines } from '@/utils/machineClassifier';
 import { Lightbulb, FileText, Building2, DollarSign, Loader2, CheckCircle, Upload } from 'lucide-react';
 import { FormLoadingSkeleton, AnalysisLoadingSkeleton } from './LoadingStates';
 
@@ -100,11 +101,21 @@ export const EnhancedAIAnalysis = () => {
         }
       }
 
-      // Enhanced equipment handling with delay to ensure clearing is complete
+      // Enhanced equipment handling with intelligent classification
       setTimeout(() => {
         if (fields.equipment) {
-          // Add washers of different sizes
-          if (fields.equipment.washers50lb) {
+          console.log('🔧 Processing equipment with smart classification:', fields.equipment);
+          
+          // Use the new machine classifier for all equipment
+          const classifiedMachines = parseAndClassifyMachines(fields.equipment);
+          
+          classifiedMachines.forEach(machine => {
+            console.log(`➕ Adding classified machine: ${machine.quantity}x ${machine.machineType} (${machine.brand})`);
+            addMachine(machine);
+          });
+          
+          // Legacy support for old format (specific sizes)
+          if (fields.equipment.washers50lb && typeof fields.equipment.washers50lb === 'number') {
             addMachine({
               machineId: `washer-50lb-${Date.now()}-${Math.random()}`,
               dealId: '',
@@ -127,76 +138,8 @@ export const EnhancedAIAnalysis = () => {
               isOutOfOrder: false
             });
           }
-          if (fields.equipment.washers35lb) {
-            addMachine({
-              machineId: `washer-35lb-${Date.now()}-${Math.random()}`,
-              dealId: '',
-              machineType: 'Front-Load Washer',
-              brand: 'Speed Queen',
-              model: '',
-              quantity: fields.equipment.washers35lb,
-              ageYears: 5,
-              capacityLbs: 35,
-              vendPricePerUse: 3.50,
-              conditionRating: 3,
-              waterConsumptionGalPerCycle: 22,
-              electricConsumptionKwh: undefined,
-              gasConsumptionBtu: undefined,
-              purchaseValue: 0,
-              currentValue: 0,
-              maintenanceCostAnnual: 0,
-              isCardOperated: true,
-              isCoinOperated: false,
-              isOutOfOrder: false
-            });
-          }
-          if (fields.equipment.washers18lb) {
-            addMachine({
-              machineId: `washer-18lb-${Date.now()}-${Math.random()}`,
-              dealId: '',
-              machineType: 'Top-Load Washer',
-              brand: 'Speed Queen',
-              model: '',
-              quantity: fields.equipment.washers18lb,
-              ageYears: 5,
-              capacityLbs: 18,
-              vendPricePerUse: 2.50,
-              conditionRating: 3,
-              waterConsumptionGalPerCycle: 30,
-              electricConsumptionKwh: undefined,
-              gasConsumptionBtu: undefined,
-              purchaseValue: 0,
-              currentValue: 0,
-              maintenanceCostAnnual: 0,
-              isCardOperated: true,
-              isCoinOperated: false,
-              isOutOfOrder: false
-            });
-          }
-          if (fields.equipment.dryerPockets) {
-            addMachine({
-              machineId: `dryer-pockets-${Date.now()}-${Math.random()}`,
-              dealId: '',
-              machineType: 'Single Dryer',
-              brand: 'Speed Queen',
-              model: '',
-              quantity: fields.equipment.dryerPockets,
-              ageYears: 5,
-              capacityLbs: 35,
-              vendPricePerUse: 2.50,
-              conditionRating: 3,
-              waterConsumptionGalPerCycle: undefined,
-              electricConsumptionKwh: undefined,
-              gasConsumptionBtu: undefined,
-              purchaseValue: 0,
-              currentValue: 0,
-              maintenanceCostAnnual: 0,
-              isCardOperated: true,
-              isCoinOperated: false,
-              isOutOfOrder: false
-            });
-          }
-          // Generic washer/dryer fallback
+          
+          // Generic fallback if no specific equipment found
           if (fields.equipment.washers && !fields.equipment.washers50lb && !fields.equipment.washers35lb && !fields.equipment.washers18lb) {
             addMachine({
               machineId: `washer-generic-${Date.now()}-${Math.random()}`,
