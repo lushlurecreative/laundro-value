@@ -1,174 +1,223 @@
-import React from 'react';
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useOpenAIAnalysis } from '@/hooks/useOpenAIAnalysis';
+import React, { useState, useEffect } from 'react';
 import { useDeal } from '@/contexts/useDeal';
-import { InfoIcon, Lightbulb } from 'lucide-react';
-import { Deal, LeaseDetails, AncillaryIncome } from '@/types/deal';
+import { useAuth } from '@/contexts/AuthContext';
+import { AIInsightsDashboard } from '@/components/AIInsightsDashboard';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { 
+  Brain, 
+  TrendingUp, 
+  AlertTriangle, 
+  CheckCircle, 
+  Clock,
+  Zap,
+  BarChart3
+} from 'lucide-react';
 
 export const AIAnalysisStep: React.FC = () => {
-  const { deal, updateDeal, updateLeaseDetails, updateAncillaryIncome, updateExpenseItem, expenseItems, addMachine, clearMachineInventory } = useDeal();
+  const { deal, expenseItems, machineInventory, leaseDetails } = useDeal();
+  const { user } = useAuth();
+  const [analysisReadiness, setAnalysisReadiness] = useState(0);
+  const [missingData, setMissingData] = useState<string[]>([]);
 
-  const { analyzeText, isAnalyzing } = useOpenAIAnalysis({
-    onFieldsPopulated: (fields) => {
-      console.log('AI Analysis Fields:', fields);
+  useEffect(() => {
+    calculateReadiness();
+  }, [deal, expenseItems, machineInventory, leaseDetails]);
 
-      // Create update objects
-      const dealUpdates: Partial<Deal> = {};
-      const leaseUpdates: Partial<LeaseDetails> = {};
-      const ancillaryUpdates: Partial<AncillaryIncome> = {};
+  const calculateReadiness = () => {
+    const checks = [
+      { name: 'Asking Price', value: deal?.askingPrice },
+      { name: 'Gross Income', value: deal?.grossIncomeAnnual },
+      { name: 'Property Address', value: deal?.propertyAddress },
+      { name: 'Facility Size', value: deal?.facilitySizeSqft },
+      { name: 'Lease Details', value: leaseDetails?.monthlyRent },
+      { name: 'Expenses', value: expenseItems?.length > 0 },
+      { name: 'Equipment Info', value: machineInventory?.length > 0 }
+    ];
 
-      // Handle top-level deal fields
-      if (fields.askingPrice) dealUpdates.askingPrice = fields.askingPrice;
-      if (fields.grossIncome) dealUpdates.grossIncomeAnnual = fields.grossIncome;
-      if (fields.totalSqft) dealUpdates.facilitySizeSqft = fields.totalSqft;
-      if (fields.propertyAddress) dealUpdates.propertyAddress = fields.propertyAddress;
+    const passedChecks = checks.filter(check => check.value).length;
+    const readinessPercent = Math.round((passedChecks / checks.length) * 100);
+    
+    const missing = checks
+      .filter(check => !check.value)
+      .map(check => check.name);
 
-      // Handle lease object
-      if (fields.lease) {
-        if (fields.lease.monthlyRent) leaseUpdates.monthlyRent = fields.lease.monthlyRent;
-        if (fields.lease.remainingTermYears) leaseUpdates.remainingLeaseTermYears = fields.lease.remainingTermYears;
-        if (fields.lease.renewalOptionsCount) leaseUpdates.renewalOptionsCount = fields.lease.renewalOptionsCount;
-        if (fields.lease.annualRentIncreasePercent) leaseUpdates.annualRentIncreasePercent = fields.lease.annualRentIncreasePercent;
-      }
+    setAnalysisReadiness(readinessPercent);
+    setMissingData(missing);
+  };
 
-      // Handle expenses
-      if (fields.expenses) {
-        const expenseMapping: { [key: string]: string } = {
-          'rent': 'Rent',
-          'gas': 'Gas',
-          'electricity': 'Electricity',
-          'electric': 'Electricity',
-          'water': 'Water & Sewer',
-          'maintenance': 'Maintenance & Repairs',
-          'insurance': 'Insurance',
-          'trash': 'Trash',
-          'licenses': 'Licenses & Permits',
-          'supplies': 'Supplies',
-          'internet': 'Internet'
-        };
+  const getReadinessBadge = () => {
+    if (analysisReadiness >= 85) return { variant: 'default' as const, text: 'Ready for Analysis', icon: CheckCircle };
+    if (analysisReadiness >= 60) return { variant: 'secondary' as const, text: 'Mostly Ready', icon: Clock };
+    return { variant: 'destructive' as const, text: 'Needs More Data', icon: AlertTriangle };
+  };
 
-        Object.entries(fields.expenses).forEach(([expenseKey, value]) => {
-          const mappedName = expenseMapping[expenseKey.toLowerCase()] || expenseKey;
-          const existingExpense = expenseItems.find(exp => 
-            exp.expenseName.toLowerCase().includes(expenseKey.toLowerCase()) ||
-            mappedName.toLowerCase().includes(exp.expenseName.toLowerCase())
-          );
-          
-          if (existingExpense && typeof value === 'number' && value > 0) {
-            updateExpenseItem(existingExpense.expenseId, { amountAnnual: value });
-          }
-        });
-      }
-
-      // Handle ancillary income
-      if (fields.ancillary) {
-        if (fields.ancillary.vending) ancillaryUpdates.vendingIncomeAnnual = fields.ancillary.vending;
-        if (fields.ancillary.other) ancillaryUpdates.otherIncomeAnnual = fields.ancillary.other;
-      }
-      
-      // Handle equipment
-      if (fields.equipment) {
-        clearMachineInventory();
-
-        setTimeout(() => {
-          if (fields.equipment.washers > 0) {
-            addMachine({
-              machineId: `machine-washers-${Date.now()}`,
-              dealId: deal?.dealId || 'deal-1',
-              machineType: 'Front-Load Washer',
-              brand: 'Various',
-              quantity: fields.equipment.washers,
-              ageYears: fields.equipment.avgAge || 10,
-              conditionRating: 3,
-              vendPricePerUse: 3.50,
-              capacityLbs: 35,
-              isCardOperated: true,
-              isCoinOperated: true,
-              isOutOfOrder: false,
-              purchaseValue: 0,
-              currentValue: 0,
-              maintenanceCostAnnual: 0,
-            });
-          }
-          
-          if (fields.equipment.dryers > 0) {
-            addMachine({
-              machineId: `machine-dryers-${Date.now()}`,
-              dealId: deal?.dealId || 'deal-1',
-              machineType: 'Single Dryer',
-              brand: 'Various',
-              quantity: fields.equipment.dryers,
-              ageYears: fields.equipment.avgAge || 10,
-              conditionRating: 3,
-              vendPricePerUse: 2.00,
-              capacityLbs: 30,
-              isCardOperated: true,
-              isCoinOperated: true,
-              isOutOfOrder: false,
-              purchaseValue: 0,
-              currentValue: 0,
-              maintenanceCostAnnual: 0,
-            });
-          }
-        }, 100);
-      }
-
-      // Apply updates
-      if (Object.keys(dealUpdates).length > 0) {
-        updateDeal(dealUpdates);
-      }
-      if (Object.keys(leaseUpdates).length > 0) {
-        updateLeaseDetails(leaseUpdates);
-      }
-      if (Object.keys(ancillaryUpdates).length > 0) {
-        updateAncillaryIncome(ancillaryUpdates);
-      }
-    }
-  });
+  const dealId = deal?.dealId || `deal-${Date.now()}`;
+  const readinessBadge = getReadinessBadge();
 
   return (
     <div className="space-y-6">
-      <Alert>
-        <InfoIcon className="h-4 w-4" />
-        <AlertDescription>
-          <strong>AI-Powered Analysis:</strong> Paste any deal information, lease summaries, or property listings here. 
-          Our AI will automatically extract and populate relevant fields throughout the wizard. This uses industry standards 
-          and should be verified for accuracy.
-        </AlertDescription>
-      </Alert>
-
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="deal-notes" className="text-base font-medium">
-            Deal Notes for AI Analysis
-          </Label>
-          <p className="text-sm text-muted-foreground mb-2">
-            Paste deal notes, lease summaries, property listings, financial statements, or any deal-related information
-          </p>
-          <Textarea
-            id="deal-notes"
-            placeholder="Example: 'LEASE SUMMARY - Premises Address: 123 Main St, Rent: $5,000/month, Term: 10 years...' or property listings with equipment details and financial information."
-            className="min-h-[200px]"
-            onBlur={(e) => analyzeText(e.target.value)}
-          />
-          {isAnalyzing && (
-            <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-              <span>Analyzing and populating fields...</span>
+      {/* Header */}
+      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Brain className="h-6 w-6 text-blue-600" />
+            AI Intelligence Analysis
+          </CardTitle>
+          <CardDescription>
+            Comprehensive AI-powered analysis of your laundromat investment opportunity
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-semibold mb-3">Analysis Readiness</h4>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Data Completeness</span>
+                  <Badge variant={readinessBadge.variant}>
+                    <readinessBadge.icon className="h-3 w-3 mr-1" />
+                    {readinessBadge.text}
+                  </Badge>
+                </div>
+                <Progress value={analysisReadiness} className="h-2" />
+                <p className="text-sm text-muted-foreground">
+                  {analysisReadiness}% complete - {analysisReadiness >= 85 ? 'Ready for comprehensive analysis' : 'Add more data for better insights'}
+                </p>
+              </div>
             </div>
-          )}
-        </div>
+            
+            <div>
+              <h4 className="font-semibold mb-3">AI Capabilities</h4>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <Zap className="h-3 w-3 text-green-500" />
+                  <span>Market Analysis</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Zap className="h-3 w-3 text-green-500" />
+                  <span>Financial Scoring</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Zap className="h-3 w-3 text-green-500" />
+                  <span>Risk Assessment</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Zap className="h-3 w-3 text-green-500" />
+                  <span>Revenue Optimization</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Zap className="h-3 w-3 text-green-500" />
+                  <span>Expense Validation</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Zap className="h-3 w-3 text-green-500" />
+                  <span>Smart Recommendations</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
+      {/* Missing Data Alert */}
+      {missingData.length > 0 && (
         <Alert>
-          <Lightbulb className="h-4 w-4" />
+          <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            <strong>Pro Tip:</strong> For best results, include property addresses, financial details, equipment lists, 
-            lease terms, and any specific business information. The AI will automatically detect and categorize this information.
+            <strong>Missing Data:</strong> {missingData.join(', ')}. 
+            Complete these fields for more accurate AI analysis.
           </AlertDescription>
         </Alert>
+      )}
+
+      {/* Analysis Features */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-3">
+              <BarChart3 className="h-6 w-6 text-blue-500" />
+              <h3 className="font-semibold">Market Intelligence</h3>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Location analysis, demographic scoring, competition assessment, and market opportunity evaluation
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-3">
+              <TrendingUp className="h-6 w-6 text-green-500" />
+              <h3 className="font-semibold">Financial Analysis</h3>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              ROI calculations, expense validation, revenue optimization, and value assessment
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-3">
+              <AlertTriangle className="h-6 w-6 text-orange-500" />
+              <h3 className="font-semibold">Risk Assessment</h3>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Comprehensive risk scoring, success probability, and mitigation strategies
+            </p>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* AI Dashboard */}
+      <AIInsightsDashboard 
+        dealId={dealId}
+        dealData={{
+          askingPrice: deal?.askingPrice,
+          grossIncomeAnnual: deal?.grossIncomeAnnual,
+          annualNet: deal?.annualNet,
+          facilitySizeSqft: deal?.facilitySizeSqft,
+          propertyAddress: deal?.propertyAddress,
+          lease: leaseDetails,
+          expenses: expenseItems,
+          equipment: null, // Derived from machineInventory
+          machineInventory: machineInventory
+        }}
+        onRunAnalysis={() => {}}
+      />
+
+      {/* Pro Tips */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">💡 Pro Tips for Better AI Analysis</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <h4 className="font-semibold mb-2">Data Quality Matters</h4>
+              <ul className="space-y-1 text-muted-foreground">
+                <li>• Provide accurate expense breakdowns</li>
+                <li>• Include detailed equipment information</li>
+                <li>• Complete lease terms and conditions</li>
+                <li>• Verify income and expense figures</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-2">Maximize AI Insights</h4>
+              <ul className="space-y-1 text-muted-foreground">
+                <li>• Run analysis after each major data update</li>
+                <li>• Review recommendations carefully</li>
+                <li>• Use market insights for negotiation</li>
+                <li>• Consider risk factors in decision making</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

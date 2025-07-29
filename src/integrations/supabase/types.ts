@@ -14,6 +14,108 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_recommendations: {
+        Row: {
+          category: string
+          created_at: string
+          deal_id: string
+          description: string | null
+          estimated_benefit: number | null
+          id: string
+          impact_score: number | null
+          implementation_difficulty: number | null
+          priority: number | null
+          status: string | null
+          timeframe: string | null
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          deal_id: string
+          description?: string | null
+          estimated_benefit?: number | null
+          id?: string
+          impact_score?: number | null
+          implementation_difficulty?: number | null
+          priority?: number | null
+          status?: string | null
+          timeframe?: string | null
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          deal_id?: string
+          description?: string | null
+          estimated_benefit?: number | null
+          id?: string
+          impact_score?: number | null
+          implementation_difficulty?: number | null
+          priority?: number | null
+          status?: string | null
+          timeframe?: string | null
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      deal_analysis: {
+        Row: {
+          analysis_summary: string | null
+          confidence_level: number | null
+          created_at: string
+          deal_id: string
+          financial_score: number | null
+          id: string
+          key_insights: Json | null
+          market_score: number | null
+          opportunities: string[] | null
+          overall_score: number | null
+          recommendation: string | null
+          red_flags: string[] | null
+          risk_score: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          analysis_summary?: string | null
+          confidence_level?: number | null
+          created_at?: string
+          deal_id: string
+          financial_score?: number | null
+          id?: string
+          key_insights?: Json | null
+          market_score?: number | null
+          opportunities?: string[] | null
+          overall_score?: number | null
+          recommendation?: string | null
+          red_flags?: string[] | null
+          risk_score?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          analysis_summary?: string | null
+          confidence_level?: number | null
+          created_at?: string
+          deal_id?: string
+          financial_score?: number | null
+          id?: string
+          key_insights?: Json | null
+          market_score?: number | null
+          opportunities?: string[] | null
+          overall_score?: number | null
+          recommendation?: string | null
+          red_flags?: string[] | null
+          risk_score?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       deals: {
         Row: {
           created_at: string
@@ -41,6 +143,108 @@ export type Database = {
         }
         Relationships: []
       }
+      expense_analysis: {
+        Row: {
+          confidence_level: number | null
+          created_at: string
+          deal_id: string
+          expense_name: string
+          id: string
+          is_reasonable: boolean | null
+          market_average: number | null
+          reported_amount: number | null
+          suggestions: string[] | null
+          user_id: string | null
+          validation_notes: string | null
+          variance_percentage: number | null
+        }
+        Insert: {
+          confidence_level?: number | null
+          created_at?: string
+          deal_id: string
+          expense_name: string
+          id?: string
+          is_reasonable?: boolean | null
+          market_average?: number | null
+          reported_amount?: number | null
+          suggestions?: string[] | null
+          user_id?: string | null
+          validation_notes?: string | null
+          variance_percentage?: number | null
+        }
+        Update: {
+          confidence_level?: number | null
+          created_at?: string
+          deal_id?: string
+          expense_name?: string
+          id?: string
+          is_reasonable?: boolean | null
+          market_average?: number | null
+          reported_amount?: number | null
+          suggestions?: string[] | null
+          user_id?: string | null
+          validation_notes?: string | null
+          variance_percentage?: number | null
+        }
+        Relationships: []
+      }
+      market_data: {
+        Row: {
+          address: string
+          city: string | null
+          competition_data: Json | null
+          competition_score: number | null
+          created_at: string
+          demographic_score: number | null
+          id: string
+          income_data: Json | null
+          location_key: string
+          market_opportunity_score: number | null
+          market_trends: Json | null
+          population_data: Json | null
+          rent_analysis: Json | null
+          state: string | null
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          address: string
+          city?: string | null
+          competition_data?: Json | null
+          competition_score?: number | null
+          created_at?: string
+          demographic_score?: number | null
+          id?: string
+          income_data?: Json | null
+          location_key: string
+          market_opportunity_score?: number | null
+          market_trends?: Json | null
+          population_data?: Json | null
+          rent_analysis?: Json | null
+          state?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string
+          city?: string | null
+          competition_data?: Json | null
+          competition_score?: number | null
+          created_at?: string
+          demographic_score?: number | null
+          id?: string
+          income_data?: Json | null
+          location_key?: string
+          market_opportunity_score?: number | null
+          market_trends?: Json | null
+          population_data?: Json | null
+          rent_analysis?: Json | null
+          state?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -65,6 +269,102 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      revenue_projections: {
+        Row: {
+          confidence_level: number | null
+          created_at: string
+          current_revenue: number | null
+          deal_id: string
+          equipment_recommendations: Json | null
+          id: string
+          optimization_opportunities: Json | null
+          pricing_recommendations: Json | null
+          projected_revenue: number | null
+          roi_projection: number | null
+          service_recommendations: Json | null
+          timeline_months: number | null
+          user_id: string | null
+        }
+        Insert: {
+          confidence_level?: number | null
+          created_at?: string
+          current_revenue?: number | null
+          deal_id: string
+          equipment_recommendations?: Json | null
+          id?: string
+          optimization_opportunities?: Json | null
+          pricing_recommendations?: Json | null
+          projected_revenue?: number | null
+          roi_projection?: number | null
+          service_recommendations?: Json | null
+          timeline_months?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          confidence_level?: number | null
+          created_at?: string
+          current_revenue?: number | null
+          deal_id?: string
+          equipment_recommendations?: Json | null
+          id?: string
+          optimization_opportunities?: Json | null
+          pricing_recommendations?: Json | null
+          projected_revenue?: number | null
+          roi_projection?: number | null
+          service_recommendations?: Json | null
+          timeline_months?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      risk_assessments: {
+        Row: {
+          break_even_analysis: Json | null
+          created_at: string
+          deal_id: string
+          exit_strategy_projection: Json | null
+          financial_risk_score: number | null
+          id: string
+          market_risk_score: number | null
+          mitigation_strategies: Json | null
+          operational_risk_score: number | null
+          overall_risk_score: number | null
+          risk_factors: Json | null
+          success_probability: number | null
+          user_id: string | null
+        }
+        Insert: {
+          break_even_analysis?: Json | null
+          created_at?: string
+          deal_id: string
+          exit_strategy_projection?: Json | null
+          financial_risk_score?: number | null
+          id?: string
+          market_risk_score?: number | null
+          mitigation_strategies?: Json | null
+          operational_risk_score?: number | null
+          overall_risk_score?: number | null
+          risk_factors?: Json | null
+          success_probability?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          break_even_analysis?: Json | null
+          created_at?: string
+          deal_id?: string
+          exit_strategy_projection?: Json | null
+          financial_risk_score?: number | null
+          id?: string
+          market_risk_score?: number | null
+          mitigation_strategies?: Json | null
+          operational_risk_score?: number | null
+          overall_risk_score?: number | null
+          risk_factors?: Json | null
+          success_probability?: number | null
+          user_id?: string | null
         }
         Relationships: []
       }
