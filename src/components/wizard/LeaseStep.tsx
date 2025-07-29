@@ -18,6 +18,7 @@ import { CurrencyInput } from "@/components/ui/currency-input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoIcon, FileText, AlertTriangle } from 'lucide-react';
+import { HelpTooltip } from '@/components/ui/help-tooltip';
 
 const LeaseSchema = z.object({
   monthlyRent: z.number().min(0, "Monthly rent must be positive"),
@@ -154,7 +155,10 @@ export const LeaseStep: React.FC = () => {
                 name="monthlyRent"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Monthly Base Rent</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      Monthly Base Rent
+                      <HelpTooltip content="The base monthly rent amount before any additional charges. This is the core lease payment amount." />
+                    </FormLabel>
                     <FormControl>
                       <CurrencyInput
                         placeholder="$5,000.00"
@@ -179,7 +183,10 @@ export const LeaseStep: React.FC = () => {
                 name="camCostAnnual"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>CAM Costs (Annual)</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      CAM Costs (Annual)
+                      <HelpTooltip content="Common Area Maintenance charges - costs for maintaining shared areas like parking lots, lobbies, and landscaping." />
+                    </FormLabel>
                     <FormControl>
                       <CurrencyInput
                         placeholder="$2,000.00"
@@ -204,7 +211,10 @@ export const LeaseStep: React.FC = () => {
                 name="remainingLeaseTermYears"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Remaining Lease Term (Years)</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      Remaining Lease Term (Years)
+                      <HelpTooltip content="How many years are left on the current lease agreement. Minimum 5-7 years is preferred for financing purposes." />
+                    </FormLabel>
                     <FormControl>
                       <Input
                         type="number"

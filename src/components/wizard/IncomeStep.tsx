@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoIcon, TrendingUp } from 'lucide-react';
+import { HelpTooltip } from '@/components/ui/help-tooltip';
 
 const IncomeSchema = z.object({
   grossIncomeAnnual: z.number().min(0, "Gross income must be positive"),
@@ -103,7 +104,10 @@ export const IncomeStep: React.FC = () => {
                 name="grossIncomeAnnual"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Gross Income (Annual)</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      Gross Income (Annual)
+                      <HelpTooltip content="Total annual revenue from the laundromat before any expenses. This includes all income from washing machines, dryers, and any additional services." />
+                    </FormLabel>
                     <FormControl>
                       <CurrencyInput
                         placeholder="$200,000.00"
@@ -164,10 +168,10 @@ export const IncomeStep: React.FC = () => {
            {/* Ancillary Income */}
            <Card className="md:col-span-2">
              <CardHeader>
-               <CardTitle>In Place Additional Income Sources</CardTitle>
-               <CardDescription>
-                 Secondary revenue streams and ancillary services.
-               </CardDescription>
+                <CardTitle>In Place Additional Income Sources</CardTitle>
+                <CardDescription>
+                  Enter other income the seller has mentioned that you plan to keep in place (e.g., coffee sales, etc.).
+                </CardDescription>
              </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Vending Income */}

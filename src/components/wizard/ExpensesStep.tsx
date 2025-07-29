@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoIcon, TrendingDown, Plus, Trash2 } from 'lucide-react';
+import { HelpTooltip } from '@/components/ui/help-tooltip';
 
 const ExpensesSchema = z.object({
   incomeGrowthRatePercent: z.number().min(0).max(100, "Income growth rate must be between 0-100%"),
@@ -181,9 +182,25 @@ export const ExpensesStep: React.FC = () => {
                       <p className="text-sm text-muted-foreground">
                         Industry: {industryStandardPercent}% of gross income
                       </p>
-                      <p className="text-sm font-medium">
-                        Current: {percentOfGrossIncome.toFixed(1)}% of gross income
-                      </p>
+                      {(() => {
+                        // Parse the industry range to get min/max values
+                        const rangeMatch = industryStandardPercent.match(/(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)/);
+                        let industryMin = 0, industryMax = 100;
+                        if (rangeMatch) {
+                          industryMin = parseFloat(rangeMatch[1]);
+                          industryMax = parseFloat(rangeMatch[2]);
+                        }
+                        
+                        const isOutOfRange = percentOfGrossIncome < industryMin || percentOfGrossIncome > industryMax;
+                        
+                        return (
+                          <p className={`text-sm font-medium ${
+                            isOutOfRange ? 'text-red-600' : 'text-green-600'
+                          }`}>
+                            Current: {percentOfGrossIncome.toFixed(1)}% of gross income
+                          </p>
+                        );
+                      })()}
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Annual amount</p>

@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoIcon, Calculator, DollarSign } from 'lucide-react';
+import { HelpTooltip } from '@/components/ui/help-tooltip';
 
 const FinancingSchema = z.object({
   downPaymentPercent: z.number().min(0).max(100, "Down payment must be between 0-100%"),
@@ -127,6 +128,56 @@ export const FinancingStep: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               {/* Loan Type */}
+               <FormField
+                 control={form.control}
+                 name="loanType"
+                 render={({ field }) => (
+                   <FormItem>
+                     <FormLabel className="flex items-center gap-2">
+                       Loan Type
+                       <HelpTooltip content="Choose the type of financing. Different loan types have different requirements, rates, and terms. SBA loans typically offer the best rates for business purchases." />
+                     </FormLabel>
+                      <Select 
+                        value={field.value} 
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          handleFieldChange('loanType', value);
+                          
+                          // Auto-fill loan parameters based on selection with visual feedback
+                          const selectedType = loanTypes.find(lt => lt.value === value);
+                          if (selectedType && 'downPayment' in selectedType) {
+                            // Use setTimeout to create visible transition effect
+                            setTimeout(() => {
+                              form.setValue('downPaymentPercent', selectedType.downPayment);
+                              form.setValue('loanInterestRatePercent', selectedType.interestRate);
+                              form.setValue('loanTermYears', selectedType.term);
+                              handleFieldChange('downPaymentPercent', selectedType.downPayment);
+                              handleFieldChange('loanInterestRatePercent', selectedType.interestRate);
+                              handleFieldChange('loanTermYears', selectedType.term);
+                            }, 100);
+                          }
+                        }}
+                     >
+                       <FormControl>
+                         <SelectTrigger>
+                           <SelectValue placeholder="Select loan type" />
+                         </SelectTrigger>
+                       </FormControl>
+                        <SelectContent>
+                          {loanTypes.map(type => (
+                            <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                     </Select>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedLoanType.description}
+                      </p>
+                     <FormMessage />
+                   </FormItem>
+                 )}
+               />
+
               {/* Down Payment Percent */}
               <FormField
                 control={form.control}
@@ -216,54 +267,8 @@ export const FinancingStep: React.FC = () => {
                 )}
               />
 
-               {/* Loan Type */}
-               <FormField
-                 control={form.control}
-                 name="loanType"
-                 render={({ field }) => (
-                   <FormItem>
-                     <FormLabel>Loan Type</FormLabel>
-                      <Select 
-                        value={field.value} 
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          handleFieldChange('loanType', value);
-                          
-                          // Auto-fill loan parameters based on selection with visual feedback
-                          const selectedType = loanTypes.find(lt => lt.value === value);
-                          if (selectedType && 'downPayment' in selectedType) {
-                            // Use setTimeout to create visible transition effect
-                            setTimeout(() => {
-                              form.setValue('downPaymentPercent', selectedType.downPayment);
-                              form.setValue('loanInterestRatePercent', selectedType.interestRate);
-                              form.setValue('loanTermYears', selectedType.term);
-                              handleFieldChange('downPaymentPercent', selectedType.downPayment);
-                              handleFieldChange('loanInterestRatePercent', selectedType.interestRate);
-                              handleFieldChange('loanTermYears', selectedType.term);
-                            }, 100);
-                          }
-                        }}
-                     >
-                       <FormControl>
-                         <SelectTrigger>
-                           <SelectValue placeholder="Select loan type" />
-                         </SelectTrigger>
-                       </FormControl>
-                        <SelectContent>
-                          {loanTypes.map(type => (
-                            <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                     </Select>
-                      <p className="text-sm text-muted-foreground">
-                        {selectedLoanType.description}
-                      </p>
-                     <FormMessage />
-                   </FormItem>
-                 )}
-               />
-            </CardContent>
-          </Card>
+             </CardContent>
+           </Card>
 
           {/* Financing Calculator */}
           <Card className="md:col-span-2">

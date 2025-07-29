@@ -99,12 +99,21 @@ export function classifyExpense(expenseName: string): {
     }
   }
   
-  // Create new category preserving original formatting (or fixing basic capitalization)
-  const newCategory = expenseName
-    .trim()
-    .split(/\s+/) // Split on any whitespace
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
+  // Create new category preserving original formatting and handling various cases
+  let newCategory = expenseName.trim();
+  
+  // Handle common cases and improve formatting
+  if (newCategory.toLowerCase().includes('cost') && newCategory.toLowerCase().includes('goods')) {
+    newCategory = 'Cost of Goods Sold';
+  } else if (newCategory.toLowerCase().includes('auto') && newCategory.toLowerCase().includes('expense')) {
+    newCategory = 'Auto Expense';
+  } else {
+    // Default: proper title case
+    newCategory = newCategory
+      .split(/\s+/) // Split on any whitespace
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  }
   
   console.log(`🆕 Creating NEW category: "${expenseName}" → "${newCategory}"`);
   
