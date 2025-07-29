@@ -50,18 +50,19 @@ export const InvestmentTargetsStep: React.FC = () => {
     return `${value.toFixed(1)}%`;
   };
 
-  // Get market context for targets
+  // Get market context for targets with proper laundromat investment thresholds
   const getCapRateContext = (capRate: number) => {
-    if (capRate < 6) return { level: 'Low', description: 'Conservative - Premium markets, newer equipment', color: 'text-blue-600' };
-    if (capRate < 8) return { level: 'Moderate', description: 'Average - Typical market rates', color: 'text-green-600' };
-    if (capRate < 10) return { level: 'Good', description: 'Above average - Good value opportunity', color: 'text-yellow-600' };
-    return { level: 'High', description: 'Aggressive - Higher risk/higher reward', color: 'text-red-600' };
+    if (capRate < 6) return { level: 'Conservative', description: 'Premium markets, newer equipment - may be acceptable', color: 'text-blue-600' };
+    if (capRate < 8) return { level: 'Moderate', description: 'Average market rates', color: 'text-green-600' };
+    if (capRate < 12) return { level: 'Good', description: 'Strong value opportunity', color: 'text-green-600' };
+    return { level: 'Aggressive', description: 'High risk/high reward - verify thoroughly', color: 'text-yellow-600' };
   };
 
   const getCoCROIContext = (cocRoi: number) => {
-    if (cocRoi < 15) return { level: 'Moderate', description: 'Balanced risk/return', color: 'text-green-600' };
-    if (cocRoi < 20) return { level: 'Good', description: 'Strong returns', color: 'text-yellow-600' };
-    return { level: 'Aggressive', description: 'High returns target', color: 'text-red-600' };
+    if (cocRoi < 8) return { level: 'Poor', description: 'Below market expectations - not recommended', color: 'text-red-600' };
+    if (cocRoi < 12) return { level: 'Below Average', description: 'Consider other opportunities', color: 'text-orange-600' };
+    if (cocRoi < 20) return { level: 'Good', description: 'Solid returns for laundromat', color: 'text-green-600' };
+    return { level: 'Excellent', description: 'Outstanding returns - verify projections', color: 'text-green-600' };
   };
 
   const capRateContext = getCapRateContext(form.watch('targetCapRatePercent') || 0);
