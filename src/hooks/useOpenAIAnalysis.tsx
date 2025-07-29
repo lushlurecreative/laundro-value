@@ -35,6 +35,18 @@ export const useOpenAIAnalysis = ({ onFieldsPopulated }: UseOpenAIAnalysisProps 
       const extractedFields = parseAIResponse(data.analysis);
       
       if (extractedFields && Object.keys(extractedFields).length > 0) {
+        // Handle new expense array format
+        if (extractedFields.expenses && Array.isArray(extractedFields.expenses)) {
+          console.log('Processing expense array:', extractedFields.expenses);
+          // Convert expense array to individual fields for backward compatibility
+          extractedFields.expenses.forEach((exp: any) => {
+            if (exp.name && exp.amount) {
+              const normalizedName = exp.name.toLowerCase().replace(/[^a-z]/g, '');
+              extractedFields[normalizedName] = exp.amount;
+            }
+          });
+        }
+        
         onFieldsPopulated?.(extractedFields);
         
         toast({

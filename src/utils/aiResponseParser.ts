@@ -49,12 +49,31 @@ export const parseAIResponse = (response: string): Record<string, any> => {
         if (jsonData.equipment.avgAge) normalizedData.equipment.avgAge = parseCurrency(jsonData.equipment.avgAge);
       }
       
-      // Handle expenses object
-      if (jsonData.expenses && typeof jsonData.expenses === 'object') {
-        normalizedData.expenses = {};
-        Object.entries(jsonData.expenses).forEach(([key, value]) => {
-          if (value) normalizedData.expenses[key] = parseCurrency(value as string | number);
-        });
+      // Handle expenses - new array format or legacy object format
+      if (jsonData.expenses) {
+        if (Array.isArray(jsonData.expenses)) {
+          // New array format
+          normalizedData.expenseArray = jsonData.expenses.map((exp: any) => ({
+            name: exp.name || '',
+            amount: parseCurrency(exp.amount || 0)
+          }));
+          
+          // Also convert to individual fields for backward compatibility
+          jsonData.expenses.forEach((exp: any) => {
+            if (exp.name && exp.amount) {
+              const normalizedName = exp.name.toLowerCase()
+                .replace(/\s+/g, '')
+                .replace(/[^a-z]/g, '');
+              normalizedData[normalizedName] = parseCurrency(exp.amount);
+            }
+          });
+        } else if (typeof jsonData.expenses === 'object') {
+          // Legacy object format
+          normalizedData.expenses = {};
+          Object.entries(jsonData.expenses).forEach(([key, value]) => {
+            if (value) normalizedData.expenses[key] = parseCurrency(value as string | number);
+          });
+        }
       }
       
       console.log('Normalized data:', normalizedData);

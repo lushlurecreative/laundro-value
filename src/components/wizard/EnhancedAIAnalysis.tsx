@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDeal } from '@/contexts/useDeal';
 import { useOpenAIAnalysis } from '@/hooks/useOpenAIAnalysis';
-import { parseAndClassifyExpenses } from '@/utils/expenseClassifier';
+import { parseAndClassifyExpenses, classifyExpense } from '@/utils/expenseClassifier';
 import { Lightbulb, FileText, Building2, DollarSign, Loader2, CheckCircle, Upload } from 'lucide-react';
 import { FormLoadingSkeleton, AnalysisLoadingSkeleton } from './LoadingStates';
 
@@ -246,34 +246,45 @@ export const EnhancedAIAnalysis = () => {
         }
       }, 150);  // Slightly longer delay to ensure clearing is complete
 
-      // Smart expense handling with AI classification
+      // Smart expense handling with new AI classification
       setTimeout(() => {
-        console.log('🚀 Processing expenses from AI:', fields.expenses);
+        console.log('🚀 Processing expenses from AI:', fields);
         
-        if (fields.expenses) {
-          // Use smart expense classifier to handle any variations
-          const classifiedExpenses = parseAndClassifyExpenses(fields.expenses);
+        // Handle new expense array format
+        if (fields.expenseArray && Array.isArray(fields.expenseArray)) {
+          console.log('📊 Processing expense array:', fields.expenseArray);
           
-          console.log('📊 Classified expenses:', classifiedExpenses);
-          
-          classifiedExpenses.forEach(expense => {
-            // Check if this expense category already exists
-            const existingExpense = expenseItems.find(item => 
-              item.expenseName.toLowerCase() === expense.expenseName.toLowerCase()
-            );
-            
-            if (existingExpense) {
-              console.log(`🔄 Updating existing expense: ${expense.expenseName}`);
-              updateExpenseItem(existingExpense.expenseId, { 
-                amountAnnual: expense.amountAnnual 
-              });
-            } else {
-              console.log(`➕ Adding new expense: ${expense.expenseName}`);
+          fields.expenseArray.forEach((expense: any) => {
+            if (expense.name && expense.amount > 0) {
+              // Use smart expense classifier for the name
+              const classified = classifyExpense(expense.name);
+              
+              console.log(`➕ Adding expense: ${expense.name} -> ${classified.category} ($${expense.amount})`);
               addExpenseItem({
-                ...expense,
+                expenseId: `ai-${Date.now()}-${Math.random()}`,
                 dealId: deal?.dealId || 'deal-1',
+                expenseName: classified.category,
+                amountAnnual: expense.amount,
+                expenseType: 'Fixed' as const,
               });
             }
+          });
+        } else if (fields.expenses) {
+          // Legacy format - convert object to array and process
+          const expenseEntries = Object.entries(fields.expenses).map(([name, amount]) => ({
+            name,
+            amount: typeof amount === 'number' ? amount : 0
+          }));
+          
+          const classifiedExpenses = parseAndClassifyExpenses(fields.expenses);
+          console.log('📊 Classified expenses (legacy):', classifiedExpenses);
+          
+          classifiedExpenses.forEach(expense => {
+            console.log(`➕ Adding legacy expense: ${expense.expenseName}`);
+            addExpenseItem({
+              ...expense,
+              dealId: deal?.dealId || 'deal-1',
+            });
           });
         }
       }, 200);  // Delay to ensure clearing is complete

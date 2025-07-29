@@ -74,25 +74,10 @@ JSON Schema (extract ALL expenses dynamically):
     "dryers": Number,
     "avgAge": Number
   },
-  "expenses": {
-    "costOfGoodsSold": Number,
-    "autoExpense": Number,
-    "bankCharges": Number,
-    "depreciationExpense": Number,
-    "insurance": Number,
-    "meals": Number,
-    "internet": Number,
-    "alarm": Number,
-    "office": Number,
-    "payroll": Number,
-    "accounting": Number,
-    "rent": Number,
-    "repairs": Number,
-    "wasteRemoval": Number,
-    "electric": Number,
-    "gas": Number,
-    "water": Number
-  }
+  "expenses": [
+    {"name": "exact expense name as mentioned in text", "amount": Number},
+    {"name": "another expense name", "amount": Number}
+  ]
 }`;
         break;
       case 'deal-analysis':
