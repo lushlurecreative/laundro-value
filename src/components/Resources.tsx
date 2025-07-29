@@ -10,13 +10,18 @@ import { useDeal } from '@/contexts/useDeal';
 import { Plus, X, Lightbulb, Coffee, Car, Shield, Wifi, DollarSign, TrendingUp, Users, MapPin, Building, FileText, ExternalLink, BookOpen } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { LaundromatsGuide } from './LaundromatsGuide';
+import { LaundromatsLegacyProgram } from './LaundromatsLegacyProgram';
 
 export const Resources: React.FC = () => {
   const { deal, updateDeal } = useDeal();
-  const [currentView, setCurrentView] = useState<'main' | 'guide'>('main');
+  const [currentView, setCurrentView] = useState<'main' | 'guide' | 'legacy'>('main');
 
   if (currentView === 'guide') {
     return <LaundromatsGuide onBack={() => setCurrentView('main')} />;
+  }
+
+  if (currentView === 'legacy') {
+    return <LaundromatsLegacyProgram onBack={() => setCurrentView('main')} />;
   }
 
 
@@ -87,54 +92,94 @@ export const Resources: React.FC = () => {
           </p>
         </div>
 
-        {/* Comprehensive Laundromat Guide */}
-        <Card className="shadow-elegant bg-gradient-subtle border-primary/20">
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-primary/10 rounded-lg">
-                <BookOpen className="h-6 w-6 text-primary" />
+        {/* Comprehensive Laundromat Guides */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Free Guide */}
+          <Card className="shadow-elegant bg-gradient-subtle border-primary/20">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-primary/10 rounded-lg">
+                  <BookOpen className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Laundromats 101</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Complete journey from idea to business
+                  </p>
+                </div>
               </div>
-              <div>
-                <CardTitle className="text-xl">Complete Laundromat Business Guide</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  From finding deals to closing and operations — the complete journey
+                  The complete "Laundromats 101" guide covers everything from hunting for deals to operations.
                 </p>
+                <div className="grid grid-cols-2 gap-3 text-center">
+                  <div className="p-2 bg-background rounded-lg border">
+                    <div className="text-lg font-bold text-primary">5</div>
+                    <div className="text-xs text-muted-foreground">Phases</div>
+                  </div>
+                  <div className="p-2 bg-background rounded-lg border">
+                    <div className="text-lg font-bold text-primary">R.A.P.I.D</div>
+                    <div className="text-xs text-muted-foreground">Location</div>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => setCurrentView('guide')}
+                  className="w-full"
+                  variant="outline"
+                >
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Read Guide
+                </Button>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <p className="text-muted-foreground">
-                The comprehensive "Laundromats 101" guide covers everything from hunting for the right deal, conducting due diligence, valuation, financing, and running a profitable laundromat business.
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                <div className="p-3 bg-background rounded-lg border">
-                  <div className="text-2xl font-bold text-primary">5</div>
-                  <div className="text-xs text-muted-foreground">Phases Covered</div>
+            </CardContent>
+          </Card>
+
+          {/* Premium Guide */}
+          <Card className="shadow-elegant bg-gradient-primary/5 border-primary/30">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-primary/20 rounded-lg">
+                  <BookOpen className="h-6 w-6 text-primary" />
                 </div>
-                <div className="p-3 bg-background rounded-lg border">
-                  <div className="text-2xl font-bold text-primary">4</div>
-                  <div className="text-xs text-muted-foreground">Week DD Plan</div>
-                </div>
-                <div className="p-3 bg-background rounded-lg border">
-                  <div className="text-2xl font-bold text-primary">R.A.P.I.D</div>
-                  <div className="text-xs text-muted-foreground">Location Factors</div>
-                </div>
-                <div className="p-3 bg-background rounded-lg border">
-                  <div className="text-2xl font-bold text-primary">3.5-5.5x</div>
-                  <div className="text-xs text-muted-foreground">Valuation Multiple</div>
+                <div>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    Legacy Program
+                    <Badge className="bg-gradient-primary text-white text-xs">Premium</Badge>
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Complete A-Z blueprint with worksheets
+                  </p>
                 </div>
               </div>
-              <Button 
-                onClick={() => setCurrentView('guide')}
-                className="w-full bg-gradient-primary text-primary-foreground shadow-button"
-              >
-                <BookOpen className="h-4 w-4 mr-2" />
-                Read Complete Guide
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  The ultimate 7-module blueprint with detailed worksheets, checklists, and templates.
+                </p>
+                <div className="grid grid-cols-2 gap-3 text-center">
+                  <div className="p-2 bg-background rounded-lg border">
+                    <div className="text-lg font-bold text-primary">7</div>
+                    <div className="text-xs text-muted-foreground">Modules</div>
+                  </div>
+                  <div className="p-2 bg-background rounded-lg border">
+                    <div className="text-lg font-bold text-primary">A-Z</div>
+                    <div className="text-xs text-muted-foreground">Complete</div>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => setCurrentView('legacy')}
+                  className="w-full bg-gradient-primary text-white"
+                >
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  View Blueprint
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Business Growth Ideas */}
         <Card className="shadow-elegant">
