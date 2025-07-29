@@ -138,27 +138,24 @@ export const FinancingStep: React.FC = () => {
                        Loan Type
                        <HelpTooltip content="Choose the type of financing. Different loan types have different requirements, rates, and terms. SBA loans typically offer the best rates for business purchases." />
                      </FormLabel>
-                      <Select 
-                        value={field.value} 
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          handleFieldChange('loanType', value);
-                          
-                          // Auto-fill loan parameters based on selection with visual feedback
-                          const selectedType = loanTypes.find(lt => lt.value === value);
-                          if (selectedType && 'downPayment' in selectedType) {
-                            // Use setTimeout to create visible transition effect
-                            setTimeout(() => {
-                              form.setValue('downPaymentPercent', selectedType.downPayment);
-                              form.setValue('loanInterestRatePercent', selectedType.interestRate);
-                              form.setValue('loanTermYears', selectedType.term);
-                              handleFieldChange('downPaymentPercent', selectedType.downPayment);
-                              handleFieldChange('loanInterestRatePercent', selectedType.interestRate);
-                              handleFieldChange('loanTermYears', selectedType.term);
-                            }, 100);
-                          }
-                        }}
-                     >
+                       <Select 
+                         value={field.value} 
+                         onValueChange={(value) => {
+                           field.onChange(value);
+                           handleFieldChange('loanType', value);
+                           
+                           // Auto-fill loan parameters based on selection
+                           const selectedType = loanTypes.find(lt => lt.value === value);
+                           if (selectedType) {
+                             form.setValue('downPaymentPercent', selectedType.downPayment);
+                             form.setValue('loanInterestRatePercent', selectedType.interestRate);
+                             form.setValue('loanTermYears', selectedType.term);
+                             handleFieldChange('downPaymentPercent', selectedType.downPayment);
+                             handleFieldChange('loanInterestRatePercent', selectedType.interestRate);
+                             handleFieldChange('loanTermYears', selectedType.term);
+                           }
+                         }}
+                      >
                        <FormControl>
                          <SelectTrigger>
                            <SelectValue placeholder="Select loan type" />

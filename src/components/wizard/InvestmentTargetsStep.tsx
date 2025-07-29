@@ -104,8 +104,8 @@ export const InvestmentTargetsStep: React.FC = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => {
-                          field.onChange(0);
-                          handleFieldChange('targetCapRatePercent', 0);
+                          field.onChange(null);
+                          handleFieldChange('targetCapRatePercent', null);
                         }}
                       >
                         <Trash2 className="h-3 w-3" />
@@ -118,9 +118,9 @@ export const InvestmentTargetsStep: React.FC = () => {
                         min="0"
                         max="50"
                         placeholder="8.0"
-                        value={field.value === 0 ? '' : field.value}
+                        value={field.value === null || field.value === 0 ? '' : field.value}
                         onChange={(e) => {
-                          const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0;
+                          const value = e.target.value === '' ? null : parseFloat(e.target.value) || null;
                           field.onChange(value);
                           handleFieldChange('targetCapRatePercent', value);
                         }}
@@ -152,8 +152,8 @@ export const InvestmentTargetsStep: React.FC = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => {
-                          field.onChange(0);
-                          handleFieldChange('targetCoCROIPercent', 0);
+                          field.onChange(null);
+                          handleFieldChange('targetCoCROIPercent', null);
                         }}
                       >
                         <Trash2 className="h-3 w-3" />
@@ -166,9 +166,9 @@ export const InvestmentTargetsStep: React.FC = () => {
                         min="0"
                         max="100"
                         placeholder="15.0"
-                        value={field.value === 0 ? '' : field.value}
+                        value={field.value === null || field.value === 0 ? '' : field.value}
                         onChange={(e) => {
-                          const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0;
+                          const value = e.target.value === '' ? null : parseFloat(e.target.value) || null;
                           field.onChange(value);
                           handleFieldChange('targetCoCROIPercent', value);
                         }}

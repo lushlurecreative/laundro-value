@@ -134,32 +134,39 @@ export const IncomeStep: React.FC = () => {
                    const grossIncome = form.watch('grossIncomeAnnual') || 0;
                    const netPercentage = grossIncome > 0 ? ((field.value || 0) / grossIncome * 100) : 0;
                    
-                   return (
-                     <FormItem>
-                       <FormLabel>Annual Net Income (NOI)</FormLabel>
-                       <FormControl>
-                         <CurrencyInput
-                           placeholder="$50,000.00"
-                           value={field.value}
-                           onChange={(value) => {
-                             field.onChange(value);
-                             handleFieldChange('annualNet', value);
-                           }}
-                         />
-                       </FormControl>
-                       <div className="space-y-1">
-                         <p className="text-sm text-muted-foreground">
-                           Typically 25-35% of gross income
-                         </p>
-                         {grossIncome > 0 && (
-                           <p className="text-sm font-medium text-primary">
-                             Current: {netPercentage.toFixed(1)}% of gross income
-                           </p>
-                         )}
-                       </div>
-                       <FormMessage />
-                     </FormItem>
-                   );
+                    const isInRange = netPercentage >= 25 && netPercentage <= 35;
+                    
+                    return (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          Annual Net Income (NOI)
+                          <HelpTooltip content="Net Operating Income (NOI) is the annual income after all operating expenses but before debt service and taxes. This is a key metric for evaluating property performance." />
+                        </FormLabel>
+                        <FormControl>
+                          <CurrencyInput
+                            placeholder="$50,000.00"
+                            value={field.value}
+                            onChange={(value) => {
+                              field.onChange(value);
+                              handleFieldChange('annualNet', value);
+                            }}
+                          />
+                        </FormControl>
+                        <div className="space-y-1">
+                          <p className="text-sm text-muted-foreground">
+                            Typically 25-35% of gross income
+                          </p>
+                          {grossIncome > 0 && (
+                            <p className={`text-sm font-medium ${
+                              isInRange ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                              Current: {netPercentage.toFixed(1)}% of gross income
+                            </p>
+                          )}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    );
                  }}
                />
             </CardContent>

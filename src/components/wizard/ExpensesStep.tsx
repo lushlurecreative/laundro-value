@@ -94,12 +94,12 @@ export const ExpensesStep: React.FC = () => {
   ];
 
   // Helper function to get industry standard percentage for an expense
-  const getIndustryStandardPercent = (expenseName: string): string => {
+  const getIndustryStandardPercent = (expenseName: string): string | null => {
     const expense = standardExpenses.find(e => e.name === expenseName);
     if (expense) return expense.industryPercent.replace('%', '');
     
-    // Fallback mapping for common variations
-    const mappings: { [key: string]: string } = {
+    // Only return documented industry standards for known categories
+    const documentedMappings: { [key: string]: string } = {
       'Electric': '4-8',
       'Electricity': '4-8',
       'Gas': '3-6',
@@ -111,13 +111,13 @@ export const ExpensesStep: React.FC = () => {
       'Telecommunications': '0.2-1',
     };
     
-    for (const [key, value] of Object.entries(mappings)) {
+    for (const [key, value] of Object.entries(documentedMappings)) {
       if (expenseName.toLowerCase().includes(key.toLowerCase())) {
         return value;
       }
     }
     
-    return '1-3'; // Default range
+    return null; // No industry standard available
   };
 
   // Ensure all standard expenses exist
@@ -179,28 +179,36 @@ export const ExpensesStep: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">
-                        Industry: {industryStandardPercent}% of gross income
-                      </p>
-                      {(() => {
-                        // Parse the industry range to get min/max values
-                        const rangeMatch = industryStandardPercent.match(/(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)/);
-                        let industryMin = 0, industryMax = 100;
-                        if (rangeMatch) {
-                          industryMin = parseFloat(rangeMatch[1]);
-                          industryMax = parseFloat(rangeMatch[2]);
-                        }
-                        
-                        const isOutOfRange = percentOfGrossIncome < industryMin || percentOfGrossIncome > industryMax;
-                        
-                        return (
-                          <p className={`text-sm font-medium ${
-                            isOutOfRange ? 'text-red-600' : 'text-green-600'
-                          }`}>
-                            Current: {percentOfGrossIncome.toFixed(1)}% of gross income
+                      {industryStandardPercent ? (
+                        <>
+                          <p className="text-sm text-muted-foreground">
+                            Industry: {industryStandardPercent}% of gross income
                           </p>
-                        );
-                      })()}
+                          {(() => {
+                            // Parse the industry range to get min/max values
+                            const rangeMatch = industryStandardPercent.match(/(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)/);
+                            let industryMin = 0, industryMax = 100;
+                            if (rangeMatch) {
+                              industryMin = parseFloat(rangeMatch[1]);
+                              industryMax = parseFloat(rangeMatch[2]);
+                            }
+                            
+                            const isOutOfRange = percentOfGrossIncome < industryMin || percentOfGrossIncome > industryMax;
+                            
+                            return (
+                              <p className={`text-sm font-medium ${
+                                isOutOfRange ? 'text-red-600' : 'text-green-600'
+                              }`}>
+                                Current: {percentOfGrossIncome.toFixed(1)}% of gross income
+                              </p>
+                            );
+                          })()}
+                        </>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          Current: {percentOfGrossIncome.toFixed(1)}% of gross income
+                        </p>
+                      )}
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Annual amount</p>

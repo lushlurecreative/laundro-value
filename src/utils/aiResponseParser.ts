@@ -186,7 +186,17 @@ export const parseAIResponse = (response: string): Record<string, any> => {
   const lease: Record<string, any> = {};
   if (fields.monthlyRent) lease.monthlyRent = fields.monthlyRent;
   if (fields.leaseTerm) lease.remainingLeaseTermYears = fields.leaseTerm;
-  if (fields.renewalOptions || fields.renewalOptionsCount) {
+  // Parse lease renewal options intelligently
+  const renewalText = response.toLowerCase();
+  if (renewalText.includes('option') && renewalText.includes('extend')) {
+    // Look for "option to extend for X years" pattern first
+    const extensionMatch = renewalText.match(/option.*?(?:extend|renewal).*?(?:for\s+)?(\d+)\s*year/);
+    if (extensionMatch) {
+      const extensionYears = parseInt(extensionMatch[1]);
+      lease.renewalOptionsCount = 1; // One option to extend
+      lease.renewalOptionLengthYears = extensionYears;
+    }
+  } else if (fields.renewalOptions || fields.renewalOptionsCount) {
     // Enhanced parsing for "Two (2) five (5) year renewal" format
     const renewalMatch = response.match(/(?:two\s*\(\s*(\d+)\s*\)|(\d+))\s*(?:five\s*\(\s*(\d+)\s*\)|(\d+))\s*year/i);
     if (renewalMatch) {

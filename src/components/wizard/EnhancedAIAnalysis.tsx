@@ -13,7 +13,7 @@ import { Lightbulb, FileText, Building2, DollarSign, Loader2, CheckCircle, Uploa
 import { FormLoadingSkeleton, AnalysisLoadingSkeleton } from './LoadingStates';
 
 export const EnhancedAIAnalysis = () => {
-  const { deal, updateDeal, updateLeaseDetails, addExpenseItem, updateExpenseItem, addMachine, machineInventory, ancillaryIncome, updateAncillaryIncome, expenseItems, removeExpenseItem, removeMachine } = useDeal();
+  const { deal, updateDeal, updateLeaseDetails, addExpenseItem, updateExpenseItem, addMachine, machineInventory, ancillaryIncome, updateAncillaryIncome, expenseItems, removeExpenseItem, removeMachine, clearMachineInventory } = useDeal();
   const [text, setText] = useState(deal?.pastedInformation || '');
   const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [confidenceScores, setConfidenceScores] = useState<Record<string, number>>({});
@@ -101,6 +101,9 @@ export const EnhancedAIAnalysis = () => {
         }
       }
 
+      // Clear existing machines before adding new ones to prevent duplicates
+      clearMachineInventory();
+      
       // Enhanced equipment handling with intelligent classification
       setTimeout(() => {
         if (fields.equipment) {
