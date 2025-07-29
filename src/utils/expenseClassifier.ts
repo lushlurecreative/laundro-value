@@ -99,9 +99,10 @@ export function classifyExpense(expenseName: string): {
     }
   }
   
-  // Create new category if no good match found
+  // Create new category preserving original formatting (or fixing basic capitalization)
   const newCategory = expenseName
-    .split(' ')
+    .trim()
+    .split(/\s+/) // Split on any whitespace
     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
   
