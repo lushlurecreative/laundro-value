@@ -184,7 +184,14 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const addExpenseItem = (expense: ExpenseItem) => {
-    setExpenseItems([...expenseItems, expense]);
+    console.log(`🏪 DealContext.addExpenseItem called with:`, expense);
+    console.log(`📊 Current expense items count: ${expenseItems.length}`);
+    setExpenseItems(prev => {
+      const newItems = [...prev, expense];
+      console.log(`📈 New expense items count: ${newItems.length}`);
+      console.log(`📋 All expense items:`, newItems.map(item => `${item.expenseName}: $${item.amountAnnual}`));
+      return newItems;
+    });
   };
 
   const updateExpenseItem = (expenseId: string, expenseUpdate: Partial<ExpenseItem>) => {

@@ -66,13 +66,16 @@ export function classifyExpense(expenseName: string): {
   confidence: number;
   isNewCategory: boolean;
 } {
+  console.log(`🔍 Classifying expense: "${expenseName}"`);
   const normalized = normalizeExpenseName(expenseName);
+  console.log(`🧹 Normalized to: "${normalized}"`);
   
   // Check for exact or high similarity matches
   for (const [category, variations] of Object.entries(EXPENSE_CATEGORIES)) {
     for (const variation of variations) {
       const similarity = calculateSimilarity(normalized, variation);
       if (similarity > 0.8) {
+        console.log(`✅ High similarity match: "${expenseName}" → "${category}" (${similarity.toFixed(2)})`);
         return {
           category,
           confidence: similarity,
@@ -86,6 +89,7 @@ export function classifyExpense(expenseName: string): {
   for (const [category, variations] of Object.entries(EXPENSE_CATEGORIES)) {
     for (const variation of variations) {
       if (normalized.includes(variation) || variation.includes(normalized)) {
+        console.log(`🎯 Partial match: "${expenseName}" → "${category}" (contains "${variation}")`);
         return {
           category,
           confidence: 0.7,
@@ -100,6 +104,8 @@ export function classifyExpense(expenseName: string): {
     .split(' ')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
+  
+  console.log(`🆕 Creating NEW category: "${expenseName}" → "${newCategory}"`);
   
   return {
     category: newCategory,

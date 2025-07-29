@@ -260,13 +260,24 @@ export const EnhancedAIAnalysis = () => {
               const classified = classifyExpense(expense.name);
               
               console.log(`➕ Adding expense: ${expense.name} -> ${classified.category} ($${expense.amount})`);
-              addExpenseItem({
+              console.log(`📋 Classification details:`, {
+                originalName: expense.name,
+                classifiedCategory: classified.category,
+                confidence: classified.confidence,
+                isNewCategory: classified.isNewCategory
+              });
+              
+              const expenseItem = {
                 expenseId: `ai-${Date.now()}-${Math.random()}`,
                 dealId: deal?.dealId || 'deal-1',
                 expenseName: classified.category,
                 amountAnnual: expense.amount,
                 expenseType: 'Fixed' as const,
-              });
+              };
+              
+              console.log(`🏪 About to add expense item:`, expenseItem);
+              addExpenseItem(expenseItem);
+              console.log(`✅ Expense item added successfully`);
             }
           });
         } else if (fields.expenses) {
