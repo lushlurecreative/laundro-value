@@ -34,20 +34,41 @@ serve(async (req) => {
 
     console.log('🔍 Starting comprehensive AI analysis for deal:', dealId);
 
+    // Get industry standards for analysis context
+    let industryStandards = null;
+    try {
+      if (dealData?.propertyAddress) {
+        // Extract zip code from address for industry standards lookup
+        const zipMatch = dealData.propertyAddress.match(/\b\d{5}\b/);
+        const zipCode = zipMatch ? zipMatch[0] : '06751'; // Default to Bethlehem, CT
+        
+        const standardsResponse = await supabase.functions.invoke('industry-standards', {
+          body: { zipCode, propertyType: 'laundromat' }
+        });
+        
+        if (standardsResponse.data) {
+          industryStandards = standardsResponse.data.industryStandards;
+          console.log('✅ Retrieved industry standards for analysis');
+        }
+      }
+    } catch (error) {
+      console.warn('⚠️ Could not retrieve industry standards:', error.message);
+    }
+
     // 1. Market Analysis
-    const marketAnalysis = await performMarketAnalysis(dealData);
+    const marketAnalysis = await performMarketAnalysis(dealData, industryStandards);
     
     // 2. Financial Analysis 
-    const financialAnalysis = await performFinancialAnalysis(dealData);
+    const financialAnalysis = await performFinancialAnalysis(dealData, industryStandards);
     
     // 3. Risk Assessment
-    const riskAssessment = await performRiskAssessment(dealData);
+    const riskAssessment = await performRiskAssessment(dealData, industryStandards);
     
     // 4. Revenue Optimization
-    const revenueOptimization = await performRevenueOptimization(dealData);
+    const revenueOptimization = await performRevenueOptimization(dealData, industryStandards);
     
     // 5. Expense Validation
-    const expenseValidation = await performExpenseValidation(dealData);
+    const expenseValidation = await performExpenseValidation(dealData, industryStandards);
     
     // 6. Generate Recommendations
     const recommendations = await generateRecommendations(dealData, {
@@ -99,23 +120,34 @@ serve(async (req) => {
   }
 });
 
-async function performMarketAnalysis(dealData: DealData) {
-  const prompt = `Analyze this laundromat market opportunity:
+async function performMarketAnalysis(dealData: DealData, industryStandards: any) {
+  const standardsContext = industryStandards ? `
+
+INDUSTRY STANDARDS REFERENCE:
+- Minimum population within 1 mile: ${industryStandards.location?.demographics?.minimumPopulation || 5000}
+- Ideal renter percentage: ${industryStandards.location?.demographics?.renters?.ideal || 60}%
+- Facility size range: ${industryStandards.location?.facility?.sizeRange?.min || 1500}-${industryStandards.location?.facility?.sizeRange?.max || 4000} sq ft
+- Optimal target demographics: ${industryStandards.location?.demographics?.incomeLevel || 'lower-to-middle income'}
+- Required visibility: ${industryStandards.location?.facility?.visibility || 'high-traffic streets'}` : '';
+
+  const prompt = `Analyze this laundromat market opportunity using industry standards and best practices:
   
 Address: ${dealData.propertyAddress}
 Facility Size: ${dealData.facilitySizeSqft} sq ft
 Asking Price: $${dealData.askingPrice?.toLocaleString()}
 Annual Revenue: $${dealData.grossIncomeAnnual?.toLocaleString()}
+${standardsContext}
 
-Provide market analysis including:
-1. Location quality assessment (0-100)
-2. Competition level analysis
-3. Demographic fit for laundromat
-4. Market saturation assessment
-5. Growth potential
-6. Rent reasonableness vs market
+Provide comprehensive market analysis including:
+1. Location quality assessment (0-100) - compare to industry standards
+2. Competition level analysis - research actual competitors in area
+3. Demographic fit for laundromat - analyze target market presence
+4. Market saturation assessment - evaluate competitive landscape
+5. Growth potential - assess market trends and opportunities  
+6. Rent reasonableness vs market - compare to industry benchmarks
 
-Return JSON format with scores and detailed insights.`;
+CRITICAL: Use industry standards to evaluate if this location meets minimum requirements for success.
+Return JSON format with scores, detailed insights, and specific recommendations.`;
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -149,24 +181,38 @@ Return JSON format with scores and detailed insights.`;
   }
 }
 
-async function performFinancialAnalysis(dealData: DealData) {
-  const prompt = `Analyze these laundromat financials:
+async function performFinancialAnalysis(dealData: DealData, industryStandards: any) {
+  const standardsContext = industryStandards ? `
+
+INDUSTRY FINANCIAL BENCHMARKS:
+- Gross Profit Margin: ${industryStandards.financial?.profitMargins?.grossProfitMargin?.min || 65}%-${industryStandards.financial?.profitMargins?.grossProfitMargin?.max || 75}%
+- Net Profit Margin: ${industryStandards.financial?.profitMargins?.netProfitMargin?.min || 20}%-${industryStandards.financial?.profitMargins?.netProfitMargin?.max || 35}%
+- Rent: ${industryStandards.financial?.expensePercentages?.rent?.min || 10}%-${industryStandards.financial?.expensePercentages?.rent?.max || 15}% of gross revenue
+- Total Utilities: ${industryStandards.financial?.expensePercentages?.utilities?.total?.min || 15}%-${industryStandards.financial?.expensePercentages?.utilities?.total?.max || 25}% of gross revenue
+- Cap Rate Range: ${industryStandards.valuation?.capRates?.min || 6}%-${industryStandards.valuation?.capRates?.max || 12}%
+- CoC Returns: Poor <12%, Acceptable 12-18%, Good 18-25%, Excellent >25%
+- NOI Multiple: ${industryStandards.valuation?.methods?.noiMultiple?.min || 3.5}x-${industryStandards.valuation?.methods?.noiMultiple?.max || 5.5}x` : '';
+
+  const prompt = `Analyze these laundromat financials against industry standards:
   
 Asking Price: $${dealData.askingPrice?.toLocaleString()}
 Gross Revenue: $${dealData.grossIncomeAnnual?.toLocaleString()}
 Net Income: $${dealData.annualNet?.toLocaleString()}
+Facility Size: ${dealData.facilitySizeSqft} sq ft
 Expenses: ${JSON.stringify(dealData.expenses)}
+${standardsContext}
 
-Calculate and analyze:
-1. Cap rate analysis
-2. Cash-on-cash return potential
-3. Revenue per square foot
-4. Expense reasonableness
-5. Financial red flags
-6. Value assessment (overpriced/fair/underpriced)
-7. Break-even analysis
+Calculate and analyze using industry benchmarks:
+1. Cap rate analysis - compare to ${industryStandards?.valuation?.capRates?.min || 6}%-${industryStandards?.valuation?.capRates?.max || 12}% standard
+2. Cash-on-cash return potential - evaluate against industry thresholds
+3. Revenue per square foot vs industry standards
+4. Expense reasonableness vs benchmark percentages
+5. Financial red flags based on industry standards
+6. Value assessment using NOI multiples (${industryStandards?.valuation?.methods?.noiMultiple?.min || 3.5}x-${industryStandards?.valuation?.methods?.noiMultiple?.max || 5.5}x)
+7. Break-even analysis with realistic projections
 
-Return JSON with scores and detailed financial metrics.`;
+CRITICAL: Flag if any metrics fall significantly outside industry standards.
+Return JSON with scores, detailed financial metrics, and benchmark comparisons.`;
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -200,7 +246,7 @@ Return JSON with scores and detailed financial metrics.`;
   }
 }
 
-async function performRiskAssessment(dealData: DealData) {
+async function performRiskAssessment(dealData: DealData, industryStandards: any) {
   const prompt = `Assess investment risks for this laundromat:
   
 Property: ${dealData.propertyAddress}
@@ -251,24 +297,35 @@ Return JSON format.`;
   }
 }
 
-async function performRevenueOptimization(dealData: DealData) {
-  const prompt = `Analyze revenue optimization opportunities for this laundromat:
+async function performRevenueOptimization(dealData: DealData, industryStandards: any) {
+  const standardsContext = industryStandards ? `
+
+INDUSTRY REVENUE STANDARDS:
+- Wash-Dry-Fold pricing: $${industryStandards.ancillaryRevenue?.washDryFold?.pricing?.min || 1.25}-$${industryStandards.ancillaryRevenue?.washDryFold?.pricing?.max || 2.50} per pound
+- WDF revenue share: ${industryStandards.ancillaryRevenue?.washDryFold?.revenueShare?.min || 10}%-${industryStandards.ancillaryRevenue?.washDryFold?.revenueShare?.max || 30}% of total
+- Vending revenue: ${industryStandards.ancillaryRevenue?.vending?.revenueShare?.min || 3}%-${industryStandards.ancillaryRevenue?.vending?.revenueShare?.max || 10}% of total
+- Machine pricing ranges: Washers $${industryStandards.equipment?.pricing?.washers?.topLoad20lb?.min || 3}-$${industryStandards.equipment?.pricing?.washers?.topLoad20lb?.max || 5}, Large $${industryStandards.equipment?.pricing?.washers?.largeCapacity60lb?.min || 8}-$${industryStandards.equipment?.pricing?.washers?.largeCapacity60lb?.max || 15}
+- Efficiency targets: ${industryStandards.equipment?.efficiency?.turnsPerDay?.average || '3-5'} turns per day average` : '';
+
+  const prompt = `Analyze revenue optimization opportunities for this laundromat using industry standards:
   
 Current Revenue: $${dealData.grossIncomeAnnual?.toLocaleString()}
 Facility Size: ${dealData.facilitySizeSqft} sq ft
 Equipment: ${JSON.stringify(dealData.equipment)}
 Machines: ${JSON.stringify(dealData.machineInventory)}
+${standardsContext}
 
-Identify:
-1. Revenue per sq ft analysis
-2. Equipment optimization opportunities
-3. Pricing optimization potential
-4. Additional service opportunities
-5. Operational efficiency improvements
-6. Timeline and investment required
-7. Projected revenue increases
+Identify specific opportunities based on industry benchmarks:
+1. Revenue per sq ft analysis vs industry standards
+2. Equipment optimization (turns per day, capacity mix)
+3. Pricing optimization potential (compare to industry ranges)
+4. Additional service opportunities (WDF, vending, specialty services)
+5. Operational efficiency improvements (reduce utility costs, increase throughput)
+6. Timeline and investment required for each opportunity
+7. Projected revenue increases with realistic ROI calculations
 
-Return JSON with specific recommendations and projections.`;
+CRITICAL: Compare current performance to industry standards and identify gaps.
+Return JSON with specific recommendations, investment amounts, and projected returns.`;
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -300,24 +357,44 @@ Return JSON with specific recommendations and projections.`;
   }
 }
 
-async function performExpenseValidation(dealData: DealData) {
+async function performExpenseValidation(dealData: DealData, industryStandards: any) {
   if (!dealData.expenses || !Array.isArray(dealData.expenses)) {
     return [];
   }
 
+  const standardsContext = industryStandards ? `
+
+INDUSTRY EXPENSE BENCHMARKS (% of gross revenue):
+- Rent: ${industryStandards.financial?.expensePercentages?.rent?.min || 10}%-${industryStandards.financial?.expensePercentages?.rent?.max || 15}%
+- Total Utilities: ${industryStandards.financial?.expensePercentages?.utilities?.total?.min || 15}%-${industryStandards.financial?.expensePercentages?.utilities?.total?.max || 25}%
+  - Water/Sewer: ${industryStandards.financial?.expensePercentages?.utilities?.water?.min || 7}%-${industryStandards.financial?.expensePercentages?.utilities?.water?.max || 15}%
+  - Gas: ${industryStandards.financial?.expensePercentages?.utilities?.gas?.min || 5}%-${industryStandards.financial?.expensePercentages?.utilities?.gas?.max || 10}%
+  - Electricity: ${industryStandards.financial?.expensePercentages?.utilities?.electricity?.min || 3}%-${industryStandards.financial?.expensePercentages?.utilities?.electricity?.max || 5}%
+- Labor: ${industryStandards.financial?.expensePercentages?.labor?.min || 5}%-${industryStandards.financial?.expensePercentages?.labor?.max || 15}% (0% if unattended)
+- Insurance: ${industryStandards.financial?.expensePercentages?.insurance?.min || 1}%-${industryStandards.financial?.expensePercentages?.insurance?.max || 3}%
+- Maintenance: ${industryStandards.financial?.expensePercentages?.maintenance?.min || 3}%-${industryStandards.financial?.expensePercentages?.maintenance?.max || 6}%
+- Marketing: ${industryStandards.financial?.expensePercentages?.marketing?.min || 1}%-${industryStandards.financial?.expensePercentages?.marketing?.max || 3}%` : '';
+
   const validations = [];
   
   for (const expense of dealData.expenses) {
-    const prompt = `Validate this laundromat expense:
+    const prompt = `Validate this laundromat expense against industry standards:
     
 Expense: ${expense.expenseName}
 Amount: $${expense.amountAnnual?.toLocaleString()}
 Revenue: $${dealData.grossIncomeAnnual?.toLocaleString()}
 Facility Size: ${dealData.facilitySizeSqft} sq ft
+${standardsContext}
 
-Is this expense reasonable? What's the typical range for this category?
-Provide percentage of revenue this should be and red flags to watch for.
-Return JSON with validation and suggestions.`;
+Analyze:
+1. Is this expense reasonable compared to industry benchmarks?
+2. What percentage of revenue does this represent vs standard ranges?
+3. Are there any red flags or concerns?
+4. Specific recommendations for this expense category
+5. Market average for this expense type
+
+CRITICAL: Use industry standards to determine if expense is within normal ranges.
+Return JSON with validation, benchmark comparison, and specific recommendations.`;
 
     try {
       const response = await fetch('https://api.openai.com/v1/chat/completions', {

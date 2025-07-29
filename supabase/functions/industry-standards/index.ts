@@ -18,55 +18,120 @@ serve(async (req) => {
       throw new Error('Zip code is required');
     }
 
-    // Mock data - in production this would call real APIs
+    // Comprehensive industry standards based on industry research and best practices
     const industryStandards = {
-      income: {
-        grossIncomePerSqft: 120, // $120/sqft annually
-        pricePerLoad: {
-          washers: { min: 2.50, max: 4.00, average: 3.25 },
-          dryers: { min: 2.00, max: 3.50, average: 2.75 }
+      financial: {
+        profitMargins: {
+          grossProfitMargin: { min: 65, max: 75, optimal: 70 },
+          netProfitMargin: { min: 20, max: 35, optimal: 30 }
         },
-        vendingIncomePerMachine: 2500, // Annual
-        utilizationRate: 0.65 // 65% utilization typical
+        expensePercentages: {
+          rent: { min: 10, max: 15, high: 20, note: "% of gross revenue" },
+          utilities: { 
+            total: { min: 15, max: 25, modernEquipment: 12, oldEquipment: 30 },
+            water: { min: 7, max: 15 },
+            gas: { min: 5, max: 10 },
+            electricity: { min: 3, max: 5 }
+          },
+          labor: { min: 5, max: 15, unattended: 0 },
+          insurance: { min: 1, max: 3 },
+          marketing: { min: 1, max: 3 },
+          maintenance: { min: 3, max: 6 },
+          miscellaneous: { min: 2, max: 5 }
+        }
       },
-      expenses: {
-        rent: { perSqft: 12, range: '8-20' },
-        utilities: {
-          electric: { perSqft: 8, range: '6-12' },
-          gas: { perSqft: 4, range: '2-6' },
-          water: { perLoad: 0.15, range: '0.10-0.25' }
+      location: {
+        demographics: {
+          minimumPopulation: 5000, // within 1 mile
+          idealPopulation: 10000,
+          renters: { minimum: 40, ideal: 60 }, // percentage
+          incomeLevel: "lower-to-middle"
         },
-        insurance: { annual: 3500, range: '2500-5000' },
-        maintenance: { percentOfRevenue: 0.08, range: '6-12%' }
+        facility: {
+          sizeRange: { min: 1500, max: 4000, average: 2200 }, // sq ft
+          parkingRatio: 1, // per 100 sq ft
+          visibility: "high-traffic streets"
+        }
       },
       equipment: {
-        washers: {
-          averageAge: 8,
-          replacementCost: 4500,
-          lifespan: 15,
-          capacity: { topLoad: 20, frontLoad: 35 }
+        pricing: {
+          washers: {
+            topLoad20lb: { min: 3.00, max: 5.00 },
+            frontLoad20lb: { min: 4.00, max: 6.00 },
+            largeCapacity60lb: { min: 8.00, max: 15.00 }
+          },
+          dryers: { perMinute: { min: 0.25, max: 0.50 }, time: "6-8 minutes" }
         },
-        dryers: {
-          averageAge: 10,
-          replacementCost: 3500,
-          lifespan: 18,
-          capacity: 45
+        costs: {
+          washers: { topLoad: 1500, frontLoad: { min: 3000, max: 25000 } },
+          dryers: { stack: { min: 5000, max: 8000 } }
+        },
+        efficiency: {
+          waterConsumption: {
+            oldTopLoad: "30-40 gallons per cycle",
+            modernHE: "10-15 gallons per cycle",
+            goal: "0.75-1.25 gallons per pound"
+          },
+          turnsPerDay: { average: "3-5", highPerforming: "5-7+" }
         }
       },
       financing: {
-        sbaRates: { min: 6.5, max: 10.5, average: 8.0 },
-        conventionalRates: { min: 7.0, max: 12.0, average: 9.5 },
-        downPayment: { sba: 15, conventional: 25 },
-        dscr: { minimum: 1.25, preferred: 1.4 }
+        sba: {
+          downPayment: { min: 20, max: 30 },
+          creditScore: 680,
+          terms: "up to 25 years for real estate"
+        },
+        conventional: {
+          downPayment: { min: 25, max: 35 },
+          terms: "2-10 years"
+        }
       },
       valuation: {
-        capRateRange: { min: 6, max: 12, average: 8.5 },
-        multipleRange: { min: 3, max: 5.5, average: 4.2 },
-        cocRoi: { min: 12, max: 25, average: 18 }
+        methods: {
+          noiMultiple: { min: 3.5, max: 5.5, factors: "equipment age, lease terms, location" },
+          revenueMultiple: { min: 0.8, max: 1.5, note: "sanity check only" }
+        },
+        capRates: { min: 6, max: 12, average: 8.5 },
+        cocReturns: { poor: "< 12%", acceptable: "12-18%", good: "18-25%", excellent: "> 25%" }
+      },
+      ancillaryRevenue: {
+        washDryFold: {
+          pricing: { min: 1.25, max: 2.50, unit: "per pound" },
+          revenueShare: { min: 10, max: 30, note: "% of total revenue" }
+        },
+        vending: {
+          revenueShare: { min: 3, max: 10, note: "% of total revenue" },
+          products: ["soap", "bleach", "fabric softener", "snacks", "drinks"]
+        }
+      },
+      operations: {
+        lease: {
+          term: { minimum: 10, preferred: 15, renewalOptions: "5-year increments" },
+          type: "Triple Net (NNN) common"
+        },
+        technology: {
+          paymentSystems: "hybrid: coins, cards, mobile",
+          monitoring: "real-time machine status and sales data",
+          security: "HD cameras, 30+ days storage"
+        },
+        staffing: {
+          attendantDuties: ["WDF processing", "customer service", "cleaning", "maintenance"],
+          training: "POS systems, customer service, safety protocols"
+        }
+      },
+      sustainability: {
+        waterReclamation: "40% reduction possible",
+        ozoneWash: "cold water sanitization",
+        energyEfficiency: "LED lighting, HE equipment"
+      },
+      insurance: {
+        generalLiability: "$1M per occurrence / $2M aggregate",
+        bailment: "$10,000 - $25,000 for customer goods",
+        businessInterruption: "6-12 months coverage"
       },
       market: {
         zipCode,
-        population: 45000, // Mock data
+        population: 45000, // This would be fetched from real APIs
         medianIncome: 65000,
         competitionLevel: 'Moderate',
         growthTrend: 'Stable',
@@ -74,7 +139,8 @@ serve(async (req) => {
           renters: 0.42,
           apartments: 0.38,
           youngProfessionals: 0.28
-        }
+        },
+        note: "Data should be supplemented with local market research"
       }
     };
 
