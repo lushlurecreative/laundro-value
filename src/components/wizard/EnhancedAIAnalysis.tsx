@@ -21,12 +21,13 @@ export const EnhancedAIAnalysis = () => {
 
   const { analyzeText, isAnalyzing } = useOpenAIAnalysis({
     onFieldsPopulated: (fields) => {
-      console.log('AI fields populated:', fields);
+      console.log('🤖 AI fields populated:', fields);
       setAnalysisResults(fields);
       
-      // Force re-render to ensure form synchronization
+      // Ensure proper form synchronization with multiple triggers
       setTimeout(() => {
-        console.log('Triggering form sync after AI analysis');
+        console.log('🔄 Triggering form sync after AI analysis');
+        window.dispatchEvent(new CustomEvent('aiAnalysisComplete', { detail: fields }));
       }, 100);
       
       // Clear existing auto-generated data before updating to avoid duplication

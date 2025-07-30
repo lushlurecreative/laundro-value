@@ -18,8 +18,38 @@ serve(async (req) => {
       throw new Error('Zip code is required');
     }
 
-    // Comprehensive industry standards based on industry research and best practices
+    // Try to get ZIP code specific data from market_data table
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    let zipCodeData = null;
+    try {
+      const response = await fetch(`${supabaseUrl}/rest/v1/market_data?zip_code=eq.${zipCode}`, {
+        headers: {
+          'Authorization': `Bearer ${supabaseKey}`,
+          'apikey': supabaseKey,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.length > 0) {
+          zipCodeData = data[0];
+        }
+      }
+    } catch (error) {
+      console.log('No ZIP code specific data found, using general standards');
+    }
+
+    // Define comprehensive industry standards with ZIP code priority
     const industryStandards = {
+      location: {
+        zipCode,
+        propertyType,
+        dataSource: zipCodeData ? 'local' : 'general',
+        lastUpdated: zipCodeData ? zipCodeData.updated_at : new Date().toISOString()
+      },
       financial: {
         profitMargins: {
           grossProfitMargin: { min: 65, max: 75, optimal: 70 },
@@ -129,18 +159,31 @@ serve(async (req) => {
         bailment: "$10,000 - $25,000 for customer goods",
         businessInterruption: "6-12 months coverage"
       },
-      market: {
+      market: zipCodeData ? {
         zipCode,
-        population: 45000, // This would be fetched from real APIs
+        population: (zipCodeData.population_data as any)?.population || 45000,
+        medianIncome: (zipCodeData.income_data as any)?.median_income || 65000,
+        competitionLevel: zipCodeData.competition_score >= 70 ? 'Low' : 
+                         zipCodeData.competition_score >= 40 ? 'Moderate' : 'High',
+        growthTrend: 'Local Data Available',
+        demographics: {
+          renters: (zipCodeData.population_data as any)?.rental_percentage || 0.42,
+          apartments: (zipCodeData.population_data as any)?.apartment_percentage || 0.38,
+          youngProfessionals: (zipCodeData.population_data as any)?.young_professional_percentage || 0.28
+        },
+        note: `Local market data for ZIP ${zipCode}`
+      } : {
+        zipCode,
+        population: 45000,
         medianIncome: 65000,
         competitionLevel: 'Moderate',
-        growthTrend: 'Stable',
+        growthTrend: 'General Standards',
         demographics: {
           renters: 0.42,
           apartments: 0.38,
           youngProfessionals: 0.28
         },
-        note: "Data should be supplemented with local market research"
+        note: "General industry standards - no local data available"
       }
     };
 
