@@ -189,11 +189,21 @@ export const FinancingStep: React.FC = () => {
                         min="0"
                         max="100"
                         placeholder="25"
-                        {...field}
+                        value={field.value || ''}
                         onChange={(e) => {
-                          const value = parseFloat(e.target.value) || 0;
+                          const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0;
                           field.onChange(value);
                           handleFieldChange('downPaymentPercent', value);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Delete' || e.key === 'Backspace') {
+                            const target = e.target as HTMLInputElement;
+                            if (target.value === field.value.toString()) {
+                              e.preventDefault();
+                              field.onChange(0);
+                              handleFieldChange('downPaymentPercent', 0);
+                            }
+                          }
                         }}
                       />
                     </FormControl>
@@ -219,11 +229,21 @@ export const FinancingStep: React.FC = () => {
                         min="0"
                         max="50"
                         placeholder="7.5"
-                        {...field}
+                        value={field.value || ''}
                         onChange={(e) => {
-                          const value = parseFloat(e.target.value) || 0;
+                          const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0;
                           field.onChange(value);
                           handleFieldChange('loanInterestRatePercent', value);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Delete' || e.key === 'Backspace') {
+                            const target = e.target as HTMLInputElement;
+                            if (target.value === field.value.toString()) {
+                              e.preventDefault();
+                              field.onChange(0);
+                              handleFieldChange('loanInterestRatePercent', 0);
+                            }
+                          }
                         }}
                       />
                     </FormControl>
@@ -248,11 +268,21 @@ export const FinancingStep: React.FC = () => {
                         min="1"
                         max="30"
                         placeholder="10"
-                        {...field}
+                        value={field.value || ''}
                         onChange={(e) => {
-                          const value = parseInt(e.target.value) || 0;
+                          const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
                           field.onChange(value);
                           handleFieldChange('loanTermYears', value);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Delete' || e.key === 'Backspace') {
+                            const target = e.target as HTMLInputElement;
+                            if (target.value === field.value.toString()) {
+                              e.preventDefault();
+                              field.onChange(0);
+                              handleFieldChange('loanTermYears', 0);
+                            }
+                          }
                         }}
                       />
                     </FormControl>

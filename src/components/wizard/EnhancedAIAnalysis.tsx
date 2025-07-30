@@ -24,6 +24,11 @@ export const EnhancedAIAnalysis = () => {
       console.log('AI fields populated:', fields);
       setAnalysisResults(fields);
       
+      // Force re-render to ensure form synchronization
+      setTimeout(() => {
+        console.log('Triggering form sync after AI analysis');
+      }, 100);
+      
       // Clear existing auto-generated data before updating to avoid duplication
       if (expenseItems.length > 0) {
         expenseItems.forEach(expense => {

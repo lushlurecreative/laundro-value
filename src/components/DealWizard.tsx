@@ -11,6 +11,7 @@ import { FinancingStep } from './wizard/FinancingStep';
 import { LeaseStep } from './wizard/LeaseStep';
 import { InvestmentTargetsStep } from './wizard/InvestmentTargetsStep';
 import { EnhancedAIAnalysis } from './wizard/EnhancedAIAnalysis';
+import { LocalInfoStep } from './wizard/LocalInfoStep';
 import { MissingDataAnalysis } from './MissingDataAnalysis';
 import { ValidationSummary } from './wizard/ValidationSummary';
 import { IncomeVerification } from './IncomeVerification';
@@ -27,6 +28,7 @@ interface DealWizardProps {
 const steps = [
   { id: 'ai-analysis', title: 'AI Analysis', component: EnhancedAIAnalysis },
   { id: 'property', title: 'Property Info', component: PropertyInfoStep },
+  { id: 'local-info', title: 'Local Market', component: LocalInfoStep },
   { id: 'lease', title: 'Lease Info', component: LeaseStep },
   { id: 'income', title: 'Income', component: IncomeStep },
   { id: 'expenses', title: 'Expenses', component: ExpensesStep },
@@ -125,25 +127,30 @@ export const DealWizard: React.FC<DealWizardProps> = ({ onComplete }) => {
       </Card>
 
       {/* Navigation Footer */}
-      <div className="flex justify-between">
-        <Button
-          variant="outline"
-          onClick={handlePrevious}
-          disabled={currentStep === 0}
-          className="flex items-center gap-2"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          Previous
-        </Button>
-        
-        <Button
-          onClick={handleNext}
-          className="flex items-center gap-2"
-        >
-          {currentStep === steps.length - 1 ? 'Complete Analysis' : 'Next'}
-          {currentStep !== steps.length - 1 && <ChevronRight className="h-4 w-4" />}
-        </Button>
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border p-4">
+        <div className="max-w-4xl mx-auto flex justify-between">
+          <Button
+            variant="outline"
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
+            className="flex items-center gap-2"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Previous
+          </Button>
+          
+          <Button
+            onClick={handleNext}
+            className="flex items-center gap-2"
+          >
+            {currentStep === steps.length - 1 ? 'Complete Analysis' : 'Next'}
+            {currentStep !== steps.length - 1 && <ChevronRight className="h-4 w-4" />}
+          </Button>
+        </div>
       </div>
+      
+      {/* Bottom spacer to prevent content overlap */}
+      <div className="h-20"></div>
     </div>
   );
 };
