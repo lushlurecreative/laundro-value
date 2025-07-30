@@ -281,10 +281,33 @@ export const EnhancedAIAnalysis = () => {
     files.forEach(file => {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const content = e.target?.result as string;
+        let content = '';
+        
+        // Handle different file types
+        if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.name.endsWith('.docx')) {
+          // For .docx files, inform user they need to copy/paste the text
+          content = `[DOCX File: ${file.name}]\n\nPlease copy and paste the text content from this Word document instead of uploading it, as .docx files contain formatting that cannot be directly read. Open the document and copy the text content.`;
+        } else if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+          // For PDF files, inform user they need to copy/paste the text
+          content = `[PDF File: ${file.name}]\n\nPlease copy and paste the text content from this PDF instead of uploading it, as PDF files require special processing. Open the PDF and copy the text content.`;
+        } else {
+          // For plain text files, read normally
+          content = e.target?.result as string;
+        }
+        
         setText(prev => prev + '\n\n' + content);
       };
-      reader.readAsText(file);
+      
+      // Read as text for supported formats, or provide instructions for others
+      if (file.type.startsWith('text/') || file.name.endsWith('.txt')) {
+        reader.readAsText(file);
+      } else {
+        // For binary files, create instruction message directly
+        const instructionContent = file.name.endsWith('.docx') 
+          ? `[DOCX File: ${file.name}]\n\nPlease copy and paste the text content from this Word document instead of uploading it, as .docx files contain formatting that cannot be directly read. Open the document and copy the text content.`
+          : `[File: ${file.name}]\n\nPlease copy and paste the text content from this file instead of uploading it, as this file type requires special processing.`;
+        setText(prev => prev + '\n\n' + instructionContent);
+      }
     });
   };
 
