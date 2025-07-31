@@ -92,6 +92,8 @@ export const EquipmentStep: React.FC = () => {
   });
 
   const handleAddMachine = (data: EquipmentData) => {
+    console.log('Adding machine with data:', data);
+    
     const newMachine = {
       machineId: `machine-${Date.now()}`,
       dealId: '',
@@ -114,7 +116,9 @@ export const EquipmentStep: React.FC = () => {
       isOutOfOrder: false
     };
 
+    console.log('Calling addMachine with:', newMachine);
     addMachine(newMachine);
+    console.log('Machine added, resetting form');
     form.reset();
   };
 

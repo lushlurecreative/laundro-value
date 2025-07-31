@@ -48,8 +48,8 @@ export const FinancingStep: React.FC = () => {
   const form = useForm<FinancingData>({
     resolver: zodResolver(FinancingSchema),
     defaultValues: {
-      downPaymentPercent: deal?.downPaymentPercent || 25,
-      loanInterestRatePercent: deal?.loanInterestRatePercent || 7.5,
+      downPaymentPercent: deal?.downPaymentPercent || 10,
+      loanInterestRatePercent: deal?.loanInterestRatePercent || 8.5,
       loanTermYears: deal?.loanTermYears || 10,
       loanType: deal?.loanType || 'SBA 7(a) Loan',
     },
@@ -59,14 +59,17 @@ export const FinancingStep: React.FC = () => {
     if (deal) {
       // Only update if values are actually different to prevent loops
       const currentLoanType = form.getValues('loanType');
-      if (currentLoanType !== (deal.loanType || 'SBA 7(a) Loan')) {
-        form.setValue('loanType', deal.loanType || 'SBA 7(a) Loan');
+      const targetLoanType = deal.loanType || 'SBA 7(a) Loan';
+      
+      if (currentLoanType !== targetLoanType) {
+        console.log('Setting loan type from deal:', targetLoanType);
+        form.setValue('loanType', targetLoanType);
       }
-      if (form.getValues('downPaymentPercent') !== (deal.downPaymentPercent || 25)) {
-        form.setValue('downPaymentPercent', deal.downPaymentPercent || 25);
+      if (form.getValues('downPaymentPercent') !== (deal.downPaymentPercent || 10)) {
+        form.setValue('downPaymentPercent', deal.downPaymentPercent || 10);
       }
-      if (form.getValues('loanInterestRatePercent') !== (deal.loanInterestRatePercent || 7.5)) {
-        form.setValue('loanInterestRatePercent', deal.loanInterestRatePercent || 7.5);
+      if (form.getValues('loanInterestRatePercent') !== (deal.loanInterestRatePercent || 8.5)) {
+        form.setValue('loanInterestRatePercent', deal.loanInterestRatePercent || 8.5);
       }
       if (form.getValues('loanTermYears') !== (deal.loanTermYears || 10)) {
         form.setValue('loanTermYears', deal.loanTermYears || 10);

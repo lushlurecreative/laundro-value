@@ -24,6 +24,13 @@ interface LocalData {
     laundromats: number;
     drycleaners: number;
     distance: string;
+    competitors?: Array<{
+      name: string;
+      address: string;
+      distance: number;
+      rating?: number;
+      priceRange?: string;
+    }>;
   };
   marketFactors: {
     rentedHousing: number;
