@@ -2,10 +2,10 @@ import { MachineInventory } from '@/types/deal';
 
 // Standard machine categories with common variations
 const MACHINE_CATEGORIES = {
-  'Front-Load Washer': ['front load', 'front-load', 'frontload', 'front loader', 'horizontal axis'],
+  'Front-Load Washer': ['front load', 'front-load', 'frontload', 'front loader', 'horizontal axis', 'washers', 'washer'],
   'Top-Load Washer': ['top load', 'top-load', 'topload', 'top loader', 'vertical axis'],
   'Stacked Washer/Dryer': ['stack', 'stacked', 'combo', 'combination', 'washer dryer combo'],
-  'Single Dryer': ['dryer', 'single dryer', 'stand alone dryer', 'individual dryer'],
+  'Single Dryer': ['dryer', 'dryers', 'single dryer', 'stand alone dryer', 'individual dryer'],
   'Stacked Dryer': ['stack dryer', 'stacked dryer', 'double stack', 'triple stack'],
   'Other': ['other', 'misc', 'miscellaneous', 'unknown']
 };
@@ -140,7 +140,44 @@ export function parseAndClassifyMachines(machines: Record<string, any>): Machine
   console.log('🔍 Classifying machines:', machines);
   
   Object.entries(machines).forEach(([key, data]) => {
-    if (data && typeof data === 'object') {
+    // Handle simple number format: {washers: 29, dryers: 32}
+    if (typeof data === 'number' && data > 0) {
+      console.log(`🔢 Processing simple format: ${key} = ${data}`);
+      
+      const typeClassification = classifyMachineType(key);
+      const brandClassification = classifyBrand('Speed Queen'); // Default brand
+      
+      console.log(`📋 "${key}" → Type: "${typeClassification.type}", Brand: "${brandClassification.brand}"`);
+      
+      // Default values based on machine type
+      const defaults = getDefaultsByType(typeClassification.type);
+      
+      const machineItem: MachineInventory = {
+        machineId: crypto.randomUUID(),
+        dealId: '', // Will be set by the context
+        machineType: typeClassification.type as any,
+        brand: brandClassification.brand,
+        model: '',
+        quantity: data,
+        ageYears: 5,
+        capacityLbs: defaults.capacity,
+        vendPricePerUse: defaults.price,
+        conditionRating: 3,
+        waterConsumptionGalPerCycle: defaults.waterUsage,
+        electricConsumptionKwh: undefined,
+        gasConsumptionBtu: undefined,
+        purchaseValue: 0,
+        currentValue: 0,
+        maintenanceCostAnnual: 0,
+        isCardOperated: true,
+        isCoinOperated: false,
+        isOutOfOrder: false
+      };
+      
+      classifiedMachines.push(machineItem);
+    }
+    // Handle detailed object format
+    else if (data && typeof data === 'object') {
       // Handle various machine data formats
       const quantity = data.quantity || data.count || 1;
       const machineDescription = data.type || data.machineType || key;
