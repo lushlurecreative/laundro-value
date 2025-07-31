@@ -505,6 +505,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      enhance_local_market_data: {
+        Args: { zip_code: string }
+        Returns: Json
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["user_role"]

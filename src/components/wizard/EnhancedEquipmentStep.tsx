@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useDeal } from '@/contexts/useDeal';
+import { parseAndClassifyMachines } from '@/utils/machineClassifier';
 import {
   Form,
   FormControl,
@@ -18,7 +19,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
-import { InfoIcon, Wrench, Plus, Trash2 } from 'lucide-react';
+import { InfoIcon, Wrench, Plus, Trash2, Wand2 } from 'lucide-react';
+import type { MachineInventory } from '@/types/deal';
 
 const EquipmentSchema = z.object({
   machineType: z.string().min(1, "Machine type is required"),
@@ -69,9 +71,10 @@ const conditionOptions = [
   { value: 5, label: '5 - Excellent (Like new)' }
 ];
 
-export const EquipmentStep: React.FC = () => {
+export const EnhancedEquipmentStep: React.FC = () => {
   const { machineInventory, addMachine, updateMachine, removeMachine, clearMachineInventory } = useDeal();
   const [editingMachine, setEditingMachine] = useState<string | null>(null);
+  const [isAutoFilling, setIsAutoFilling] = useState(false);
 
   const form = useForm<EquipmentData>({
     resolver: zodResolver(EquipmentSchema),
@@ -91,8 +94,85 @@ export const EquipmentStep: React.FC = () => {
     },
   });
 
+  // Enhanced auto-fill functionality
+  const handleAutoFillEquipment = () => {
+    setIsAutoFilling(true);
+    
+    // Create sample equipment data based on typical laundromat setup
+    const sampleEquipment = {
+      "washers": [
+        { type: "Front-Load Washer", brand: "Speed Queen", quantity: 8, capacity: 25, price: 3.50, age: 3 },
+        { type: "Top-Load Washer", brand: "Speed Queen", quantity: 4, capacity: 20, price: 3.00, age: 5 },
+        { type: "Front-Load Washer", brand: "Dexter", quantity: 2, capacity: 40, price: 5.00, age: 2 }
+      ],
+      "dryers": [
+        { type: "Single Dryer", brand: "Speed Queen", quantity: 10, capacity: 30, price: 2.50, age: 3 },
+        { type: "Double Stack Dryer", brand: "Dexter", quantity: 4, capacity: 35, price: 2.75, age: 4 }
+      ]
+    };
+
+    // Clear existing equipment first
+    clearMachineInventory();
+
+    setTimeout(() => {
+      // Add washers
+      sampleEquipment.washers.forEach((washer, index) => {
+        const machine: MachineInventory = {
+          machineId: `auto-washer-${index}-${Date.now()}`,
+          dealId: '',
+          machineType: washer.type as any,
+          brand: washer.brand,
+          model: '',
+          quantity: washer.quantity,
+          ageYears: washer.age,
+          capacityLbs: washer.capacity,
+          vendPricePerUse: washer.price,
+          conditionRating: 4,
+          waterConsumptionGalPerCycle: washer.capacity * 1.2, // Estimate
+          electricConsumptionKwh: undefined,
+          gasConsumptionBtu: undefined,
+          purchaseValue: washer.capacity * 150, // Estimate
+          currentValue: washer.capacity * 100, // Estimate
+          maintenanceCostAnnual: 0,
+          isCardOperated: true,
+          isCoinOperated: false,
+          isOutOfOrder: false
+        };
+        addMachine(machine);
+      });
+
+      // Add dryers
+      sampleEquipment.dryers.forEach((dryer, index) => {
+        const machine: MachineInventory = {
+          machineId: `auto-dryer-${index}-${Date.now()}`,
+          dealId: '',
+          machineType: dryer.type as any,
+          brand: dryer.brand,
+          model: '',
+          quantity: dryer.quantity,
+          ageYears: dryer.age,
+          capacityLbs: dryer.capacity,
+          vendPricePerUse: dryer.price,
+          conditionRating: 4,
+          waterConsumptionGalPerCycle: undefined,
+          electricConsumptionKwh: dryer.capacity * 0.3, // Estimate
+          gasConsumptionBtu: dryer.capacity * 1000, // Estimate
+          purchaseValue: dryer.capacity * 120, // Estimate
+          currentValue: dryer.capacity * 80, // Estimate
+          maintenanceCostAnnual: 0,
+          isCardOperated: true,
+          isCoinOperated: false,
+          isOutOfOrder: false
+        };
+        addMachine(machine);
+      });
+
+      setIsAutoFilling(false);
+    }, 1000);
+  };
+
   const handleAddMachine = (data: EquipmentData) => {
-    const newMachine = {
+    const newMachine: MachineInventory = {
       machineId: `machine-${Date.now()}`,
       dealId: '',
       machineType: data.machineType as any,
@@ -189,9 +269,48 @@ export const EquipmentStep: React.FC = () => {
       <Alert>
         <InfoIcon className="h-4 w-4" />
         <AlertDescription>
-          Add all equipment in your laundromat. If you don't have specific information, leave fields blank. Industry standards are provided for reference.
+          Add all equipment in your laundromat. Use the Auto-Fill feature for a quick start with typical equipment, 
+          or add machines manually. If you don't have specific information, leave fields blank.
         </AlertDescription>
       </Alert>
+
+      {/* Auto-Fill Equipment Button */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Wand2 className="h-5 w-5" />
+            Quick Equipment Setup
+          </CardTitle>
+          <CardDescription>
+            Auto-populate with a typical laundromat equipment setup to get started quickly
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button 
+            onClick={handleAutoFillEquipment}
+            disabled={isAutoFilling}
+            variant="outline"
+            className="w-full"
+          >
+            {isAutoFilling ? (
+              <>
+                <Wand2 className="mr-2 h-4 w-4 animate-spin" />
+                Setting up equipment...
+              </>
+            ) : (
+              <>
+                <Wand2 className="mr-2 h-4 w-4" />
+                Auto-Fill Typical Equipment
+              </>
+            )}
+          </Button>
+          {machineInventory.length > 0 && (
+            <p className="text-sm text-muted-foreground mt-2">
+              Current inventory: {machineInventory.length} machines
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -350,34 +469,6 @@ export const EquipmentStep: React.FC = () => {
                 )}
               />
 
-              {/* Water Usage */}
-              <FormField
-                control={form.control}
-                name="waterUsagePerCycle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      Water Usage per Cycle (gal)
-                      <HelpTooltip content="Water consumption per wash cycle in gallons (if known)" />
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.1"
-                        placeholder="Optional"
-                        value={field.value || ''}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
-                      />
-                    </FormControl>
-                    <p className="text-sm text-muted-foreground">
-                      Top-load: 25-40 gal, Front-load: 15-25 gal *
-                    </p>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               {/* Price per Load */}
               <FormField
                 control={form.control}
@@ -451,13 +542,12 @@ export const EquipmentStep: React.FC = () => {
                         onChange={field.onChange}
                       />
                     </FormControl>
-                    <p className="text-sm text-muted-foreground">Current resale value</p>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Replacement Cost */}
+              {/* Purchase Value */}
               <FormField
                 control={form.control}
                 name="purchaseValue"
@@ -465,7 +555,7 @@ export const EquipmentStep: React.FC = () => {
                   <FormItem>
                     <FormLabel className="flex items-center gap-2">
                       Replacement Cost
-                      <HelpTooltip content="Cost to replace with new equipment (if known)" />
+                      <HelpTooltip content="Cost to replace this equipment new" />
                     </FormLabel>
                     <FormControl>
                       <CurrencyInput
@@ -474,59 +564,14 @@ export const EquipmentStep: React.FC = () => {
                         onChange={field.onChange}
                       />
                     </FormControl>
-                    <p className="text-sm text-muted-foreground">New equipment cost</p>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
-              {/* Payment Type */}
-              <div className="md:col-span-3 space-y-3">
-                <FormLabel>Payment Type</FormLabel>
-                <div className="flex gap-4">
-                  <FormField
-                    control={form.control}
-                    name="isCoinOperated"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center space-x-2">
-                        <FormControl>
-                          <input
-                            type="checkbox"
-                            checked={field.value || false}
-                            onChange={(e) => field.onChange(e.target.checked)}
-                            className="rounded"
-                          />
-                        </FormControl>
-                        <FormLabel className="text-sm font-normal">Coin Operated</FormLabel>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="isCardOperated"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center space-x-2">
-                        <FormControl>
-                          <input
-                            type="checkbox"
-                            checked={field.value || false}
-                            onChange={(e) => field.onChange(e.target.checked)}
-                            className="rounded"
-                          />
-                        </FormControl>
-                        <FormLabel className="text-sm font-normal">Card Operated</FormLabel>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
             </CardContent>
-            <div className="px-6 pb-6">
-              <div className="flex gap-2">
-                <Button type="submit" className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  {editingMachine ? 'Update Equipment' : 'Add Equipment'}
-                </Button>
+            
+            <CardContent className="pt-0">
+              <div className="flex gap-4 justify-end">
                 {editingMachine && (
                   <Button
                     type="button"
@@ -539,44 +584,37 @@ export const EquipmentStep: React.FC = () => {
                     Cancel
                   </Button>
                 )}
+                <Button type="submit">
+                  {editingMachine ? 'Update Machine' : 'Add Machine'}
+                </Button>
               </div>
-            </div>
+            </CardContent>
           </Card>
         </form>
       </Form>
 
-      {/* Equipment Inventory List */}
+      {/* Equipment Inventory Display */}
       {machineInventory.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Equipment Inventory</CardTitle>
-            <CardDescription>
-              Current equipment in the laundromat
-            </CardDescription>
+            <CardTitle className="flex items-center justify-between">
+              Equipment Inventory
+              <span className="text-sm font-normal text-muted-foreground">
+                {machineInventory.reduce((sum, machine) => sum + machine.quantity, 0)} total machines
+              </span>
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {machineInventory.map((machine) => (
-                <div key={machine.machineId} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
-                    <div>
-                      <p className="font-medium">{machine.machineType}</p>
-                      <p className="text-sm text-muted-foreground">{machine.brand}</p>
-                    </div>
-                    <div className="text-sm">
-                      <p>Qty: {machine.quantity}</p>
-                      <p>Age: {machine.ageYears} years</p>
-                      <p>Capacity: {machine.capacityLbs} lbs</p>
-                    </div>
-                    <div className="text-sm">
-                      <p>Price: {formatCurrency(machine.vendPricePerUse)}</p>
-                      <p>Condition: {machine.conditionRating}/5</p>
-                      <p>Payment: {machine.isCoinOperated && machine.isCardOperated ? 'Coin & Card' : machine.isCoinOperated ? 'Coin' : machine.isCardOperated ? 'Card' : 'N/A'}</p>
-                    </div>
-                    <div className="text-sm">
-                      {machine.currentValue > 0 && <p>Value: {formatCurrency(machine.currentValue)}</p>}
-                      {machine.purchaseValue > 0 && <p>Replace: {formatCurrency(machine.purchaseValue)}</p>}
-                    </div>
+            <div className="space-y-3">
+              {machineInventory.map(machine => (
+                <div key={machine.machineId} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex-1">
+                    <p className="font-medium">
+                      {machine.quantity}x {machine.machineType} - {machine.brand}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {machine.capacityLbs} lbs • {formatCurrency(machine.vendPricePerUse)}/load • {machine.ageYears} years old
+                    </p>
                   </div>
                   <div className="flex gap-2">
                     <Button

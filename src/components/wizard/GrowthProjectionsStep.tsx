@@ -58,7 +58,7 @@ export const GrowthProjectionsStep: React.FC = () => {
 
   const projectedIncomeYear2 = currentGrossIncome * (1 + incomeGrowthRate / 100);
   const projectedIncomeYear3 = projectedIncomeYear2 * (1 + incomeGrowthRate / 100);
-  const projectedIncomeYear5 = currentGrossIncome * Math.pow(1 + incomeGrowthRate / 100, 5);
+  const projectedIncomeYear5 = currentGrossIncome * Math.pow(1 + incomeGrowthRate / 100, 4);
 
   const formatCurrency = (value: number): string => {
     return new Intl.NumberFormat('en-US', {

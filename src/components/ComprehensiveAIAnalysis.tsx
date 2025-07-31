@@ -221,8 +221,40 @@ export const ComprehensiveAIAnalysis: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="prose prose-sm max-w-none">
-              <div className="whitespace-pre-wrap">{analysis}</div>
+            <div className="prose prose-sm max-w-none space-y-4">
+              {analysis.split('\n\n').map((section, index) => {
+                // Clean up formatting issues
+                const cleanSection = section
+                  .replace(/###\s*-\s*\*\*([^*]+)\*\*/g, '### $1')
+                  .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                  .replace(/\n/g, '<br>')
+                  .replace(/- /g, '• ');
+                
+                if (cleanSection.startsWith('###')) {
+                  return (
+                    <div key={index} className="space-y-2">
+                      <h3 className="text-lg font-semibold text-primary border-b border-border pb-2">
+                        {cleanSection.replace('### ', '')}
+                      </h3>
+                    </div>
+                  );
+                } else if (cleanSection.startsWith('##')) {
+                  return (
+                    <h2 key={index} className="text-xl font-bold text-foreground mt-6 mb-3">
+                      {cleanSection.replace('## ', '')}
+                    </h2>
+                  );
+                } else if (cleanSection.trim()) {
+                  return (
+                    <div 
+                      key={index} 
+                      className="text-muted-foreground leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: cleanSection }}
+                    />
+                  );
+                }
+                return null;
+              })}
             </div>
           </CardContent>
         </Card>

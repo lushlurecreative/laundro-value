@@ -169,9 +169,9 @@ export const LeaseStep: React.FC = () => {
                         }}
                       />
                     </FormControl>
-                    <p className="text-sm text-muted-foreground">
-                      Typical: $3-8 per sq ft annually *
-                    </p>
+                     <p className="text-sm text-muted-foreground">
+                       Typical: $3-8 per sq ft annually *
+                     </p>
                     <FormMessage />
                   </FormItem>
                 )}

@@ -205,11 +205,11 @@ export const ExpensesStep: React.FC = () => {
                             );
                           })()}
                         </>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">
-                          Current: {percentOfGrossIncome.toFixed(1)}% of gross income
-                        </p>
-                      )}
+                       ) : (
+                         <p className="text-sm text-muted-foreground">
+                           Current: {percentOfGrossIncome < 0.1 ? percentOfGrossIncome.toFixed(2) : percentOfGrossIncome.toFixed(1)}% of gross income
+                         </p>
+                       )}
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Annual amount</p>
@@ -349,111 +349,7 @@ export const ExpensesStep: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Growth Projections */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              Growth Projections
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  form.setValue('incomeGrowthRatePercent', 0);
-                  form.setValue('expenseGrowthRatePercent', 0);
-                  handleFieldChange('incomeGrowthRatePercent', 0);
-                  handleFieldChange('expenseGrowthRatePercent', 0);
-                }}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </CardTitle>
-            <CardDescription>
-              Expected annual growth rates for financial projections (deletable fields)
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="incomeGrowthRatePercent"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center justify-between">
-                    Income Growth Rate (%)
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        field.onChange(0);
-                        handleFieldChange('incomeGrowthRatePercent', 0);
-                      }}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.1"
-                      placeholder="2.0"
-                      value={field.value === 0 ? '' : field.value}
-                      onChange={(e) => {
-                        const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0;
-                        field.onChange(value);
-                        handleFieldChange('incomeGrowthRatePercent', value);
-                      }}
-                    />
-                  </FormControl>
-                   <p className="text-sm text-muted-foreground">
-                     ANNUAL industry standard: 1.5-3.0%
-                   </p>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="expenseGrowthRatePercent"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center justify-between">
-                    Expense Growth Rate (%)
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        field.onChange(0);
-                        handleFieldChange('expenseGrowthRatePercent', 0);
-                      }}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.1"
-                      placeholder="3.0"
-                      value={field.value === 0 ? '' : field.value}
-                      onChange={(e) => {
-                        const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0;
-                        field.onChange(value);
-                        handleFieldChange('expenseGrowthRatePercent', value);
-                      }}
-                    />
-                  </FormControl>
-                   <p className="text-sm text-muted-foreground">
-                     ANNUAL industry standard: 2.5-4.0%
-                   </p>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
+        {/* Note: Growth Projections moved to dedicated tab */}
 
         {/* Expense Summary */}
         <Card className="bg-muted/50">
