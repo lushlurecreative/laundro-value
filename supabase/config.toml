@@ -3,6 +3,9 @@ project_id = "lzokflsidobsouzqxtta"
 [functions.extract-listing-data]
 verify_jwt = false
 
+[functions.extract-equipment-data]
+verify_jwt = false
+
 [functions.openai-analysis]
 verify_jwt = false
 
