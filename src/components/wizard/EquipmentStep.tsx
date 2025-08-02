@@ -19,7 +19,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { InfoIcon, Wrench, Plus, Trash2, Upload } from 'lucide-react';
-import { EquipmentParser } from '@/components/EquipmentParser';
+
 
 const EquipmentSchema = z.object({
   machineType: z.string().min(1, "Machine type is required"),
@@ -73,7 +73,7 @@ const conditionOptions = [
 export const EquipmentStep: React.FC = () => {
   const { machineInventory, addMachine, updateMachine, removeMachine, clearMachineInventory } = useDeal();
   const [editingMachine, setEditingMachine] = useState<string | null>(null);
-  const [showParser, setShowParser] = useState(false);
+  
 
   const form = useForm<EquipmentData>({
     resolver: zodResolver(EquipmentSchema),
@@ -190,80 +190,15 @@ export const EquipmentStep: React.FC = () => {
     return standards[machineType] || { capacity: 'Varies', price: 'Varies', life: 'Varies' };
   };
 
-  const handleImportEquipment = (parsedEquipment: any[]) => {
-    parsedEquipment.forEach(item => {
-      // Map parsed equipment to MachineInventory format
-      const mappedMachine = {
-        machineId: `machine-${Date.now()}-${Math.random()}`,
-        dealId: '',
-        machineType: classifyEquipmentType(item.name),
-        brand: item.brand || 'Other',
-        model: '',
-        quantity: item.quantity,
-        ageYears: 5, // Default age
-        capacityLbs: item.capacity || 20,
-        vendPricePerUse: 2.50, // Default price
-        conditionRating: item.condition.toLowerCase().includes('not working') || item.condition.toLowerCase().includes('broken') ? 1 : 3,
-        waterConsumptionGalPerCycle: undefined,
-        electricConsumptionKwh: undefined,
-        gasConsumptionBtu: undefined,
-        purchaseValue: 0,
-        currentValue: 0,
-        maintenanceCostAnnual: 0,
-        isCardOperated: false,
-        isCoinOperated: true,
-        isOutOfOrder: item.condition.toLowerCase().includes('not working') || item.condition.toLowerCase().includes('broken')
-      };
-      
-      addMachine(mappedMachine);
-    });
-  };
-
-  const classifyEquipmentType = (name: string): any => {
-    const nameLower = name.toLowerCase();
-    if (nameLower.includes('washer')) {
-      return nameLower.includes('front') ? 'Front-Load Washer' : 'Top-Load Washer';
-    }
-    if (nameLower.includes('dryer')) {
-      if (nameLower.includes('double') || nameLower.includes('stack')) {
-        return 'Double Stack Dryer';
-      }
-      return 'Single Dryer';
-    }
-    return 'Other';
-  };
 
   return (
     <div className="space-y-6">
       <Alert>
         <InfoIcon className="h-4 w-4" />
         <AlertDescription>
-          Add all equipment in your laundromat. You can add equipment manually or import from a text list.
+          Add all equipment in your laundromat manually.
         </AlertDescription>
       </Alert>
-
-      {/* Import Equipment Button */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Upload className="h-5 w-5" />
-            Quick Import
-          </CardTitle>
-          <CardDescription>
-            Import multiple equipment from a text list (e.g., "32- 35# SPEED QUEEN DRYER POCKETS")
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button 
-            onClick={() => setShowParser(true)}
-            variant="outline" 
-            className="flex items-center gap-2"
-          >
-            <Upload className="h-4 w-4" />
-            Import Equipment List
-          </Button>
-        </CardContent>
-      </Card>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -673,12 +608,6 @@ export const EquipmentStep: React.FC = () => {
         </Card>
       )}
 
-      {/* Equipment Parser Dialog */}
-      <EquipmentParser
-        isOpen={showParser}
-        onClose={() => setShowParser(false)}
-        onImport={handleImportEquipment}
-      />
     </div>
   );
 };
