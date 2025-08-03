@@ -55,14 +55,16 @@ export const FinancingStep: React.FC = () => {
     },
   });
 
+  // Track if user is actively changing loan type to prevent auto-revert
+  const [userChangingLoanType, setUserChangingLoanType] = React.useState(false);
+
   useEffect(() => {
-    if (deal) {
+    if (deal && !userChangingLoanType) {
       // Only update if values are actually different to prevent loops
       const currentLoanType = form.getValues('loanType');
       const targetLoanType = deal.loanType || 'SBA 7(a) Loan';
       
       if (currentLoanType !== targetLoanType) {
-        console.log('Setting loan type from deal:', targetLoanType);
         form.setValue('loanType', targetLoanType);
       }
       if (form.getValues('downPaymentPercent') !== (deal.downPaymentPercent || 10)) {
@@ -75,7 +77,7 @@ export const FinancingStep: React.FC = () => {
         form.setValue('loanTermYears', deal.loanTermYears || 10);
       }
     }
-  }, [deal, form]);
+  }, [deal, form, userChangingLoanType]);
 
   const handleFieldChange = (field: keyof FinancingData, value: any) => {
     updateDeal({ [field]: value });
@@ -151,26 +153,28 @@ export const FinancingStep: React.FC = () => {
                        Loan Type
                        <HelpTooltip content="Choose the type of financing. Different loan types have different requirements, rates, and terms. SBA loans typically offer the best rates for business purchases." />
                      </FormLabel>
-                        <Select 
-                          value={field.value} 
-                          onValueChange={(value) => {
-                            console.log('Loan type selection changing to:', value);
-                            field.onChange(value);
-                            handleFieldChange('loanType', value);
-                            
-                            // Auto-fill loan parameters based on selection
-                            const selectedType = loanTypes.find(lt => lt.value === value);
-                            if (selectedType && selectedType.value !== 'Custom') {
-                              console.log('Auto-filling with:', selectedType);
-                              form.setValue('downPaymentPercent', selectedType.downPayment);
-                              form.setValue('loanInterestRatePercent', selectedType.interestRate);
-                              form.setValue('loanTermYears', selectedType.term);
-                              handleFieldChange('downPaymentPercent', selectedType.downPayment);
-                              handleFieldChange('loanInterestRatePercent', selectedType.interestRate);
-                              handleFieldChange('loanTermYears', selectedType.term);
-                            }
-                          }}
-                       >
+                         <Select 
+                           value={field.value} 
+                           onValueChange={(value) => {
+                             setUserChangingLoanType(true);
+                             field.onChange(value);
+                             handleFieldChange('loanType', value);
+                             
+                             // Auto-fill loan parameters based on selection
+                             const selectedType = loanTypes.find(lt => lt.value === value);
+                             if (selectedType && selectedType.value !== 'Custom') {
+                               form.setValue('downPaymentPercent', selectedType.downPayment);
+                               form.setValue('loanInterestRatePercent', selectedType.interestRate);
+                               form.setValue('loanTermYears', selectedType.term);
+                               handleFieldChange('downPaymentPercent', selectedType.downPayment);
+                               handleFieldChange('loanInterestRatePercent', selectedType.interestRate);
+                               handleFieldChange('loanTermYears', selectedType.term);
+                             }
+                             
+                             // Reset flag after a short delay to allow context updates
+                             setTimeout(() => setUserChangingLoanType(false), 100);
+                           }}
+                        >
                        <FormControl>
                          <SelectTrigger>
                            <SelectValue placeholder="Select loan type" />

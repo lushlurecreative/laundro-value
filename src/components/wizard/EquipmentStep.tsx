@@ -22,18 +22,19 @@ import { InfoIcon, Wrench, Plus, Trash2, Upload } from 'lucide-react';
 
 
 const EquipmentSchema = z.object({
-  machineType: z.string().min(1, "Machine type is required"),
-  brand: z.string().min(1, "Brand is required"),
-  quantity: z.number().min(1, "Quantity must be at least 1"),
-  ageYears: z.number().min(0, "Age cannot be negative"),
-  capacityLbs: z.number().min(1, "Capacity must be at least 1"),
-  waterUsagePerCycle: z.number().min(0, "Water usage cannot be negative").optional(),
-  vendPricePerUse: z.number().min(0, "Price per load cannot be negative"),
-  conditionRating: z.number().min(1).max(5, "Condition must be 1-5"),
-  currentValue: z.number().min(0, "Current value cannot be negative").optional(),
-  purchaseValue: z.number().min(0, "Replacement cost cannot be negative").optional(),
+  machineType: z.string().optional(),
+  brand: z.string().optional(),
+  quantity: z.number().min(0).optional(),
+  ageYears: z.number().min(0).optional(),
+  capacityLbs: z.number().min(0).optional(),
+  waterUsagePerCycle: z.number().min(0).optional(),
+  vendPricePerUse: z.number().min(0).optional(),
+  conditionRating: z.number().min(1).max(5).optional(),
+  currentValue: z.number().min(0).optional(),
+  purchaseValue: z.number().min(0).optional(),
   isCoinOperated: z.boolean().optional(),
   isCardOperated: z.boolean().optional(),
+  otherEquipment: z.string().optional(),
 });
 
 type EquipmentData = z.infer<typeof EquipmentSchema>;
@@ -80,16 +81,17 @@ export const EquipmentStep: React.FC = () => {
     defaultValues: {
       machineType: '',
       brand: '',
-      quantity: 1,
-      ageYears: 5,
-      capacityLbs: 20,
+      quantity: undefined,
+      ageYears: undefined,
+      capacityLbs: undefined,
       waterUsagePerCycle: undefined,
-      vendPricePerUse: 2.50,
+      vendPricePerUse: undefined,
       conditionRating: 3,
       currentValue: undefined,
       purchaseValue: undefined,
       isCoinOperated: true,
       isCardOperated: false,
+      otherEquipment: '',
     },
   });
 
@@ -196,7 +198,8 @@ export const EquipmentStep: React.FC = () => {
       <Alert>
         <InfoIcon className="h-4 w-4" />
         <AlertDescription>
-          Add all equipment in your laundromat manually.
+          Add all equipment in your laundromat manually. Leave fields blank if unknown. 
+          If you don't know the condition, assume "Fair" (3/5) or "Poor" (2/5) condition.
         </AlertDescription>
       </Alert>
 
@@ -282,8 +285,20 @@ export const EquipmentStep: React.FC = () => {
                       <Input
                         type="number"
                         min="1"
-                        {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                        value={field.value || ''}
+                        onChange={(e) => {
+                          const value = e.target.value === '' ? undefined : parseInt(e.target.value) || undefined;
+                          field.onChange(value);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Delete' || e.key === 'Backspace') {
+                            const target = e.target as HTMLInputElement;
+                            if (target.selectionStart === 0 && target.selectionEnd === target.value.length) {
+                              e.preventDefault();
+                              field.onChange(undefined);
+                            }
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -306,8 +321,11 @@ export const EquipmentStep: React.FC = () => {
                         type="number"
                         min="0"
                         step="0.5"
-                        {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        value={field.value || ''}
+                        onChange={(e) => {
+                          const value = e.target.value === '' ? undefined : parseFloat(e.target.value) || undefined;
+                          field.onChange(value);
+                        }}
                       />
                     </FormControl>
                     <p className="text-sm text-muted-foreground">
@@ -329,7 +347,7 @@ export const EquipmentStep: React.FC = () => {
                       <HelpTooltip content="Load capacity in pounds" />
                     </FormLabel>
                     <Select 
-                      value={field.value.toString()} 
+                      value={field.value ? field.value.toString() : ''} 
                       onValueChange={(value) => field.onChange(parseInt(value))}
                     >
                       <FormControl>
@@ -420,7 +438,7 @@ export const EquipmentStep: React.FC = () => {
                       <HelpTooltip content="Rate the equipment condition from 1 (poor) to 5 (excellent)" />
                     </FormLabel>
                     <Select 
-                      value={field.value.toString()} 
+                      value={field.value ? field.value.toString() : '3'} 
                       onValueChange={(value) => field.onChange(parseInt(value))}
                     >
                       <FormControl>
@@ -607,6 +625,45 @@ export const EquipmentStep: React.FC = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Other Equipment Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Plus className="h-5 w-5" />
+            Other Equipment
+          </CardTitle>
+          <CardDescription>
+            List any other equipment like soap machines, change machines, carts, tables, etc.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <FormField
+              control={form.control}
+              name="otherEquipment"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Other Equipment Description</FormLabel>
+                  <FormControl>
+                    <textarea
+                      className="w-full p-3 border border-input rounded-md resize-none"
+                      rows={4}
+                      placeholder="Example: 2 soap dispensers, 1 change machine, 3 folding tables, 5 laundry carts..."
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <p className="text-sm text-muted-foreground">
+                    Describe any additional equipment not listed above
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </Form>
+        </CardContent>
+      </Card>
 
     </div>
   );
