@@ -48,36 +48,12 @@ export const FinancingStep: React.FC = () => {
   const form = useForm<FinancingData>({
     resolver: zodResolver(FinancingSchema),
     defaultValues: {
-      downPaymentPercent: deal?.downPaymentPercent || 10,
-      loanInterestRatePercent: deal?.loanInterestRatePercent || 8.5,
-      loanTermYears: deal?.loanTermYears || 10,
-      loanType: deal?.loanType || 'SBA 7(a) Loan',
+      downPaymentPercent: deal?.downPaymentPercent || 0,
+      loanInterestRatePercent: deal?.loanInterestRatePercent || 0,
+      loanTermYears: deal?.loanTermYears || 0,
+      loanType: deal?.loanType || '',
     },
   });
-
-  // Track if user is actively changing loan type to prevent auto-revert
-  const [userChangingLoanType, setUserChangingLoanType] = React.useState(false);
-
-  useEffect(() => {
-    if (deal && !userChangingLoanType) {
-      // Only update if values are actually different to prevent loops
-      const currentLoanType = form.getValues('loanType');
-      const targetLoanType = deal.loanType || 'SBA 7(a) Loan';
-      
-      if (currentLoanType !== targetLoanType) {
-        form.setValue('loanType', targetLoanType);
-      }
-      if (form.getValues('downPaymentPercent') !== (deal.downPaymentPercent || 10)) {
-        form.setValue('downPaymentPercent', deal.downPaymentPercent || 10);
-      }
-      if (form.getValues('loanInterestRatePercent') !== (deal.loanInterestRatePercent || 8.5)) {
-        form.setValue('loanInterestRatePercent', deal.loanInterestRatePercent || 8.5);
-      }
-      if (form.getValues('loanTermYears') !== (deal.loanTermYears || 10)) {
-        form.setValue('loanTermYears', deal.loanTermYears || 10);
-      }
-    }
-  }, [deal, form, userChangingLoanType]);
 
   const handleFieldChange = (field: keyof FinancingData, value: any) => {
     updateDeal({ [field]: value });
@@ -153,28 +129,13 @@ export const FinancingStep: React.FC = () => {
                        Loan Type
                        <HelpTooltip content="Choose the type of financing. Different loan types have different requirements, rates, and terms. SBA loans typically offer the best rates for business purchases." />
                      </FormLabel>
-                         <Select 
-                           value={field.value} 
-                           onValueChange={(value) => {
-                             setUserChangingLoanType(true);
-                             field.onChange(value);
-                             handleFieldChange('loanType', value);
-                             
-                             // Auto-fill loan parameters based on selection
-                             const selectedType = loanTypes.find(lt => lt.value === value);
-                             if (selectedType && selectedType.value !== 'Custom') {
-                               form.setValue('downPaymentPercent', selectedType.downPayment);
-                               form.setValue('loanInterestRatePercent', selectedType.interestRate);
-                               form.setValue('loanTermYears', selectedType.term);
-                               handleFieldChange('downPaymentPercent', selectedType.downPayment);
-                               handleFieldChange('loanInterestRatePercent', selectedType.interestRate);
-                               handleFieldChange('loanTermYears', selectedType.term);
-                             }
-                             
-                             // Reset flag after a short delay to allow context updates
-                             setTimeout(() => setUserChangingLoanType(false), 100);
-                           }}
-                        >
+                          <Select 
+                            value={field.value} 
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              handleFieldChange('loanType', value);
+                            }}
+                         >
                        <FormControl>
                          <SelectTrigger>
                            <SelectValue placeholder="Select loan type" />
