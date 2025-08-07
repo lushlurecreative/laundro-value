@@ -35,7 +35,7 @@ export const IncomeStep: React.FC = () => {
     resolver: zodResolver(IncomeSchema),
     defaultValues: {
       grossIncomeAnnual: deal?.grossIncomeAnnual || 0,
-      annualNet: deal?.annualNet || 0,
+      annualNet: 0, // Keep blank until proper NOI calculation
       vendingIncomeAnnual: ancillaryIncome?.vendingIncomeAnnual || 0,
       otherIncomeAnnual: ancillaryIncome?.otherIncomeAnnual || 0,
       projectedAdditionalMonthlyRevenue: deal?.projectedAdditionalMonthlyRevenue || 0,
@@ -46,7 +46,10 @@ export const IncomeStep: React.FC = () => {
   useEffect(() => {
     if (deal) {
       form.setValue('grossIncomeAnnual', deal.grossIncomeAnnual || 0);
-      form.setValue('annualNet', deal.annualNet || 0);
+      // Only set annualNet if it was manually entered (not auto-calculated)
+      if (deal.annualNet && deal.annualNet > 0) {
+        form.setValue('annualNet', deal.annualNet);
+      }
       form.setValue('projectedAdditionalMonthlyRevenue', deal.projectedAdditionalMonthlyRevenue || 0);
     }
     if (ancillaryIncome) {
