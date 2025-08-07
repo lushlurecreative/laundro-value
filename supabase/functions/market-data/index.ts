@@ -21,26 +21,26 @@ serve(async (req) => {
 
     let results = {};
 
-    // Get rental market data from RentCast
-    if (rentcastKey && address) {
-      try {
-        const rentcastResponse = await fetch(
-          `https://api.rentcast.io/v1/avm/rent/long-term?address=${encodeURIComponent(address)}`,
-          {
-            headers: {
-              'X-Api-Key': rentcastKey,
-            },
-          }
-        );
-        
-        if (rentcastResponse.ok) {
-          const rentData = await rentcastResponse.json();
-          results = { ...results, rentalData: rentData };
-        }
-      } catch (error) {
-        console.error('RentCast API error:', error);
-      }
-    }
+    // Get rental market data from RentCast - TEMPORARILY DISABLED
+    // if (rentcastKey && address) {
+    //   try {
+    //     const rentcastResponse = await fetch(
+    //       `https://api.rentcast.io/v1/avm/rent/long-term?address=${encodeURIComponent(address)}`,
+    //       {
+    //         headers: {
+    //           'X-Api-Key': rentcastKey,
+    //         },
+    //       }
+    //     );
+    //     
+    //     if (rentcastResponse.ok) {
+    //       const rentData = await rentcastResponse.json();
+    //       results = { ...results, rentalData: rentData };
+    //     }
+    //   } catch (error) {
+    //     console.error('RentCast API error:', error);
+    //   }
+    // }
 
     // Get location data from Google Places
     if (googlePlacesKey && address) {
