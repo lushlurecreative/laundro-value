@@ -113,11 +113,21 @@ export const IncomeStep: React.FC = () => {
                     </FormLabel>
                     <FormControl>
                       <CurrencyInput
-                        placeholder="$200,000.00"
-                        value={field.value}
+                        placeholder="$0.00"
+                        value={field.value || 0}
                         onChange={(value) => {
                           field.onChange(value);
                           handleFieldChange('grossIncomeAnnual', value);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Delete' || e.key === 'Backspace') {
+                            const target = e.target as HTMLInputElement;
+                            if (target.value === '' || target.value === '$0.00') {
+                              e.preventDefault();
+                              field.onChange(0);
+                              handleFieldChange('grossIncomeAnnual', 0);
+                            }
+                          }
                         }}
                       />
                     </FormControl>
@@ -147,11 +157,21 @@ export const IncomeStep: React.FC = () => {
                         </FormLabel>
                         <FormControl>
                           <CurrencyInput
-                            placeholder="$50,000.00"
-                            value={field.value}
+                            placeholder="$0.00"
+                            value={field.value || 0}
                             onChange={(value) => {
                               field.onChange(value);
                               handleFieldChange('annualNet', value);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Delete' || e.key === 'Backspace') {
+                                const target = e.target as HTMLInputElement;
+                                if (target.value === '' || target.value === '$0.00') {
+                                  e.preventDefault();
+                                  field.onChange(0);
+                                  handleFieldChange('annualNet', 0);
+                                }
+                              }
                             }}
                           />
                         </FormControl>
