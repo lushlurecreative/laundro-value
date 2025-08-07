@@ -141,26 +141,7 @@ export const DealProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setLeaseDetails(null);
       }
       
-      // Only auto-calculate annual net (NOI) if expenses exist and user hasn't manually set it
-      if (expenseItems.length > 0 && (!updatedDeal.annualNet || updatedDeal.annualNet === 0)) {
-        const totalOperatingExpenses = expenseItems.reduce((sum, expense) => sum + expense.amountAnnual, 0);
-        let totalGrossIncome = updatedDeal.grossIncomeAnnual;
-        
-        // Add ancillary income
-        if (ancillaryIncome) {
-          if (ancillaryIncome.isWDFActive) {
-            totalGrossIncome += ancillaryIncome.wdfPricePerLb * ancillaryIncome.wdfVolumeLbsPerWeek * 52;
-          }
-          totalGrossIncome += ancillaryIncome.vendingIncomeAnnual + ancillaryIncome.otherIncomeAnnual;
-        }
-        
-        // Add value-added services income
-        if (updatedDeal.valueAddedServices) {
-          totalGrossIncome += updatedDeal.valueAddedServices.reduce((sum, service) => sum + service.potentialRevenue, 0);
-        }
-        
-        updatedDeal.annualNet = totalGrossIncome - totalOperatingExpenses;
-      }
+      // Remove auto-calculation - let users enter values manually
       
       setDeal(updatedDeal);
     }

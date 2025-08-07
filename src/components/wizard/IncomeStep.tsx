@@ -34,11 +34,11 @@ export const IncomeStep: React.FC = () => {
   const form = useForm<IncomeData>({
     resolver: zodResolver(IncomeSchema),
     defaultValues: {
-      grossIncomeAnnual: deal?.grossIncomeAnnual || 0,
-      annualNet: 0, // Keep blank until proper NOI calculation
-      vendingIncomeAnnual: ancillaryIncome?.vendingIncomeAnnual || 0,
-      otherIncomeAnnual: ancillaryIncome?.otherIncomeAnnual || 0,
-      projectedAdditionalMonthlyRevenue: deal?.projectedAdditionalMonthlyRevenue || 0,
+      grossIncomeAnnual: 0,
+      annualNet: 0,
+      vendingIncomeAnnual: 0,
+      otherIncomeAnnual: 0,
+      projectedAdditionalMonthlyRevenue: 0,
     },
   });
 
