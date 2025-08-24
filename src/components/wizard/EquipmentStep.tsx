@@ -96,33 +96,34 @@ export const EquipmentStep: React.FC = () => {
   });
 
   const handleAddMachine = (data: EquipmentData) => {
-    console.log('Adding machine with data:', data);
+    // Validate required fields
+    if (!data.machineType || !data.quantity || data.quantity < 1) {
+      return;
+    }
     
     const newMachine = {
       machineId: `machine-${Date.now()}`,
       dealId: '',
       machineType: data.machineType as any,
-      brand: data.brand,
+      brand: data.brand || 'Unknown',
       model: '',
-      quantity: data.quantity,
-      ageYears: data.ageYears,
-      capacityLbs: data.capacityLbs,
-      vendPricePerUse: data.vendPricePerUse,
-      conditionRating: data.conditionRating,
-      waterConsumptionGalPerCycle: data.waterUsagePerCycle,
+      quantity: data.quantity || 1,
+      ageYears: data.ageYears || 0,
+      capacityLbs: data.capacityLbs || 25,
+      vendPricePerUse: data.vendPricePerUse || 3.00,
+      conditionRating: data.conditionRating || 3,
+      waterConsumptionGalPerCycle: data.waterUsagePerCycle || 20,
       electricConsumptionKwh: undefined,
       gasConsumptionBtu: undefined,
       purchaseValue: data.purchaseValue || 0,
       currentValue: data.currentValue || 0,
       maintenanceCostAnnual: 0,
       isCardOperated: data.isCardOperated || false,
-      isCoinOperated: data.isCoinOperated || true,
+      isCoinOperated: data.isCoinOperated !== false,
       isOutOfOrder: false
     };
 
-    console.log('Calling addMachine with:', newMachine);
     addMachine(newMachine);
-    console.log('Machine added, resetting form');
     form.reset();
   };
 
