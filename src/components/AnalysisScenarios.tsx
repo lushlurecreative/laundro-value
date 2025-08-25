@@ -12,6 +12,7 @@ import { calculateMetrics, formatCurrency, formatPercentage, calculateWaterBased
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Crown, Lock, TrendingUp } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { HelpTooltip } from '@/components/ui/help-tooltip';
 import { ScenarioComparison } from './ScenarioComparison';
 import { BreakevenAnalysis } from './BreakevenAnalysis';
 import { ComprehensiveAIAnalysis } from './ComprehensiveAIAnalysis';
@@ -110,7 +111,10 @@ export const AnalysisScenarios: React.FC = () => {
             {deal && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Sensitivity Analysis</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    Sensitivity Analysis
+                    <HelpTooltip content="This tool allows you to see how changes to key variables like rent, utility costs, and vend prices would impact your deal's profitability in real-time." />
+                  </CardTitle>
                   <p className="text-sm text-muted-foreground">
                     Test how changes in key variables affect your investment returns.
                   </p>

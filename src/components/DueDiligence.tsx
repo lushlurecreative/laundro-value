@@ -186,7 +186,9 @@ export const DueDiligence: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold">Due Diligence Checklists</h2>
-          <p className="text-muted-foreground">Comprehensive checklists for thorough deal evaluation</p>
+          <p className="text-muted-foreground">
+            This interactive checklist guides you through the critical steps of a laundromat acquisition. Complete each section to ensure a thorough review of the deal's financials, lease, legal status, and operations. Use the notes field for any comments and the document upload to attach relevant files.
+          </p>
         </div>
         <div className="text-right">
           <p className="text-sm text-muted-foreground">Overall Progress</p>

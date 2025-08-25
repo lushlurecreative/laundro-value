@@ -34,7 +34,8 @@ export const IncomeVerification: React.FC = () => {
       method: 'Utility Analysis',
       description: 'Verify income through water usage and utility costs correlation',
       importance: 'High',
-      documents: ['Water Bills', 'Electric Bills', 'Usage Calculations']
+      documents: ['Water Bills', 'Electric Bills', 'Usage Calculations'],
+      tooltip: 'This section helps you verify the seller\'s reported income by comparing it to industry-standard utility usage. It can flag discrepancies that may indicate inflated revenue claims.'
     },
     {
       method: 'Third-Party Verification',
@@ -230,7 +231,7 @@ export const IncomeVerification: React.FC = () => {
                 <li>• Request 2-3 years of financial statements</li>
                 <li>• Analyze monthly trends and seasonality</li>
                 <li>• Cross-reference multiple verification methods</li>
-                <li>• Calculate income per machine and compare to industry standards</li>
+                <li>• Calculate income per machine and compare to Industry Standards</li>
                 <li>• Verify utility usage correlates with claimed volume</li>
               </ul>
             </div>

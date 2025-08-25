@@ -279,7 +279,7 @@ export const Resources: React.FC = () => {
                   <div className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
                       <p className="font-medium">Coin Laundry Association</p>
-                      <p className="text-sm text-muted-foreground">Industry standards & best practices</p>
+                      <p className="text-sm text-muted-foreground">Industry Standards & best practices</p>
                     </div>
                     <ExternalLink className="h-4 w-4 text-muted-foreground" />
                   </div>
@@ -339,7 +339,7 @@ export const Resources: React.FC = () => {
               <DollarSign className="h-5 w-5 text-primary" />
             </div>
             <p className="text-sm text-muted-foreground">
-              Financing options and industry standards for laundromat acquisitions
+              Financing options and Industry Standards for laundromat acquisitions
             </p>
           </CardHeader>
           <CardContent className="space-y-6">

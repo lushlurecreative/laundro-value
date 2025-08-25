@@ -15,12 +15,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, Trash2 } from 'lucide-react';
+import { TrendingUp, Trash2, InfoIcon } from 'lucide-react';
 import { HelpTooltip } from '@/components/ui/help-tooltip';
+import { CurrencyInput } from "@/components/ui/currency-input";
 
 const GrowthProjectionsSchema = z.object({
   incomeGrowthRatePercent: z.number().min(0).max(100, "Income growth rate must be between 0-100%"),
   expenseGrowthRatePercent: z.number().min(0).max(100, "Expense growth rate must be between 0-100%"),
+  projectedAdditionalMonthlyRevenue: z.number().min(0, "Projected revenue must be positive").optional(),
 });
 
 type GrowthProjectionsData = z.infer<typeof GrowthProjectionsSchema>;
@@ -33,6 +35,7 @@ export const GrowthProjectionsStep: React.FC = () => {
     defaultValues: {
       incomeGrowthRatePercent: deal?.incomeGrowthRatePercent || 2.0,
       expenseGrowthRatePercent: deal?.expenseGrowthRatePercent || 3.0,
+      projectedAdditionalMonthlyRevenue: deal?.projectedAdditionalMonthlyRevenue || 0,
     },
   });
 
@@ -40,6 +43,7 @@ export const GrowthProjectionsStep: React.FC = () => {
     if (deal) {
       form.setValue('incomeGrowthRatePercent', deal.incomeGrowthRatePercent || 2.0);
       form.setValue('expenseGrowthRatePercent', deal.expenseGrowthRatePercent || 3.0);
+      form.setValue('projectedAdditionalMonthlyRevenue', deal.projectedAdditionalMonthlyRevenue || 0);
     }
   }, [deal, form]);
 
@@ -126,7 +130,7 @@ export const GrowthProjectionsStep: React.FC = () => {
                     />
                   </FormControl>
                   <p className="text-sm text-muted-foreground">
-                    Industry standard: 1.5-3.0% annually
+                    Industry Standard: 1.5-3.0% annually
                   </p>
                   <FormMessage />
                 </FormItem>
@@ -169,7 +173,7 @@ export const GrowthProjectionsStep: React.FC = () => {
                     />
                   </FormControl>
                   <p className="text-sm text-muted-foreground">
-                    Industry standard: 2.0-4.0% annually
+                    Industry Standard: 2.0-4.0% annually
                   </p>
                   <FormMessage />
                 </FormItem>
@@ -212,6 +216,61 @@ export const GrowthProjectionsStep: React.FC = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Income Improvement Strategy */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Income Improvement Strategy</CardTitle>
+            <CardDescription>
+              Project additional monthly revenue opportunities
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <FormField
+              control={form.control}
+              name="projectedAdditionalMonthlyRevenue"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Projected Additional Monthly Revenue</FormLabel>
+                  <FormControl>
+                    <CurrencyInput
+                      placeholder="$2,500.00"
+                      value={field.value || 0}
+                      onChange={(value) => {
+                        field.onChange(value);
+                        handleFieldChange('projectedAdditionalMonthlyRevenue', value);
+                      }}
+                    />
+                  </FormControl>
+                  <p className="text-sm text-muted-foreground">
+                    Potential monthly revenue increase from expansions, improvements, or operational changes
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            {/* Notes Section */}
+            <div className="space-y-2">
+              <FormLabel>Notes</FormLabel>
+              <textarea
+                className="w-full min-h-[100px] p-3 border border-input rounded-md bg-background text-sm resize-vertical"
+                placeholder="Add notes about your income improvement strategy, expansion plans, market opportunities, or other relevant details..."
+                value={deal?.notes || ''}
+                onChange={(e) => handleFieldChange('notes', e.target.value)}
+              />
+              <p className="text-sm text-muted-foreground">
+                Document your strategy for increasing revenue and any relevant market insights
+              </p>
+            </div>
+            <Alert>
+              <InfoIcon className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Ideas:</strong> Equipment additions, service improvements, pricing optimization, new revenue streams
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
 
         {/* Growth Strategy Considerations */}
         <Card>

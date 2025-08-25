@@ -101,7 +101,7 @@ export const FinancingStep: React.FC = () => {
       <Alert>
         <InfoIcon className="h-4 w-4" />
         <AlertDescription>
-          Enter your financing details. If you don't have specific information, leave fields blank. Interest rates and terms shown are industry standards.
+          Enter your financing details. If you don't have specific information, leave fields blank. Interest rates and terms shown are Industry Standards.
         </AlertDescription>
       </Alert>
 

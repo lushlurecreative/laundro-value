@@ -45,7 +45,7 @@ export const ComprehensiveAIAnalysis: React.FC = () => {
         body: {
           dealData,
           analysisType,
-          userInput: `Analyze this complete laundromat deal with current market conditions and industry standards.`
+          userInput: `Analyze this complete laundromat deal with current market conditions and Industry Standards.`
         }
       });
 
@@ -82,7 +82,7 @@ export const ComprehensiveAIAnalysis: React.FC = () => {
 
     } catch (error) {
       console.error('AI Analysis error:', error);
-      setAnalysis('AI analysis is temporarily unavailable. Please review your deal manually using the industry standards provided throughout the application.');
+      setAnalysis('AI analysis is temporarily unavailable. Please review your deal manually using the Industry Standards provided throughout the application.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -117,7 +117,7 @@ export const ComprehensiveAIAnalysis: React.FC = () => {
         <Brain className="h-4 w-4" />
         <AlertDescription>
           <strong>AI-Powered Analysis:</strong> Get comprehensive insights using current market data, 
-          industry standards, and advanced financial modeling. Analysis automatically updates as you input deal data.
+          Industry Standards, and advanced financial modeling. Analysis automatically updates as you input deal data.
         </AlertDescription>
       </Alert>
 

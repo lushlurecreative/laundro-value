@@ -143,7 +143,7 @@ export const ExpensesStep: React.FC = () => {
       <Alert>
         <InfoIcon className="h-4 w-4" />
         <AlertDescription>
-          <strong>Important:</strong> The goal is to run the deal accurately for <strong>YOUR</strong> operation. While seller-reported expenses are important reference points, analyze how <strong>YOU</strong> would run this business. Consider whether expenses like meals, travel, excessive cleaning costs, or personal vehicle insurance are reasonable for your operation. Run the numbers based on industry standards and your business plan.
+          <strong>Important:</strong> The goal is to run the deal accurately for <strong>YOUR</strong> operation. While seller-reported expenses are important reference points, analyze how <strong>YOU</strong> would run this business. Consider whether expenses like meals, travel, excessive cleaning costs, or personal vehicle insurance are reasonable for your operation. Run the numbers based on Industry Standards and your business plan.
         </AlertDescription>
       </Alert>
 

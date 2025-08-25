@@ -131,7 +131,7 @@ export const LeaseStep: React.FC = () => {
         <AlertTriangle className="h-4 w-4" />
         <AlertDescription>
           <strong>Important:</strong> Since real estate is not included in this purchase, lease terms are critical to your deal analysis. 
-          All information marked with * represents industry standards and should be verified with the actual lease agreement.
+          All information marked with * represents Industry Standards and should be verified with the actual lease agreement.
         </AlertDescription>
       </Alert>
 
