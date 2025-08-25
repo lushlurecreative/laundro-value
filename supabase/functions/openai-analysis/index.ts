@@ -102,28 +102,41 @@ JSON Schema (extract ALL expenses dynamically):
         systemPrompt = `You are a laundromat investment expert. Provide comprehensive analysis of the deal.`;
     }
 
+    const requestBody = {
+      model: 'gpt-5-2025-08-07',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Analyze this laundromat deal data (may contain messy formatting from spreadsheets): ${preprocessText(dealData.text || JSON.stringify(dealData))}` }
+      ],
+      max_completion_tokens: 2000,
+    };
+
+    console.log('Making OpenAI API request with model:', requestBody.model);
+    console.log('Request body preview:', JSON.stringify(requestBody).substring(0, 500) + '...');
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Analyze this laundromat deal data (may contain messy formatting from spreadsheets): ${preprocessText(dealData.text || JSON.stringify(dealData))}` }
-        ],
-        max_completion_tokens: 2000,
-      }),
+      body: JSON.stringify(requestBody),
     });
 
+    console.log('OpenAI API response status:', response.status);
+    console.log('OpenAI API response headers:', Object.fromEntries(response.headers.entries()));
+
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('OpenAI API error response:', errorText);
+      throw new Error(`OpenAI API error: ${response.statusText} - ${errorText}`);
     }
 
     const data = await response.json();
-    const analysis = data.choices[0].message.content;
+    console.log('OpenAI API response data:', data);
+    
+    const analysis = data.choices[0]?.message?.content;
+    console.log('Extracted analysis:', analysis);
 
     return new Response(JSON.stringify({ analysis }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
