@@ -144,14 +144,14 @@ export const TestingPanel: React.FC = () => {
         <CardContent className="space-y-3">
           <div className="text-sm space-y-2">
             <div>
-              <strong>Albany Park Test:</strong> Complete laundromat with 12 washers, 14 dryers, $450k asking price
+              <strong>Albany Park Test:</strong> Real listing at 3516 W Lawrence Ave, $175k asking price, $231k income
             </div>
             <div>
               <strong>Expected Results:</strong>
               <ul className="list-disc list-inside ml-4 text-muted-foreground">
-                <li>NOI calculation: ~$60,000 (33% margin)</li>
-                <li>Cap rate: ~13.3%</li>
-                <li>Equipment age: 6 years (good condition)</li>
+                <li>NOI calculation: $18,301 (from $231k income - $213k expenses)</li>
+                <li>Cap rate: ~10.5%</li>
+                <li>Equipment: Speed Queen washers/dryers (multiple sizes)</li>
                 <li>Basic validation warnings for expense completeness</li>
               </ul>
             </div>

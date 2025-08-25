@@ -21,7 +21,8 @@ const navigationItems = [
   { id: 'projections', label: '10-Year Projections', icon: '📅' },
   { id: 'resources', label: 'Resources', icon: '💡' },
   { id: 'due-diligence', label: 'Due Diligence', icon: '✅' },
-  { id: 'reports', label: 'Reports', icon: '📋' }
+  { id: 'reports', label: 'Reports', icon: '📋' },
+  { id: 'testing', label: 'System Testing', icon: '🧪' }
 ];
 
 export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
