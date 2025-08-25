@@ -14,8 +14,12 @@ serve(async (req) => {
   try {
     const { dealData, analysisType } = await req.json();
     
+    console.log('OpenAI Analysis - dealData:', dealData);
+    console.log('OpenAI Analysis - analysisType:', analysisType);
+    
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
+      console.error('OPENAI_API_KEY is not set');
       throw new Error('OPENAI_API_KEY is not set');
     }
 
@@ -108,7 +112,7 @@ JSON Schema (extract ALL expenses dynamically):
         model: 'gpt-5-2025-08-07',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Analyze this laundromat deal data (may contain messy formatting from spreadsheets): ${preprocessText(JSON.stringify(dealData))}` }
+          { role: 'user', content: `Analyze this laundromat deal data (may contain messy formatting from spreadsheets): ${preprocessText(dealData.text || JSON.stringify(dealData))}` }
         ],
         max_completion_tokens: 2000,
       }),
