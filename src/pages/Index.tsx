@@ -51,13 +51,6 @@ const Index = () => {
         return <UserProfile />;
       case 'subscription':
         return <SubscriptionDashboard />;
-      case 'testing':
-        return (
-          <div className="space-y-6">
-            <TestingPanel />
-            <ComprehensiveSystemTest />
-          </div>
-        );
       default:
         return <Dashboard />;
     }
