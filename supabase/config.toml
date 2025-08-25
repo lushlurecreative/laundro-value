@@ -3,7 +3,6 @@ project_id = "lzokflsidobsouzqxtta"
 [functions.extract-listing-data]
 verify_jwt = false
 
-
 [functions.openai-analysis]
 verify_jwt = false
 
@@ -29,4 +28,10 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.ai-deal-analysis]
+verify_jwt = false
+
+[functions.enhanced-ai-analysis]
+verify_jwt = false
+
+[functions.comprehensive-ai-analyzer]
 verify_jwt = false

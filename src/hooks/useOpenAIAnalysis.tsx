@@ -27,46 +27,77 @@ export const useOpenAIAnalysis = ({ onFieldsPopulated }: UseOpenAIAnalysisProps 
         }
       });
 
-      if (error) {
-        throw error;
+      let extractedFields = null;
+
+      // Try to parse AI response first
+      if (!error && data?.analysis) {
+        try {
+          extractedFields = parseAIResponse(data.analysis);
+        } catch (parseError) {
+          console.warn('Failed to parse AI response:', parseError);
+        }
       }
 
-      // Parse the AI response to extract structured data
-      const extractedFields = parseAIResponse(data.analysis);
-      
-      if (extractedFields && Object.keys(extractedFields).length > 0) {
-        // Handle new expense array format
-        if (extractedFields.expenses && Array.isArray(extractedFields.expenses)) {
-          console.log('Processing expense array:', extractedFields.expenses);
-          // Convert expense array to individual fields for backward compatibility
-          extractedFields.expenses.forEach((exp: any) => {
-            if (exp.name && exp.amount) {
-              const normalizedName = exp.name.toLowerCase().replace(/[^a-z]/g, '');
-              extractedFields[normalizedName] = exp.amount;
-            }
+      // Fallback to local extraction if AI fails or returns empty
+      if (!extractedFields || Object.keys(extractedFields).length === 0) {
+        console.log('AI analysis failed or empty, using local extraction fallback');
+        extractedFields = parseAIResponse(text);
+        
+        if (extractedFields && Object.keys(extractedFields).length > 0) {
+          toast({
+            title: "Local Extraction Complete",
+            description: `Extracted ${Object.keys(extractedFields).length} fields using local parsing`,
           });
+        } else {
+          toast({
+            title: "Analysis Complete",
+            description: "No specific data fields were found to auto-populate. Please review and enter data manually.",
+          });
+          return;
         }
-        
-        onFieldsPopulated?.(extractedFields);
-        
-        toast({
-          title: "AI Analysis Complete",
-          description: `Auto-populated fields from your text`,
-        });
       } else {
         toast({
-          title: "Analysis Complete",
-          description: "No specific data fields were found to auto-populate. Please review and enter data manually.",
+          title: "AI Analysis Complete",
+          description: `Auto-populated ${Object.keys(extractedFields).length} fields from your text`,
         });
       }
+      
+      // Handle new expense array format
+      if (extractedFields.expenses && Array.isArray(extractedFields.expenses)) {
+        console.log('Processing expense array:', extractedFields.expenses);
+        // Convert expense array to individual fields for backward compatibility
+        extractedFields.expenses.forEach((exp: any) => {
+          if (exp.name && exp.amount) {
+            const normalizedName = exp.name.toLowerCase().replace(/[^a-z]/g, '');
+            extractedFields[normalizedName] = exp.amount;
+          }
+        });
+      }
+      
+      onFieldsPopulated?.(extractedFields);
 
     } catch (error) {
       console.error('AI Analysis error:', error);
-      toast({
-        title: "AI Analysis Unavailable",
-        description: "Unable to analyze text. Please fill fields manually.",
-        variant: "destructive"
-      });
+      
+      // Final fallback to local extraction
+      try {
+        const fallbackFields = parseAIResponse(text);
+        if (fallbackFields && Object.keys(fallbackFields).length > 0) {
+          onFieldsPopulated?.(fallbackFields);
+          toast({
+            title: "Local Extraction Complete",
+            description: `Used local parsing to extract ${Object.keys(fallbackFields).length} fields`,
+          });
+        } else {
+          throw new Error('No extraction possible');
+        }
+      } catch (fallbackError) {
+        toast({
+          title: "Analysis Unavailable",
+          description: "Unable to analyze text. Please fill fields manually.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsAnalyzing(false);
     }

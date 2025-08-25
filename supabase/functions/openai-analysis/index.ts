@@ -48,6 +48,7 @@ serve(async (req) => {
     let systemPrompt = '';
     switch (analysisType) {
       case 'field-extraction':
+      case 'comprehensive-field-extraction':
         systemPrompt = `Your task is to extract key information from the following text about a laundromat business for sale. Your response MUST be a single, valid JSON object and nothing else. Do not include any explanatory text, comments, or markdown formatting like \`\`\`json.
 
 The JSON object must conform to the following schema. If a value for a field cannot be found in the text, either omit the key entirely or set its value to null. Do not invent or guess data. All currency values should be numbers without symbols or commas.
