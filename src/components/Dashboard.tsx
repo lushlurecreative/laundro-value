@@ -109,7 +109,7 @@ export const Dashboard: React.FC = () => {
         )}
       </div>
 
-      {!deal && (
+          {!deal && (
         <Card className="mb-8">
           <CardContent className="p-8">
             <div className="text-center mb-8">
@@ -122,6 +122,22 @@ export const Dashboard: React.FC = () => {
               <p className="text-lg text-muted-foreground">
                 This tool helps prospective buyers analyze, value, and assess the risk of purchasing an existing laundromat with precision and confidence.
               </p>
+            </div>
+            
+            <div className="mb-8">
+              <Card className="border-primary bg-primary/5">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-3 text-primary">🚀 Quick Start: AI Analysis</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Paste any deal information, property listing, or lease document and let our AI instantly extract and populate all relevant fields.
+                  </p>
+                  <div className="space-y-2">
+                    <p className="text-xs text-muted-foreground">✅ Auto-populates property details, income, expenses, and equipment</p>
+                    <p className="text-xs text-muted-foreground">✅ Processes equipment lists like "5 - 50# SPEED QUEEN WASHERS"</p>
+                    <p className="text-xs text-muted-foreground">✅ Extracts lease terms, rent amounts, and financial data</p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
             
             <div className="grid md:grid-cols-2 gap-8 mb-8">
