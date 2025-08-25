@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useAuth } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface SubscriptionPlan {
@@ -57,7 +56,7 @@ export const useSubscription = () => {
 };
 
 export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
+  const user = null; // No auth in testing mode
   const [subscription, setSubscription] = useState<UserSubscription | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);

@@ -18,7 +18,6 @@ import {
   TrendingDown
 } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 
 interface AIInsightsProps {
   dealId: string;
@@ -40,7 +39,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsProps> = ({
   dealData, 
   onRunAnalysis 
 }) => {
-  const { user } = useAuth();
+  const user = { id: 'test-user' }; // Mock user for testing
   const [analysisResults, setAnalysisResults] = useState<AnalysisResults>({});
   const [isLoading, setIsLoading] = useState(false);
   const [lastAnalyzed, setLastAnalyzed] = useState<string | null>(null);

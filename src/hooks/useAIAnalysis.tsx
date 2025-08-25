@@ -1,10 +1,9 @@
 import { useState, useCallback } from 'react';
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import { useDeal } from "@/contexts/useDeal";
 
 export const useAIAnalysis = () => {
-  const { user } = useAuth();
+  const user = { id: 'test-user' }; // Mock user for testing
   const { deal, leaseDetails, expenseItems, machineInventory } = useDeal();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResults, setAnalysisResults] = useState<any>(null);

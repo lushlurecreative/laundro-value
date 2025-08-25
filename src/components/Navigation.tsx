@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useDeal } from '@/contexts/useDeal';
-import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Trash2, Plus, User, Crown } from 'lucide-react';
 
@@ -27,11 +26,8 @@ const navigationItems = [
 
 export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
   const { clearAllData, saveAndStartNew } = useDeal();
-  const { user, profile } = useAuth();
 
-  const initials = profile?.full_name 
-    ? profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase()
-    : user?.email?.charAt(0).toUpperCase() || 'U';
+  const initials = 'U'; // Default user initial
 
   return (
     <Card className="h-full shadow-elegant bg-gradient-card border-0">
@@ -58,8 +54,8 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
               </AvatarFallback>
             </Avatar>
             <div className="text-left">
-              <p className="text-sm font-medium">{profile?.full_name || 'User'}</p>
-              <p className="text-xs text-muted-foreground">{user?.email}</p>
+              <p className="text-sm font-medium">User</p>
+              <p className="text-xs text-muted-foreground">Testing Mode</p>
             </div>
           </Button>
         </div>

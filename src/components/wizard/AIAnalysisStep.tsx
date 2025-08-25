@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useDeal } from '@/contexts/useDeal';
-import { useAuth } from '@/contexts/AuthContext';
 import { AIInsightsDashboard } from '@/components/AIInsightsDashboard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,7 @@ import {
 
 export const AIAnalysisStep: React.FC = () => {
   const { deal, expenseItems, machineInventory, leaseDetails } = useDeal();
-  const { user } = useAuth();
+  const user = { id: 'test-user' }; // Mock user for testing
   const [analysisReadiness, setAnalysisReadiness] = useState(0);
   const [missingData, setMissingData] = useState<string[]>([]);
 
