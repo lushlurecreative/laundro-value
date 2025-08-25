@@ -9,92 +9,98 @@ export const useDataProcessor = () => {
   const { deal, updateDeal, addMachine, addExpenseItem, expenseItems, machineInventory } = useDeal();
   const { toast } = useToast();
 
-  const processAlbanyParkData = () => {
+  const processAlbanyParkData = async () => {
     setIsProcessing(true);
     
     try {
-      // Albany Park Coin Laundry sample data
-      updateDeal({
-        dealName: 'Albany Park Coin Laundry',
-        askingPrice: 450000,
-        grossIncomeAnnual: 180000,
-        facilitySizeSqft: 2400,
-        propertyAddress: '4627 N Kedzie Ave, Chicago, IL 60625'
+      // Use the actual Albany Park equipment list to test real extraction
+      const albanyParkData = `
+        Albany Park Coin Laundry
+        3516 W Lawrence Ave, Chicago, IL 60625
+        Asking Price: $175,000
+        
+        EQUIPMENT:
+        5 - 50# SPEED QUEEN WASHERS
+        4 - 40# SPEED QUEEN WASHERS  
+        3 - 35# SPEED QUEEN WASHERS
+        12 - 75# SPEED QUEEN DRYERS
+        8 - 50# SPEED QUEEN DRYERS
+        6 - 30# SPEED QUEEN DRYERS
+        32- 35# SPEED QUEEN DRYER POCKETS
+        24- LAUNDRY CARTS
+        1 - WATER HEATER (NOT WORKING)
+        
+        2024 INCOME: $231,283
+        Total Annual Expenses: $212,982
+        Net Operating Income: $18,301
+      `;
+
+      // Use the working extract-listing-data function
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: result, error } = await supabase.functions.invoke('extract-listing-data', {
+        body: {
+          extractionType: 'text',
+          rawText: albanyParkData,
+          documentType: 'real-estate'
+        }
       });
 
-      // Process equipment: 12 Washers, 14 Dryers
-      addMachine({
-        machineId: `washers-${Date.now()}`,
-        dealId: '',
-        machineType: 'Front-Load Washer',
-        brand: 'Continental Girbau',
-        model: '25 lb',
-        quantity: 12,
-        ageYears: 6, // 2018 machines
-        capacityLbs: 25,
-        vendPricePerUse: 3.75,
-        conditionRating: 3,
-        waterConsumptionGalPerCycle: 20,
-        electricConsumptionKwh: undefined,
-        gasConsumptionBtu: undefined,
-        purchaseValue: 0,
-        currentValue: 0,
-        maintenanceCostAnnual: 0,
-        isCardOperated: false,
-        isCoinOperated: true,
-        isOutOfOrder: false
-      });
+      if (error) throw error;
 
-      addMachine({
-        machineId: `dryers-${Date.now()}`,
-        dealId: '',
-        machineType: 'Single Dryer',
-        brand: 'Continental Girbau',
-        model: '50 lb',
-        quantity: 14,
-        ageYears: 6, // 2018 machines
-        capacityLbs: 50,
-        vendPricePerUse: 2.50,
-        conditionRating: 3,
-        waterConsumptionGalPerCycle: 0,
-        electricConsumptionKwh: undefined,
-        gasConsumptionBtu: undefined,
-        purchaseValue: 0,
-        currentValue: 0,
-        maintenanceCostAnnual: 0,
-        isCardOperated: false,
-        isCoinOperated: true,
-        isOutOfOrder: false
-      });
+      if (result.success && result.data) {
+        const extractedData = result.data;
+        
+        // Apply the extracted data using the working logic
+        if (extractedData.propertyInfo) {
+          updateDeal({
+            dealName: 'Albany Park Coin Laundry',
+            propertyAddress: extractedData.propertyInfo.address || '3516 W Lawrence Ave, Chicago, IL 60625',
+            askingPrice: extractedData.propertyInfo.askingPrice || 175000,
+            facilitySizeSqft: extractedData.propertyInfo.squareFootage,
+            grossIncomeAnnual: 231283 // From the actual P&L
+          });
+        }
 
-      // Add estimated expenses
-      const sampleExpenses = [
-        { name: 'Rent', amountAnnual: 84000 }, // $7,000/month
-        { name: 'Utilities', amountAnnual: 18000 },
-        { name: 'Insurance', amountAnnual: 6000 },
-        { name: 'Maintenance', amountAnnual: 9000 },
-        { name: 'Supplies', amountAnnual: 3600 }
-      ];
+        // Apply equipment using the working extraction logic
+        if (extractedData.equipment) {
+          extractedData.equipment.forEach(equipment => {
+            addMachine({
+              machineId: crypto.randomUUID(),
+              dealId: '',
+              machineType: equipment.type as any,
+              brand: equipment.brand || 'Speed Queen',
+              model: equipment.model || '',
+              quantity: equipment.quantity,
+              ageYears: 5,
+              capacityLbs: parseInt(equipment.capacity?.replace('#', '') || '35'),
+              vendPricePerUse: equipment.type.toLowerCase().includes('washer') ? 4.50 : 3.50,
+              conditionRating: 3,
+              waterConsumptionGalPerCycle: equipment.type.toLowerCase().includes('washer') ? 25 : 0,
+              electricConsumptionKwh: undefined,
+              gasConsumptionBtu: undefined,
+              purchaseValue: 0,
+              currentValue: 0,
+              maintenanceCostAnnual: 0,
+              isCardOperated: true,
+              isCoinOperated: false,
+              isOutOfOrder: false
+            });
+          });
+        }
 
-      sampleExpenses.forEach(expense => {
-        addExpenseItem({
-          expenseId: `expense-${expense.name}-${Date.now()}`,
-          dealId: '',
-          expenseName: expense.name,
-          expenseType: 'Fixed',
-          amountAnnual: expense.amountAnnual
+        toast({
+          title: "Albany Park Data Extracted",
+          description: `Successfully loaded real data: $${extractedData.propertyInfo?.askingPrice?.toLocaleString()} asking price with ${extractedData.equipment?.length || 0} equipment items`,
         });
-      });
-
-      toast({
-        title: "Albany Park Data Loaded",
-        description: "Sample deal data has been populated for testing",
-      });
+      } else {
+        throw new Error('Data extraction failed');
+      }
 
     } catch (error) {
+      console.error('Albany Park data processing error:', error);
       toast({
         title: "Data Processing Error",
-        description: "Failed to process Albany Park data",
+        description: "Failed to process Albany Park data using extraction system",
         variant: "destructive"
       });
     } finally {
