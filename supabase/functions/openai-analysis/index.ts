@@ -49,41 +49,31 @@ serve(async (req) => {
     switch (analysisType) {
       case 'field-extraction':
       case 'comprehensive-field-extraction':
-        systemPrompt = `Your task is to extract key information from the following text about a laundromat business for sale. Your response MUST be a single, valid JSON object and nothing else. Do not include any explanatory text, comments, or markdown formatting like \`\`\`json.
+        systemPrompt = `You are an expert data extraction AI for a laundromat analysis application. Your sole function is to parse unstructured text from a business listing and convert it into a structured JSON object.
 
-The JSON object must conform to the following schema. If a value for a field cannot be found in the text, either omit the key entirely or set its value to null. Do not invent or guess data. All currency values should be numbers without symbols or commas.
+Analyze the text provided after the "---" separator. Extract the following fields according to the specified data types.
 
-For expenses, extract ALL expense items regardless of name. Look for any line item with a name and dollar amount. Include EVERY expense found in the text including: cost of goods sold, auto expense, bank charges, depreciation, insurance, meals, internet, alarm, office, payroll, accounting, rent, repairs, waste removal, electric, gas, water, and ANY OTHER expenses listed.
+**Required Fields:**
+- \`asking_price\` (Number, do not include commas or currency symbols. If a range is given, use the highest number.)
+- \`total_income\` (Number, annual unless specified otherwise.)
+- \`net_income\` (Number, annual unless specified otherwise.)
+- \`cash_flow_ebitda\` (Number, annual unless specified otherwise.)
+- \`rent_monthly\` (Number, calculate from annual if necessary.)
+- \`square_footage\` (Number)
+- \`address_street\` (String)
+- \`address_city\` (String)
+- \`address_state\` (String)
+- \`address_zip\` (String)
+- \`equipment_issues\` (Array of Strings. List all broken, non-working, or explicitly mentioned "needed" items.)
+- \`real_estate_included\` (Boolean, true if the property is included in the sale, false if it is a lease.)
 
-For lease information, extract the INITIAL or FIRST YEAR monthly rent amount, lease term in years, and number of renewal options.
+**Rules of Extraction:**
+1.  If a value for a specific field is not mentioned or cannot be found in the text, you MUST use the JSON value \`null\`. Do not omit the field.
+2.  Do not make up, infer, or calculate any values unless explicitly instructed to (e.g., calculating monthly rent from an annual figure). Only extract data that is stated in the text.
+3.  Your final response MUST be a single, valid JSON object.
+4.  Do not include any introductory text, apologies, explanations, or any text whatsoever before the opening \`{\` or after the closing \`}\` of the JSON object.
 
-For equipment, count the total number of washers and dryers from equipment lists or summaries.
-
-For revenue, look for "Annual Revenue", "Gross Income", or similar terms. The asking price is the business purchase price.
-
-JSON Schema (extract ALL expenses dynamically):
-
-{
-  "askingPrice": Number,
-  "grossIncome": Number,
-  "totalSqft": Number,
-  "propertyAddress": "String",
-  "lease": {
-    "monthlyRent": Number,
-    "remainingTermYears": Number,
-    "renewalOptionsCount": Number,
-    "annualRentIncreasePercent": Number
-  },
-  "equipment": {
-    "washers": Number,
-    "dryers": Number,
-    "avgAge": Number
-  },
-  "expenses": [
-    {"name": "exact expense name as mentioned in text", "amount": Number},
-    {"name": "another expense name", "amount": Number}
-  ]
-}`;
+---`;
         break;
       case 'deal-analysis':
         systemPrompt = `You are an expert laundromat investment analyst. Analyze the provided deal data and provide:
