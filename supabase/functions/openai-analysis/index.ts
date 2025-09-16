@@ -94,12 +94,13 @@ Analyze the text provided after the "---" separator. Extract the following field
     }
 
     const requestBody = {
-      model: 'gpt-5-2025-08-07',
+      model: 'gpt-4o',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Analyze this laundromat deal data (may contain messy formatting from spreadsheets): ${preprocessText(dealData.text || JSON.stringify(dealData))}` }
       ],
-      max_completion_tokens: 2000,
+      max_tokens: 2000,
+      temperature: 0,
     };
 
     console.log('Making OpenAI API request with model:', requestBody.model);
