@@ -8,29 +8,92 @@ const parseCurrency = (value: string | number): number => {
   return Number(String(value).replace(/[^0-9.-]+/g, '')) || 0;
 };
 
+// Field mapping from snake_case (OpenAI) to camelCase (app)
+const fieldMapping: Record<string, string> = {
+  'asking_price': 'askingPrice',
+  'total_income': 'grossIncomeAnnual',
+  'net_income': 'annualNet',
+  'cash_flow_ebitda': 'cashFlowEBITDA',
+  'rent_monthly': 'monthlyRent',
+  'square_footage': 'facilitySizeSqft',
+  'address_street': 'propertyAddress',
+  'address_city': 'city',
+  'address_state': 'state',
+  'address_zip': 'zipCode',
+  'equipment_issues': 'equipmentIssues',
+  'real_estate_included': 'isRealEstateIncluded'
+};
+
+function mapFieldNames(data: Record<string, any>): Record<string, any> {
+  const mapped: Record<string, any> = {};
+  
+  for (const [key, value] of Object.entries(data)) {
+    const mappedKey = fieldMapping[key] || key;
+    mapped[mappedKey] = value;
+  }
+  
+  return mapped;
+}
+
 // Main function to parse the AI's response
 export const parseAIResponse = (response: string): Record<string, any> => {
   console.log('Raw AI response:', response);
   
-  // First, try to find and parse a clean JSON object, which is the preferred method.
-  try {
-    const jsonMatch = response.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      let jsonStr = jsonMatch[0]
-        .replace(/,\s*([}\]])/g, '$1') // Fix trailing commas
-        .replace(/([{,]\s*)(\w+):/g, '$1"$2":'); // Quote unquoted keys
+  // First, try to extract and parse JSON
+  const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/) || 
+                   response.match(/```\s*([\s\S]*?)\s*```/) ||
+                   response.match(/\{[\s\S]*\}/);
+  
+  if (jsonMatch) {
+    try {
+      let jsonStr = jsonMatch[1] || jsonMatch[0];
+      
+      // Clean up common JSON formatting issues
+      jsonStr = jsonStr
+        .replace(/,\s*}/g, '}')  // Remove trailing commas
+        .replace(/,\s*]/g, ']')  // Remove trailing commas in arrays
+        .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":')  // Quote unquoted keys
+        .trim();
       
       const jsonData = JSON.parse(jsonStr);
-      console.log('Parsed JSON data:', jsonData);
+      console.log('Successfully parsed JSON:', jsonData);
       
-      // Normalize the parsed data to ensure numbers are properly converted
+      // Map snake_case field names to camelCase and normalize data
+      const mappedData = mapFieldNames(jsonData);
+      console.log('Mapped field names:', mappedData);
+      
+      // Normalize the mapped data to ensure numbers are properly converted
       const normalizedData: Record<string, any> = {};
       
-      if (jsonData.askingPrice) normalizedData.askingPrice = parseCurrency(jsonData.askingPrice);
-      if (jsonData.grossIncome) normalizedData.grossIncomeAnnual = parseCurrency(jsonData.grossIncome);
-      if (jsonData.totalSqft) normalizedData.facilitySizeSqft = parseCurrency(jsonData.totalSqft);
-      if (jsonData.facilitySizeSqft) normalizedData.facilitySizeSqft = parseCurrency(jsonData.facilitySizeSqft);
-      if (jsonData.propertyAddress) normalizedData.propertyAddress = jsonData.propertyAddress;
+      // Handle new OpenAI format fields
+      if (mappedData.askingPrice) normalizedData.askingPrice = parseCurrency(mappedData.askingPrice);
+      if (mappedData.grossIncomeAnnual) normalizedData.grossIncomeAnnual = parseCurrency(mappedData.grossIncomeAnnual);
+      if (mappedData.annualNet) normalizedData.annualNet = parseCurrency(mappedData.annualNet);
+      if (mappedData.cashFlowEBITDA) normalizedData.cashFlowEBITDA = parseCurrency(mappedData.cashFlowEBITDA);
+      if (mappedData.facilitySizeSqft) normalizedData.facilitySizeSqft = parseCurrency(mappedData.facilitySizeSqft);
+      if (mappedData.monthlyRent) normalizedData.monthlyRent = parseCurrency(mappedData.monthlyRent);
+      if (mappedData.propertyAddress && typeof mappedData.propertyAddress === 'string') {
+        normalizedData.propertyAddress = mappedData.propertyAddress.trim();
+      }
+      if (mappedData.city && typeof mappedData.city === 'string') {
+        normalizedData.city = mappedData.city.trim();
+      }
+      if (mappedData.state && typeof mappedData.state === 'string') {
+        normalizedData.state = mappedData.state.trim();
+      }
+      if (mappedData.zipCode && typeof mappedData.zipCode === 'string') {
+        normalizedData.zipCode = mappedData.zipCode.trim();
+      }
+      if (mappedData.isRealEstateIncluded !== undefined) {
+        normalizedData.isRealEstateIncluded = mappedData.isRealEstateIncluded;
+      }
+      if (mappedData.equipmentIssues && Array.isArray(mappedData.equipmentIssues)) {
+        normalizedData.equipmentIssues = mappedData.equipmentIssues;
+      }
+      
+      // Handle legacy camelCase format fields for backward compatibility
+      if (mappedData.grossIncome) normalizedData.grossIncomeAnnual = parseCurrency(mappedData.grossIncome);
+      if (mappedData.totalSqft) normalizedData.facilitySizeSqft = parseCurrency(mappedData.totalSqft);
       
       // Handle lease object
       if (jsonData.lease && typeof jsonData.lease === 'object') {
@@ -78,9 +141,10 @@ export const parseAIResponse = (response: string): Record<string, any> => {
       
       console.log('Normalized data:', normalizedData);
       return normalizedData;
+    } catch (error) {
+      console.warn('AI did not return a valid JSON object. Falling back to pattern matching.', error);
+      // Continue to fallback parsing
     }
-  } catch (error) {
-    console.warn('AI did not return a valid JSON object. Falling back to pattern matching.', error);
   }
 
   // --- Fallback to Regex Pattern Matching if JSON fails ---
